@@ -1,0 +1,107 @@
+#!/usr/bin/python3
+""" genACTTractography
+
+Python command line interface for MRTrix3 ACT Tractography pipeline
+
+"""
+def get_parser():
+    """
+    Argument parser
+    """
+    from argparse import ArgumentParser, RawTextHelpFormatter
+
+    parser = ArgumentParser(description='Pipeline to generate MRTrix3 ACT Tractography',
+                                                formatter_class=RawTextHelpFormatter)
+
+    # Version option
+    parser.add_argument("-v", "--version", dest="version", action="version", version="0.0.1")
+
+    # Required arguments
+    g_req = parser.add_argument_group("Required arguments")
+    g_req.add_argument("bids_dir", help="Directory with input dataset, formatted according to the "
+                                                        "BIDS standard. This can either be derivative level directory or "
+                                                        "parent BIDS directory.")
+    g_req.add_argument('participant_label', help="The label of the participant to perform pipeline "
+                                                    "execution on (e.g. sub-<participant_label>).")
+
+    # Optional arguments
+    g_opt = parser.add_argument_group("Optional arguments")
+    g_opt.add_argument("-w", "--work_dir", dest="work_dir",
+                                        help="Work directory. Defaults to <bids_dir>/derivatives/scratch")
+    g_opt.add_argument("-c", "--crash_dir", dest="crash_dir",
+                                        help="Nipype crash dump directory. "
+                                        "Defaults to <bids_dir>/derivatives/crash")
+    g_opt.add_argument("-n", "--nthreads", dest="nthreads", default=1,
+                                        help="The number of threads to use for pipeline execution where "
+                                        "applicable.")
+
+    return parser
+
+def main():
+    """
+    Entry point of coide
+    """
+    import os
+
+    from nipype import config
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces import utility as niu
+
+    from mrtpipelines.interfaces import DataGrabber as dg
+
+    args = get_parser().parse_args()
+
+    # Required inputs
+    bids_dir = args.bids_dir
+    subjid = args.participant_label
+    nthreads = args.nthreads
+
+    # Set work & crash directories
+    if args.work_dir:
+        work_dir = os.path.abspath(args.work_dir)
+    else:
+        work_dir = os.path.join(bids_dir, "/derivatives/scratch")
+    if args.crash_dir:
+        crash_dir = os.path.abspath(args.crash_dir)
+    else:
+        crash_dir = os.path.join(bids_dir, "/derivatives/crash")
+
+    config.update_config({'execution': {
+                                            'crashdump_dir': crash_dir,
+                                            'crashfile_format': 'txt'
+                                        }})
+
+    # Create necessary nodes not part of existing workflows
+    # UserInput
+    UserInput = pe.Node(niu.Function(function=dg.getExecOpt,
+                                                            input_names=['bids_dir', 'subjid', 'wdir', 'nthreads'],
+                                                            output_names=['bids_dir', 'subjid', 'wdir', 'nthreads']),
+                                                            name='UserInput')
+    UserInput.inputs.bids_dir = bids_dir
+    UserInput.inputs.subjid = subjid
+    UserInput.inputs.wdir = work_dir
+    UserInput.inputs.nthreads = nthreads
+    UserInput.base_dir = work_dir
+
+    # BIDSDataGrabber
+    BIDSDataGrabber = pe.Node(niu.Function(function=dg.getData,
+                                                                         input_names=['bids_dir', 'subjid', 'wdir'],
+                                                                         output_names=['nifti', 'bdata', 'parc']),
+                                                                         name='BIDSDataGrabber')
+
+    # Pipeline creation (join nodes and workflows)
+    pl = pe.Workflow(name='genACTTractography')
+    pl.base_dir = work_dir
+
+    pl.connect([(UserInput, BIDSDataGrabber, [('bids_dir', 'bids_dir'),
+                                                                            ('subjid', 'subjid'),
+                                                                            ('wdir', 'wdir')])
+                    ])
+
+    pl.write_graph(graph2use='flat', format='svg', simple_form=False)
+    pl.write_graph(graph2use='colored', format='svg')
+    pl.run()
+
+
+if __name__ == '__main__':
+    main()
