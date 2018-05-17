@@ -19,14 +19,18 @@ def getSubj(subjFile, work_dir):
 
 def getData(bids_layout, subjid):
     # Diffusion
-    nifti = bids_layout.get(subject=subjid, modality='dwi', space='T1w', type='preproc',
-                                return_type='file', extensions=['nii', 'nii.gz'])
-    bval = bids_layout.get(subject=subjid, modality='dwi', space='T1w', type='preproc',
-                                return_type='file', extensions=['bval'])
-    bvec = bids_layout.get(subject=subjid, modality='dwi', space='T1w', type='preproc',
-                                return_type='file', extensions=['bvec'])
+    nifti = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
+                            type='preproc', return_type='file',
+                            extensions=['nii', 'nii.gz'])
+    bval = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
+                           type='preproc', return_type='file',
+                           extensions=['bval'])
+    bvec = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
+                           type='preproc', return_type='file',
+                           extensions=['bvec'])
 
     # Freesurfer parcellation (from fmriprep)
-    parc = bids_layout.get(subject=subjid, type='aseg', return_type='file', extensions=['mgz'])
+    parc = bids_layout.get(subject=subjid, type='aseg', return_type='file',
+                           extensions=['mgz'])
 
     return nifti[0], (bvec[0], bval[0]), parc[0]

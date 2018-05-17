@@ -10,27 +10,34 @@ def get_parser():
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
 
-    parser = ArgumentParser(description='Pipeline to generate MRTrix3 ACT Tractography',
-                                                formatter_class=RawTextHelpFormatter)
+    parser = ArgumentParser(description="Pipeline to generate MRTrix3 ACT "
+                                        "Tractography",
+                            formatter_class=RawTextHelpFormatter)
 
     # Version option
-    parser.add_argument("-v", "--version", dest="version", action="version", version="0.0.1")
+    parser.add_argument("-v", "--version", dest="version", action="version",
+                        version="0.0.1")
 
     # Required arguments
     g_req = parser.add_argument_group("Required arguments")
-    g_req.add_argument("bids_dir", help="Directory with input dataset, formatted according to the "
-                                                        "BIDS standard. This can either be derivative level directory or "
-                                                        "parent BIDS directory.")
-    g_req.add_argument('participant_label', help="A file containing label(s) of participant(s) to "
-                                                    "perform pipeline execution on")
+    g_req.add_argument("bids_dir", help="Directory with input dataset, "
+                                        "formatted according to the BIDS "
+                                        "standard. This can either be "
+                                        "derivative level directory or "
+                                        "parent BIDS directory.")
+    g_req.add_argument('participant_label', help="A file containing label(s) "
+                                                 "of participant(s) to perform "
+                                                 "pipeline execution on")
 
     # Optional arguments
     g_opt = parser.add_argument_group("Optional arguments")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
-                                        help="Work directory. Defaults to <bids_dir>/derivatives/scratch")
+                                           help="Work directory. Defaults to "
+                                            "<bids_dir>/derivatives/scratch")
     g_opt.add_argument("-n", "--nthreads", dest="nthreads", default=1,
-                                        help="The number of threads to use for pipeline execution where "
-                                        "applicable.")
+                                           help="The number of threads to use "
+                                           "for pipeline execution where "
+                                           "applicable.")
 
     return parser
 
@@ -42,7 +49,7 @@ def main():
 
     from bids.grabbids import BIDSLayout
 
-    from nipype import config, IdentityInterface
+    from nipype import config
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
@@ -64,9 +71,8 @@ def main():
         work_dir = os.path.join(bids_dir, "/derivatives/scratch")
         crash_dir = os.path.join(os.path.abspath(bids_dir, "/derivatives/crash"))
 
-    config.update_config({'execution': {
-                                            'crashdump_dir': crash_dir,
-                                            'crashfile_format': 'txt'
+    config.update_config({'execution': {'crashdump_dir': crash_dir,
+                                        'crashfile_format': 'txt'
                                         }})
 
     # getSubj
@@ -77,9 +83,9 @@ def main():
     layout = BIDSLayout(bids_dir)
 
     BIDSDataGrabber = pe.Node(niu.Function(function=dg.getData,
-                                                                         input_names=['bids_layout', 'subjid'],
-                                                                         output_names=['nifti', 'bdata', 'parc']),
-                                                                         name='BIDSDataGrabber')
+                                           input_names=['bids_layout', 'subjid'],
+                                           output_names=['nifti', 'bdata', 'parc']),
+                                           name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = work_dir
     BIDSDataGrabber.inputs.bids_layout = layout
 
@@ -92,7 +98,7 @@ def main():
 
     pl.connect([(Subjid, BIDSDataGrabber, [('subjid', 'subjid')]),
                         (BIDSDataGrabber, act_preproc_wf, [('nifti', 'MRConvert.in_file'),
-                                                                                    ('bdata', 'MRConvert.grad_fsl')]),
+                                                           ('bdata', 'MRConvert.grad_fsl')]),
                         (BIDSDataGrabber, act_preproc_wf, [('parc', 'Generate5tt.in_file')]),
                         (BIDSDataGrabber, act_preproc_wf, [('bdata', 'dwi2response.grad_fsl')]),
                         (BIDSDataGrabber, act_preproc_wf, [('bdata', 'dwi2mask.grad_fsl')])])
