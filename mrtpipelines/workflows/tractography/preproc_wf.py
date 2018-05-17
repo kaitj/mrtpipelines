@@ -1,10 +1,7 @@
 from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
 from nipype.interfaces import mrtrix3 as mrt
 
-from ...interfaces import DataGrabber as dg
-
-def act_preproc_wf(bids_dir, subjid, wdir=None, nthreads=1, name='act_preproc_wf'):
+def act_preproc_wf(wdir=None, nthreads=1, name='act_preproc_wf'):
     """
     Set up ACT preproc workflow
     """
@@ -15,11 +12,11 @@ def act_preproc_wf(bids_dir, subjid, wdir=None, nthreads=1, name='act_preproc_wf
     MRConvert.inputs.nthreads = nthreads
 
     # Generate 5 tissue-type using free surfer algorithm [T1w-space]
-    Gen5tt = pe.Node(mrt.Generate5tt(), name="Generate5tt")
-    Gen5tt.inputs.algorithm = 'freesurfer'
-    Gen5tt.inputs.args = '-nocrop'
-    Gen5tt.inputs.out_file = '5tt.mif'
-    Gen5tt.inputs.nthreads = nthreads
+    Generate5tt = pe.Node(mrt.Generate5tt(), name="Generate5tt")
+    Generate5tt.inputs.algorithm = 'freesurfer'
+    Generate5tt.inputs.args = '-nocrop'
+    Generate5tt.inputs.out_file = '5tt.mif'
+    Generate5tt.inputs.nthreads = nthreads
 
     # dwi2response
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
@@ -38,13 +35,8 @@ def act_preproc_wf(bids_dir, subjid, wdir=None, nthreads=1, name='act_preproc_wf
     workflow = pe.Workflow(name=name)
 
     workflow.connect([
-        (BIDSDataGrabber, MRConvert, [("nifti", "in_file"),
-                                                            ("bdata", "grad_fsl")]),
-        (BIDSDataGrabber, Gen5tt, [('parc', 'in_file')]),
-        (BIDSDataGrabber, dwi2response, [('bdata', 'grad_fsl')]),
         (MRConvert, dwi2response, [('out_file', 'in_file')]),
-        (Gen5tt, dwi2response, [('out_file', 'in_file')]),
-        (BIDSDataGrabber, dwi2mask, [('bdata', 'grad_fsl')]),
+        (Generate5tt, dwi2response, [('out_file', 'mtt_file')]),
         (MRConvert, dwi2mask, [('out_file', 'in_file')])])
 
     return workflow

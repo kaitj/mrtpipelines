@@ -1,7 +1,4 @@
-def getExecOpt(bids_dir, subjid, wdir, nthreads):
-    return bids_dir, subjid, wdir, nthreads
-
-def getData(bids_dir, subjid, wdir):
+def getData(bids_dir, subjid):
     from bids.grabbids import BIDSLayout
 
     layout = BIDSLayout(bids_dir)

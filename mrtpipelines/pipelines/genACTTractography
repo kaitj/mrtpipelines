@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """ genACTTractography
 
 Python command line interface for MRTrix3 ACT Tractography pipeline
@@ -48,13 +48,14 @@ def main():
     from nipype.interfaces import utility as niu
 
     from mrtpipelines.interfaces import DataGrabber as dg
+    import mrtpipelines.workflows.tractography.preproc_wf as mrtract
 
     args = get_parser().parse_args()
 
     # Required inputs
     bids_dir = args.bids_dir
     subjid = args.participant_label
-    nthreads = args.nthreads
+    nthreads = int(args.nthreads)
 
     # Set work & crash directories
     if args.work_dir:
@@ -72,31 +73,27 @@ def main():
                                         }})
 
     # Create necessary nodes not part of existing workflows
-    # UserInput
-    UserInput = pe.Node(niu.Function(function=dg.getExecOpt,
-                                                            input_names=['bids_dir', 'subjid', 'wdir', 'nthreads'],
-                                                            output_names=['bids_dir', 'subjid', 'wdir', 'nthreads']),
-                                                            name='UserInput')
-    UserInput.inputs.bids_dir = bids_dir
-    UserInput.inputs.subjid = subjid
-    UserInput.inputs.wdir = work_dir
-    UserInput.inputs.nthreads = nthreads
-    UserInput.base_dir = work_dir
-
     # BIDSDataGrabber
     BIDSDataGrabber = pe.Node(niu.Function(function=dg.getData,
-                                                                         input_names=['bids_dir', 'subjid', 'wdir'],
+                                                                         input_names=['bids_dir', 'subjid'],
                                                                          output_names=['nifti', 'bdata', 'parc']),
                                                                          name='BIDSDataGrabber')
+    BIDSDataGrabber.base_dir = work_dir
+    BIDSDataGrabber.inputs.subjid = subjid
+    BIDSDataGrabber.inputs.bids_dir = bids_dir
+
+    # MRTrix Preproc workflow
+    act_preproc_wf = mrtract.act_preproc_wf(wdir=work_dir, nthreads=nthreads)
 
     # Pipeline creation (join nodes and workflows)
     pl = pe.Workflow(name='genACTTractography')
     pl.base_dir = work_dir
 
-    pl.connect([(UserInput, BIDSDataGrabber, [('bids_dir', 'bids_dir'),
-                                                                            ('subjid', 'subjid'),
-                                                                            ('wdir', 'wdir')])
-                    ])
+    pl.connect([(BIDSDataGrabber, act_preproc_wf, [('nifti', 'MRConvert.in_file'),
+                                                                                    ('bdata', 'MRConvert.grad_fsl')]),
+                        (BIDSDataGrabber, act_preproc_wf, [('parc', 'Generate5tt.in_file')]),
+                        (BIDSDataGrabber, act_preproc_wf, [('bdata', 'dwi2response.grad_fsl')]),
+                        (BIDSDataGrabber, act_preproc_wf, [('bdata', 'dwi2mask.grad_fsl')])])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
     pl.write_graph(graph2use='colored', format='svg')

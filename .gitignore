@@ -1,0 +1,9 @@
+# Byte-compiled / optimized/ DLL files
+*.py[cod]
+build/
+
+# Ipython Notebook
+notebooks/
+.ipynb_checkpoints
+
+*.swp
