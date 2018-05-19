@@ -37,6 +37,7 @@ def act_preproc_wf(wdir=None, nthreads=1, name='act_preproc_wf'):
     workflow.connect([
         (MRConvert, dwi2response, [('out_file', 'in_file')]),
         (Generate5tt, dwi2response, [('out_file', 'mtt_file')]),
-        (MRConvert, dwi2mask, [('out_file', 'in_file')])])
+        (MRConvert, dwi2mask, [('out_file', 'in_file')])
+    ])
 
     return workflow
