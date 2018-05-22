@@ -53,7 +53,7 @@ def main():
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
-    from mrtpipelines.interfaces import DataGrabber as dg
+    from mrtpipelines.interfaces import io
     from mrtpipelines.workflows.tractography import population_wf, preproc_wf
 
     args = get_parser().parse_args()
@@ -76,13 +76,13 @@ def main():
                                         }})
 
     # getSubj
-    Subjid = dg.getSubj(subjids, work_dir)
+    Subjid = io.getSubj(subjids, work_dir)
 
     # Create necessary nodes not part of existing workflows
     # BIDSDataGrabber
     layout = BIDSLayout(bids_dir)
 
-    BIDSDataGrabber = pe.Node(niu.Function(function=dg.getData,
+    BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
                                            input_names=['bids_layout', 'subjid'],
                                            output_names=['nifti', 'bdata', 'parc']),
                                            name='BIDSDataGrabber')
