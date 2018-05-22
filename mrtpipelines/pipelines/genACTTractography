@@ -105,9 +105,9 @@ def main():
                         (BIDSDataGrabber, act_preproc_wf, [('parc', 'Generate5tt.in_file')]),
                         (BIDSDataGrabber, act_preproc_wf, [('bdata', 'dwi2response.grad_fsl')]),
                         (BIDSDataGrabber, act_preproc_wf, [('bdata', 'dwi2mask.grad_fsl')]),
-                        (act_preproc_wf, template_wf, [('dwi2response.gm_file', 'avg_gm.in_files',),
-                                                       ('dwi2response.wm_file', 'avg_wm.in_files'),
-                                                       ('dwi2response.csf_file', 'avg_csf.in_files'),
+                        (act_preproc_wf, template_wf, [('dwi2response.gm_file', 'avgResponse_gm.in_files',),
+                                                       ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
+                                                       ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
                                                        ('MRConvert.out_file', 'dwi2fod.in_file')])
                 ])
 

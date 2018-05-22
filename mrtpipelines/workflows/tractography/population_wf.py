@@ -23,16 +23,17 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     avg_csf.inputs.out_file = 'avg_csf.txt'
 
     # dwi2fod
-    dwi2fod = pe.MapNode(mrt.EstimateFOD(), name-'dwi2fod')
+    dwi2fod = pe.MapNode(mrt.EstimateFOD(), iterfield=['in_file'],
+                                            name='dwi2fod')
     dwi2fod.inputs.algorithm = 'msmt_csd'
 
     # Build workflow
     workflow = pe.Workflow(name=name)
 
     workflow.connect([
-        (avg_wm, dwi2fod, [('out_file'), 'wm_txt']),
-        (avg_gm, dwi2fod, [('out_file'), 'gm_txt']),
-        (avg_csf, dwi2fod, [('out_file'), 'csf_txt'])
+        (avg_wm, dwi2fod, [('out_file', 'wm_txt')]),
+        (avg_gm, dwi2fod, [('out_file', 'gm_txt')]),
+        (avg_csf, dwi2fod, [('out_file', 'csf_txt')])
     ])
 
     return workflow
