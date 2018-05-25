@@ -45,11 +45,11 @@ def main():
     """
     Entry point of coide
     """
-    import os
+    import os.path as op
 
     from bids.grabbids import BIDSLayout
 
-    from nipype import config, IdentityInterface
+    from nipype import config
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
@@ -65,13 +65,16 @@ def main():
 
     # Set work & crash directories
     if args.work_dir:
-        work_dir = os.path.abspath(args.work_dir)
-        crash_dir = os.path.join(os.path.abspath(args.work_dir), "crash")
+        work_dir = op.abspath(args.work_dir)
+        crash_dir = op.join(op.abspath(args.work_dir), "crash")
     else:
-        work_dir = os.path.join(bids_dir, "derivatives/scratch")
-        crash_dir = os.path.join(os.path.abspath(bids_dir, "derivatives/crash"))
+        work_dir = op.join(bids_dir, "derivatives/scratch")
+        crash_dir = op.join(op.abspath(bids_dir, "derivatives/crash"))
 
-    config.update_config({'execution': {'crashdump_dir': crash_dir,
+    config.update_config({'logging': {'log_directory': work_dir,
+                                      'log_to_file': True,
+                                      },
+                          'execution': {'crashdump_dir': crash_dir,
                                         'crashfile_format': 'txt'
                                         }})
 
@@ -92,7 +95,7 @@ def main():
     # MRTrix Preproc workflow
     act_preproc_wf = preproc_wf.act_preproc_wf(wdir=work_dir, nthreads=nthreads)
 
-    # MRTrix population template workflow
+    # MRTrix population template workflowmrt.
     template_wf = population_wf.pop_template_wf(wdir=work_dir, nthreads=nthreads)
 
     # Pipeline creation (join nodes and workflows)
@@ -108,7 +111,8 @@ def main():
                         (act_preproc_wf, template_wf, [('dwi2response.gm_file', 'avgResponse_gm.in_files',),
                                                        ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                                                        ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
-                                                       ('MRConvert.out_file', 'dwi2fod.in_file')])
+                                                       ('MRConvert.out_file', 'dwi2fod.in_file')]),
+                        (act_preproc_wf, template_wf, [('dwi2mask.out_file', 'copyMask.in_file')])
                 ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)

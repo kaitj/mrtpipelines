@@ -24,6 +24,7 @@ def act_preproc_wf(wdir=None, nthreads=1, name='act_preproc_wf'):
     dwi2response.inputs.wm_file = 'wm.txt'
     dwi2response.inputs.gm_file = 'gm.txt'
     dwi2response.inputs.csf_file = 'csf.txt'
+    dwi2response.inputs.max_sh = [0, 8, 8]
     dwi2response.inputs.nthreads = nthreads
 
     # dwi2mask

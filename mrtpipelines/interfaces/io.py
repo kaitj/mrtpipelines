@@ -34,3 +34,27 @@ def getData(bids_layout, subjid):
                            extensions=['mgz'])
 
     return nifti[0], (bvec[0], bval[0]), parc[0]
+
+
+def copyFile(in_file, out_dir):
+    import os, shutil, fnmatch
+
+    # Check if output directory exists
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    for curFile in in_file:
+        if type(curFile) is list:
+            curFile = curFile[-1]
+
+        # Create new temp file with subjid label
+        file_list = curFile.split('/')
+        subjid = fnmatch.filter(file_list, '*subjid*')
+        subjid = subjid[0].strip('_')
+
+        out_file = subjid + '_' + file_list[-1]
+        out_file = os.path.join(out_dir, out_file)
+
+        shutil.copy2(curFile, out_file)
+
+    return out_dir
