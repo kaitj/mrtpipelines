@@ -49,7 +49,7 @@ def main():
 
     from bids.grabbids import BIDSLayout
 
-    from nipype import config
+    from nipype import config, logging
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
@@ -77,6 +77,7 @@ def main():
                           'execution': {'crashdump_dir': crash_dir,
                                         'crashfile_format': 'txt'
                                         }})
+    logging.update_logging(config)
 
     # getSubj
     Subjid = io.getSubj(subjids, work_dir)
@@ -93,10 +94,10 @@ def main():
     BIDSDataGrabber.inputs.bids_layout = layout
 
     # MRTrix Preproc workflow
-    act_preproc_wf = preproc_wf.act_preproc_wf(wdir=work_dir, nthreads=nthreads)
+    act_preproc_wf = preproc_wf.act_preproc_wf(wdir=work_dir)
 
     # MRTrix population template workflowmrt.
-    template_wf = population_wf.pop_template_wf(wdir=work_dir, nthreads=nthreads)
+    template_wf = population_wf.pop_template_wf(wdir=work_dir)
 
     # Pipeline creation (join nodes and workflows)
     pl = pe.Workflow(name='genACTTractography')

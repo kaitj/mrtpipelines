@@ -1,11 +1,15 @@
 from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3 as mrt
 
-def act_preproc_wf(wdir=None, nthreads=1, name='act_preproc_wf'):
+def act_preproc_wf(wdir=None, nthreads=4, name='act_preproc_wf'):
     """
     Set up ACT preproc workflow
     """
-    # Instantiate Nodes
+
+    # Define each node to use 4 cores if available
+    if nthreads >= 4:
+        nthreads = 4
+
     # Convert from nii to mif
     MRConvert = pe.Node(mrt.MRConvert(), name="MRConvert")
     MRConvert.base_dir = wdir

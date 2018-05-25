@@ -7,6 +7,13 @@ from ...interfaces import io
 import os.path as op
 
 def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
+    """
+    Set up population template workflow
+    """
+
+    # Define each node to use 4 cores if available
+    if nthreads >= 4:
+        nthreads = 4
 
     # Estimate group response for each tissue type
     avg_wm = pe.JoinNode(mrt.AverageResponse(), joinsource='SubjectID',
@@ -31,6 +38,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     dwi2fod = pe.MapNode(mrt.EstimateFOD(), iterfield=['in_file'],
                                             name='dwi2fod')
     dwi2fod.inputs.algorithm = 'msmt_csd'
+    dwi2fod.inputs.nthreads = nthreads
 
     # Copy FOD and masks
     copyFOD = pe.JoinNode(niu.Function(function=io.copyFile,
@@ -56,7 +64,6 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     popTemplate.base_dir = wdir
     popTemplate.inputs.out_file = 'template_wmfod.mif'
     popTemplate.inputs.nthreads = nthreads
-
     # Build workflow
     workflow = pe.Workflow(name=name)
 
