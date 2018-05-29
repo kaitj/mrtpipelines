@@ -1,4 +1,5 @@
 from nipype.pipeline import engine as pe
+from nipype.interfaces import utility as niu
 from nipype.interfaces import mrtrix3 as mrt
 
 def act_preproc_wf(wdir=None, nthreads=4, name='act_preproc_wf'):
@@ -43,6 +44,58 @@ def act_preproc_wf(wdir=None, nthreads=4, name='act_preproc_wf'):
         (MRConvert, dwi2response, [('out_file', 'in_file')]),
         (Generate5tt, dwi2response, [('out_file', 'mtt_file')]),
         (MRConvert, dwi2mask, [('out_file', 'in_file')])
+    ])
+
+    return workflow
+
+def prepACTTract_wf(nfibers=None, wdir=None, nthreads=1, name='prepACTTract_wf'):
+    """
+    Set up workflow to generate Tractography
+    """
+
+    # Define nodes to use 4 cores if available
+    if nthreads >= 4:
+        nthreads = 4
+
+    # Register subjects to template
+    MRRegister = pe.MapNode(mrt.MRRegister(), iterfield=['in_file', 'mask1'],
+                                              name='MRRegister')
+    MRRegister.base_wdir = wdir
+    MRRegister.inputs.nl_warp = ['mov-tmp_warp.mif', 'tmp-mov_warp.mif']
+    MRRegister.inputs.nthreads = nthreads
+
+    # Transform subjects' data into template space
+    WarpSelect = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                          name='WarpSelect')
+    WarpSelect.base_dir = wdir
+    WarpSelect.inputs.index = [0]
+
+    FODTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                 name='FODTransform')
+    FODTransform.base_dir = wdir
+    FODTransform.inputs.out_file = 'space-Template_wmfod.mif'
+    FODTransform.inputs.nthreads = nthreads
+
+    AnatTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                  name='AnatTransform')
+    AnatTransform.base_dir = wdir
+    AnatTransform.inputs.out_file = 'space-Template_5tt.mif'
+    AnatTransform.inputs.nthreads = nthreads
+
+    # Generate 5tt mask
+    gen5ttMask = pe.MapNode(mrt.Generate5ttMask(), iterfield=['in_file'],
+                                                   name='5tt2gmwmi')
+    gen5ttMask.base_dir = wdir
+    gen5ttMask.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (MRRegister, WarpSelect, [('nl_warp', 'inlist')]),
+        (WarpSelect, FODTransform, [('out', 'warp')]),
+        (WarpSelect, AnatTransform, [('out', 'warp')]),
+        (AnatTransform, gen5ttMask, [('out_file', 'in_file')])
     ])
 
     return workflow

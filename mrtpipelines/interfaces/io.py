@@ -2,19 +2,21 @@ from nipype import IdentityInterface
 from nipype.pipeline import engine as pe
 
 def getSubj(subjFile, work_dir):
-    # Retrieve individual subject ids
+    # Retrieve individual subject ids & number of subjectss
     subjids = []
+    noSubj = 0
     with open(subjFile) as f:
         for subj in f:
             temp = subj.lstrip('sub-')
             temp = temp.rstrip('\n')
             subjids.append(temp)
+            noSubj += 1
 
     Subjid = pe.Node(IdentityInterface(fields=['subjid']), name='SubjectID')
     Subjid.base_dir = work_dir
     Subjid.iterables = [('subjid', subjids)]
 
-    return Subjid
+    return Subjid, noSubj
 
 
 def getData(bids_layout, subjid):
