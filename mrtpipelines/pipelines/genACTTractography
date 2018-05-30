@@ -22,9 +22,7 @@ def get_parser():
     g_req = parser.add_argument_group("Required arguments")
     g_req.add_argument("bids_dir", help="Directory with input dataset, "
                                         "formatted according to the BIDS "
-                                        "standard. This can either be "
-                                        "derivative level directory or "
-                                        "parent BIDS directory.")
+                                        "standard.")
     g_req.add_argument('participant_label', help="A file containing label(s) "
                                                  "of participant(s) to perform "
                                                  "pipeline execution on")
@@ -38,12 +36,34 @@ def get_parser():
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                             "<bids_dir>/derivatives/scratch")
+    g_opt.add_argument("-o", "--out_dir", dest="out_dir",
+                                          help="Output directory. Defaults to "
+                                           "<bids_dir>/derivatives/MRtrix")
     g_opt.add_argument("-n", "--nthreads", dest="nthreads", default=1,
                                            help="The number of threads to use "
                                            "for pipeline execution where "
                                            "applicable.")
 
     return parser
+
+
+def getBIDS(layout, wdir=None):
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces import utility as niu
+
+    from mrtpipelines.interfaces import io
+
+    BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
+                                           input_names=['bids_layout',
+                                                        'subjid'],
+                                           output_names=['nifti', 'bdata',
+                                                         'parc']),
+                                           name='BIDSDataGrabber')
+    BIDSDataGrabber.base_dir = wdir
+    BIDSDataGrabber.inputs.bids_layout = layout
+
+    return BIDSDataGrabber
+
 
 def main():
     """
@@ -55,7 +75,6 @@ def main():
 
     from nipype import config, logging
     from nipype.pipeline import engine as pe
-    from nipype.interfaces import utility as niu
 
     from mrtpipelines.interfaces import io
     from mrtpipelines.workflows.tractography import (population_wf, preproc_wf,
@@ -90,50 +109,64 @@ def main():
 
     # Create necessary nodes not part of existing workflows
     # BIDSDataGrabber
-    layout = BIDSLayout(bids_dir)
-
-    BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
-                                           input_names=['bids_layout', 'subjid'],
-                                           output_names=['nifti', 'bdata', 'parc']),
-                                           name='BIDSDataGrabber')
-    BIDSDataGrabber.base_dir = work_dir
-    BIDSDataGrabber.inputs.bids_layout = layout
+    layout = BIDSLayout(op.join(op.abspath(bids_dir), "derivatives"))
+    BIDSDataGrabber = getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
-    act_preproc_wf = preproc_wf.act_preproc_wf(wdir=work_dir, nthreads=nthreads)
+    act_preproc_wf = preproc_wf.act_preproc_wf(wdir=work_dir,
+                                               nthreads=nthreads)
 
     # MRTrix population template workflow
-    template_wf = population_wf.pop_template_wf(wdir=work_dir, nthreads=nthreads)
+    template_wf = population_wf.pop_template_wf(wdir=work_dir,
+                                                nthreads=nthreads)
 
     # MRTrix tractography preperation workflow
-    prepACTTract_wf = preproc_wf.prepACTTract_wf(wdir=work_dir, nthreads=nthreads)
+    prepACTTract_wf = preproc_wf.prepACTTract_wf(wdir=work_dir,
+                                                 nthreads=nthreads)
 
     # MRTrix template tractography generation workflow
-    genTemplate_wf = tractography_wf.genTemplate_wf(nfibers=int(75000)/noSubj, wdir=work_dir, nthreads=nthreads)
+    genTemplate_wf = tractography_wf.genTemplate_wf(nfibers=int(75000)/noSubj,
+                                                    wdir=work_dir,
+                                                    nthreads=nthreads)
+
+    # MRTrix subject tractography generation workflow
+    genSubj_wf = tractography_wf.genSubj_wf(nfibers=nfibers, wdir=work_dir,
+                                            nthreads=nthreads)
 
     # Pipeline creation (join nodes and workflows)
     pl = pe.Workflow(name='genACTTractography')
     pl.base_dir = work_dir
 
     pl.connect([(Subjid, BIDSDataGrabber, [('subjid', 'subjid')]),
-                (BIDSDataGrabber, act_preproc_wf, [('nifti', 'MRConvert.in_file'),
-                                                   ('bdata', 'MRConvert.grad_fsl'),
-                                                   ('parc', 'Generate5tt.in_file'),
-                                                   ('bdata', 'dwi2response.grad_fsl'),
-                                                   ('bdata', 'dwi2mask.grad_fsl')]),
-                (act_preproc_wf, template_wf, [('dwi2response.gm_file', 'avgResponse_gm.in_files',),
-                                               ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
-                                               ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
-                                               ('MRConvert.out_file', 'dwi2fod.in_file'),
-                                               ('dwi2mask.out_file', 'copyMask.in_file')]),
-                (template_wf, prepACTTract_wf, [('dwi2fod.wm_odf', 'MRRegister.in_file'),
-                                                ('population_template.out_file', 'MRRegister.ref_file'),
-                                                ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
-                (act_preproc_wf, prepACTTract_wf, [('dwi2mask.out_file', 'MRRegister.mask1'),
-                                                   ('Generate5tt.out_file', 'AnatTransform.in_file')]),
-                (prepACTTract_wf, genTemplate_wf, [('gen5ttMask.out_file', 'genSubjTemp.seed_gmwmi'),
-                                                   ('AnatTransform.out_file', 'genSubjTemp.act_file'),
-                                                   ('FODTransform.out_file', 'genSubjTemp.in_file')])
+                (BIDSDataGrabber, act_preproc_wf, [
+                    ('nifti', 'MRConvert.in_file'),
+                    ('bdata', 'MRConvert.grad_fsl'),
+                    ('parc', 'Generate5tt.in_file'),
+                    ('bdata', 'dwi2response.grad_fsl'),
+                    ('bdata', 'dwi2mask.grad_fsl')]),
+                (act_preproc_wf, template_wf, [
+                    ('dwi2response.gm_file', 'avgResponse_gm.in_files',),
+                    ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
+                    ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
+                    ('MRConvert.out_file', 'dwi2fod.in_file'),
+                    ('dwi2mask.out_file', 'copyMask.in_file')]),
+                (template_wf, prepACTTract_wf, [
+                    ('dwi2fod.wm_odf', 'MRRegister.in_file'),
+                    ('population_template.out_file', 'MRRegister.ref_file'),
+                    ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
+                (act_preproc_wf, prepACTTract_wf, [
+                    ('dwi2mask.out_file', 'MRRegister.mask1'),
+                    ('Generate5tt.out_file', 'AnatTransform.in_file')]),
+                (prepACTTract_wf, genTemplate_wf, [
+                    ('gen5ttMask.out_file', 'genSubjTemp.seed_gmwmi'),
+                    ('AnatTransform.out_file', 'genSubjTemp.act_file'),
+                    ('FODTransform.out_file', 'genSubjTemp.in_file'),
+                    ('FODTransform.out_file', 'siftTemplate.in_fod')]),
+                (prepACTTract_wf, genSubj_wf, [
+                    ('gen5ttMask.out_file', 'genSubjTracts.seed_gmwmi'),
+                    ('AnatTransform.out_file', 'genSubjTracts.act_file'),
+                    ('FODTransform.out_file', 'genSubjTracts.in_file'),
+                    ('FODTransform.out_file', 'siftSubject.in_fod')])
                 ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)

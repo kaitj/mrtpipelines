@@ -48,7 +48,7 @@ def act_preproc_wf(wdir=None, nthreads=4, name='act_preproc_wf'):
 
     return workflow
 
-def prepACTTract_wf(nfibers=None, wdir=None, nthreads=1, name='prepACTTract_wf'):
+def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     """
     Set up workflow to generate Tractography
     """
@@ -84,7 +84,7 @@ def prepACTTract_wf(nfibers=None, wdir=None, nthreads=1, name='prepACTTract_wf')
 
     # Generate 5tt mask
     gen5ttMask = pe.MapNode(mrt.Generate5ttMask(), iterfield=['in_file'],
-                                                   name='5tt2gmwmi')
+                                                   name='gen5ttMask')
     gen5ttMask.base_dir = wdir
     gen5ttMask.inputs.nthreads = nthreads
 
