@@ -21,7 +21,6 @@ def genTemplate_wf(nfibers=7500, wdir=None, nthreads=1, name='genTemplate_wf'):
                                                             'seed_gmwmi'],
                                                  name='genSubjTemp')
     genSubjTemp.base_dir = wdir
-    genSubjTemp.inputs.angle = 22.5
     genSubjTemp.inputs.max_length = 200
     genSubjTemp.inputs.power = 1
     genSubjTemp.inputs.backtrack
@@ -80,7 +79,6 @@ def genSubj_wf(nfibers=100000, wdir=None, nthreads=1, name='genSubj_wf'):
                                                             'seed_gmwmi'],
                                                 name='genSubjTracts')
     genSubjTracts.base_dir = wdir
-    genSubjTracts.inputs.angle = 22.5
     genSubjTracts.inputs.max_length = 200
     genSubjTracts.inputs.power = 1
     genSubjTracts.inputs.backtrack
