@@ -88,6 +88,23 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     gen5ttMask.base_dir = wdir
     gen5ttMask.inputs.nthreads = nthreads
 
+    # Generate tractography
+    genTract = pe.MapNode(mrt.Tractography(), iterfield=['in_file',
+                                                         'act_file',
+                                                         'seed_gmwmi'],
+                                              name='genTract')
+    genTract.base_dir = wdir
+    genTract.inputs.backtrack
+    genTract.inputs.n_tracks = 200000
+    genTract.inputs.nthreads = nthreads
+
+    # Sphereical-deconvoulution informed filtering of tractography
+    siftTract = pe.MapNode(mrt.SIFT(), iterfield=['in_file', 'in_fod'],
+                                       name='tcksift')
+    siftTract.base_dir = wdir
+    siftTract.inputs.term_number = 100000
+    siftTract.inputs.nthreads = nthreads
+
     # Build workflow
     workflow = pe.Workflow(name=name)
 
@@ -95,7 +112,12 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
         (MRRegister, WarpSelect, [('nl_warp', 'inlist')]),
         (WarpSelect, FODTransform, [('out', 'warp')]),
         (WarpSelect, AnatTransform, [('out', 'warp')]),
-        (AnatTransform, gen5ttMask, [('out_file', 'in_file')])
+        (AnatTransform, gen5ttMask, [('out_file', 'in_file')]),
+        (AnatTransform, genTract, [('out_file', 'act_file')]),
+        (gen5ttMask, genTract, [('out_file', 'seed_gmwmi')]),
+        (FODTransform, genTract, [('out_file', 'in_file')]),
+        (genTract, siftTract, [('out_file', 'in_file')]),
+        (FODTransform, siftTract, [('out_file', 'in_fod')])
     ])
 
     return workflow

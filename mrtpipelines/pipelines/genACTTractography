@@ -125,8 +125,7 @@ def main():
                                                  nthreads=nthreads)
 
     # MRTrix template tractography generation workflow
-    genTemplate_wf = tractography_wf.genTemplate_wf(nfibers=int(75000)/noSubj,
-                                                    wdir=work_dir,
+    genTemplate_wf = tractography_wf.genTemplate_wf(wdir=work_dir,
                                                     nthreads=nthreads)
 
     # MRTrix subject tractography generation workflow
@@ -158,15 +157,9 @@ def main():
                     ('dwi2mask.out_file', 'MRRegister.mask1'),
                     ('Generate5tt.out_file', 'AnatTransform.in_file')]),
                 (prepACTTract_wf, genTemplate_wf, [
-                    ('gen5ttMask.out_file', 'genSubjTemp.seed_gmwmi'),
-                    ('AnatTransform.out_file', 'genSubjTemp.act_file'),
-                    ('FODTransform.out_file', 'genSubjTemp.in_file'),
-                    ('FODTransform.out_file', 'siftTemplate.in_fod')]),
+                    ('tcksift.out_file', 'tempConvert1.in_file')]),
                 (prepACTTract_wf, genSubj_wf, [
-                    ('gen5ttMask.out_file', 'genSubjTracts.seed_gmwmi'),
-                    ('AnatTransform.out_file', 'genSubjTracts.act_file'),
-                    ('FODTransform.out_file', 'genSubjTracts.in_file'),
-                    ('FODTransform.out_file', 'siftSubject.in_fod')])
+                    ('tcksift.out_file', 'subjSelect.in_file')])
                 ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
