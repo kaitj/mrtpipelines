@@ -19,7 +19,7 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
     tempConvert1 = pe.MapNode(mrt.TCKConvert(), iterfield=['in_file'],
                                                 name='tempConvert1')
     tempConvert1.base_dir = wdir
-    tempConvert1.inputs.out_file = 'tracts.vtk'
+    tempConvert1.inputs.out_file = 'space-Template_variant-sift_tract.vtk'
     tempConvert1.inputs.nthreads = nthreads
 
     # Craete template tract
@@ -32,24 +32,25 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
                                            name='genTemplate')
     genTemplate.base_dir = wdir
     genTemplate.inputs.out_tract = op.join(genTemplate.base_dir,
-                                           'tmpFiles/template_tract.vtk')
+                                           'tmpFiles/sub-tmp_space-Template_variant-sift_tract.vtk')
 
     # Convert to tck to select number of fibers
     tempConvert2 = pe.Node(mrt.TCKConvert(), name='tempConvert2')
     tempConvert2.base_dir = wdir
-    tempConvert2.inputs.out_file = 'templateTracts.tck'
+    tempConvert2.inputs.out_file = 'sub-tmp_space-Template_variant-sift_tract.tck'
     tempConvert2.inputs.nthreads = nthreads
 
     # Select number of fibres for template
     tempSelect = pe.Node(mrt.TCKEdit(), name='tempSelect')
     tempSelect.base_dir = wdir
     tempSelect.inputs.number = 10000
+    tempSelect.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-10K_tract.tck'
     tempSelect.inputs.nthreads = nthreads
 
     # Convert template to vtk
     tempConvert3 = pe.Node(mrt.TCKConvert(), name='tempConvert3')
     tempConvert3.base_dir = wdir
-    tempConvert3.inputs.out_file = 'templateTracts.vtk'
+    tempConvert3.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-10K_tract.vtk'
     tempConvert3.inputs.nthreads = nthreads
 
     # Build workflow
@@ -78,13 +79,14 @@ def genSubj_wf(nfibers=10000, wdir=None, nthreads=1, name='genSubj_wf'):
                                          name='subjSelect')
     subjSelect.base_dir = wdir
     subjSelect.inputs.number = nfibers
+    subjSelect.inputs.out_file = 'space-Template_variant-sift_streamlines_%d_tract.tck' % nfibers
     subjSelect.nthreads = nthreads
 
     # Subject convert
     subjConvert = pe.MapNode(mrt.TCKConvert(), iterfield=['in_file'],
                                               name='subjConvert')
     subjConvert.base_dir = wdir
-    subjConvert.inputs.out_file = 'subjectTracts.vtk'
+    subjConvert.inputs.out_file = 'space-Template_variant-sift_streamlines_%d_tract.vtk' % nfibers
     subjConvert.inputs.nthreads = nthreads
 
     # Build workflow

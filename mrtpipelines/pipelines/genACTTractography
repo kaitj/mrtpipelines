@@ -47,24 +47,6 @@ def get_parser():
     return parser
 
 
-def getBIDS(layout, wdir=None):
-    from nipype.pipeline import engine as pe
-    from nipype.interfaces import utility as niu
-
-    from mrtpipelines.interfaces import io
-
-    BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
-                                           input_names=['bids_layout',
-                                                        'subjid'],
-                                           output_names=['nifti', 'bdata',
-                                                         'parc']),
-                                           name='BIDSDataGrabber')
-    BIDSDataGrabber.base_dir = wdir
-    BIDSDataGrabber.inputs.bids_layout = layout
-
-    return BIDSDataGrabber
-
-
 def main():
     """
     Entry point of coide
@@ -84,6 +66,7 @@ def main():
 
     # Required inputs
     bids_dir = args.bids_dir
+    deriv_dir = op.join(op.abspath(bids_dir), "derivatives")
     subjids = args.participant_label
     nfibers = int(args.select)
     nthreads = int(args.nthreads)
@@ -109,15 +92,15 @@ def main():
 
     # Create necessary nodes not part of existing workflows
     # BIDSDataGrabber
-    layout = BIDSLayout(op.join(op.abspath(bids_dir), "derivatives"))
-    BIDSDataGrabber = getBIDS(layout=layout, wdir=work_dir)
+    layout = BIDSLayout(deriv_dir)
+    BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
     act_preproc_wf = preproc_wf.act_preproc_wf(wdir=work_dir,
                                                nthreads=nthreads)
 
     # MRTrix population template workflow
-    template_wf = population_wf.pop_template_wf(wdir=work_dir,
+    template_proc_wf = population_wf.pop_template_wf(wdir=work_dir,
                                                 nthreads=nthreads)
 
     # MRTrix tractography preperation workflow
@@ -132,24 +115,49 @@ def main():
     genSubj_wf = tractography_wf.genSubj_wf(nfibers=nfibers, wdir=work_dir,
                                             nthreads=nthreads)
 
+    # Template datasink
+    templateSink = io.templateSink(op.join(deriv_dir, 'mrtrix'), wdir=work_dir)
+
+    # Rename nodes for subject sinking
+    renameTract = io.renameFile(file_name='space-Template_variant-sift_streamlines-%d_tract' % nfibers,
+                  node_name='renameTract', wdir=work_dir)
+
+    renameWarp1 = io.renameFile(file_name='space-Template_warp',
+                                node_name='renameWarp1', wdir=work_dir)
+
+    renameWarp2 = io.renameFile(file_name='space-T1w_warp',
+                                node_name='renameWarp2', wdir=work_dir)
+
+    # Subject datasink
+    subjSink = io.subjSink(op.join(deriv_dir, 'mrtrix'), wdir=work_dir)
+    regex_sub = [('_subjid_sub-[0-9]*', ''),
+                ('_renameTract[0-9]*', ''),
+                ('_renameWarp[0-9]*', '')]
+    subjSink.inputs.regexp_substitutions = regex_sub
+
     # Pipeline creation (join nodes and workflows)
     pl = pe.Workflow(name='genACTTractography')
     pl.base_dir = work_dir
 
-    pl.connect([(Subjid, BIDSDataGrabber, [('subjid', 'subjid')]),
+    pl.connect([
+                # Input
+                (Subjid, BIDSDataGrabber, [
+                    ('subjid', 'subjid')]),
                 (BIDSDataGrabber, act_preproc_wf, [
                     ('nifti', 'MRConvert.in_file'),
                     ('bdata', 'MRConvert.grad_fsl'),
                     ('parc', 'Generate5tt.in_file'),
                     ('bdata', 'dwi2response.grad_fsl'),
                     ('bdata', 'dwi2mask.grad_fsl')]),
-                (act_preproc_wf, template_wf, [
-                    ('dwi2response.gm_file', 'avgResponse_gm.in_files',),
+
+                # Workflows
+                (act_preproc_wf, template_proc_wf, [
+                    ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                     ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
                     ('MRConvert.out_file', 'dwi2fod.in_file'),
                     ('dwi2mask.out_file', 'copyMask.in_file')]),
-                (template_wf, prepACTTract_wf, [
+                (template_proc_wf, prepACTTract_wf, [
                     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
                     ('population_template.out_file', 'MRRegister.ref_file'),
                     ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
@@ -159,8 +167,39 @@ def main():
                 (prepACTTract_wf, genTemplate_wf, [
                     ('tcksift.out_file', 'tempConvert1.in_file')]),
                 (prepACTTract_wf, genSubj_wf, [
-                    ('tcksift.out_file', 'subjSelect.in_file')])
-                ])
+                    ('tcksift.out_file', 'subjSelect.in_file')]),
+
+                # File rename
+                (Subjid, renameTract, [
+                    ('subjid', 'subjid')]),
+                (genSubj_wf, renameTract, [
+                    ('subjConvert.out_file', 'in_file')]),
+                (Subjid, renameWarp1, [
+                    ('subjid', 'subjid')]),
+                (prepACTTract_wf, renameWarp1, [
+                    ('WarpSelect1.out', 'in_file')]),
+                (Subjid, renameWarp2, [
+                    ('subjid', 'subjid')]),
+                (prepACTTract_wf, renameWarp2, [
+                    ('WarpSelect2.out', 'in_file')]),
+
+                # Output
+                (template_proc_wf, templateSink, [
+                    ('population_template.out_file', 'response.@template'),
+                    ('avgResponse_csf.out_file', 'response.@csf'),
+                    ('avgResponse_gm.out_file', 'response.@gm'),
+                    ('avgResponse_wm.out_file', 'response.@wm')]),
+                (genTemplate_wf, templateSink, [
+                    ('tempConvert3.out_file', 'tractography.@tract')]),
+                (Subjid, subjSink, [
+                    ('subjid', 'container')]),
+                (renameTract, subjSink, [
+                    ('out_file', 'tractography.@tract')]),
+                (renameWarp1, subjSink, [
+                    ('out_file', 'transform.@warp1')]),
+                (renameWarp2, subjSink, [
+                    ('out_file', 'transform.@warp2')])
+            ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
     pl.write_graph(graph2use='colored', format='svg')

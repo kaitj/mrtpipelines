@@ -20,15 +20,15 @@ def act_preproc_wf(wdir=None, nthreads=4, name='act_preproc_wf'):
     Generate5tt = pe.Node(mrt.Generate5tt(), name="Generate5tt")
     Generate5tt.inputs.algorithm = 'freesurfer'
     Generate5tt.inputs.args = '-nocrop'
-    Generate5tt.inputs.out_file = '5tt.mif'
+    Generate5tt.inputs.out_file = 'space-T1w_5tt.mif'
     Generate5tt.inputs.nthreads = nthreads
 
     # dwi2response
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
     dwi2response.inputs.algorithm = 'msmt_5tt'
-    dwi2response.inputs.wm_file = 'wm.txt'
-    dwi2response.inputs.gm_file = 'gm.txt'
-    dwi2response.inputs.csf_file = 'csf.txt'
+    dwi2response.inputs.wm_file = 'space-T1w_wm.txt'
+    dwi2response.inputs.gm_file = 'space-T1w_gm.txt'
+    dwi2response.inputs.csf_file = 'space-T1w_csf.txt'
     dwi2response.inputs.max_sh = [0, 8, 8]
     dwi2response.inputs.nthreads = nthreads
 
@@ -61,14 +61,19 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     MRRegister = pe.MapNode(mrt.MRRegister(), iterfield=['in_file', 'mask1'],
                                               name='MRRegister')
     MRRegister.base_wdir = wdir
-    MRRegister.inputs.nl_warp = ['mov-tmp_warp.mif', 'tmp-mov_warp.mif']
+    MRRegister.inputs.nl_warp = ['mov_sub-tmp_warp.mif', 'sub-tmp_mov_warp.mif']
     MRRegister.inputs.nthreads = nthreads
 
     # Transform subjects' data into template space
-    WarpSelect = pe.MapNode(niu.Select(), iterfield=['inlist'],
-                                          name='WarpSelect')
-    WarpSelect.base_dir = wdir
-    WarpSelect.inputs.index = [0]
+    WarpSelect1 = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                           name='WarpSelect1')
+    WarpSelect1.base_dir = wdir
+    WarpSelect1.inputs.index = [0]
+
+    WarpSelect2 = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                           name='WarpSelect2')
+    WarpSelect2.base_dir = wdir
+    WarpSelect2.inputs.index = [1]
 
     FODTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                  name='FODTransform')
@@ -86,6 +91,7 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     gen5ttMask = pe.MapNode(mrt.Generate5ttMask(), iterfield=['in_file'],
                                                    name='gen5ttMask')
     gen5ttMask.base_dir = wdir
+    gen5ttMask.inputs.out_file = 'space-Template_5ttMask.mif'
     gen5ttMask.inputs.nthreads = nthreads
 
     # Generate tractography
@@ -96,6 +102,7 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     genTract.base_dir = wdir
     genTract.inputs.backtrack
     genTract.inputs.n_tracks = 200000
+    genTract.inputs.out_file = 'space-Template_variant-tckgen_streamlines-200K_tract.tck'
     genTract.inputs.nthreads = nthreads
 
     # Sphereical-deconvoulution informed filtering of tractography
@@ -103,15 +110,17 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
                                        name='tcksift')
     siftTract.base_dir = wdir
     siftTract.inputs.term_number = 100000
+    siftTract.inputs.out_file = 'space-Template_variant-sift_streamlines-100K_tract.tck'
     siftTract.inputs.nthreads = nthreads
 
     # Build workflow
     workflow = pe.Workflow(name=name)
 
     workflow.connect([
-        (MRRegister, WarpSelect, [('nl_warp', 'inlist')]),
-        (WarpSelect, FODTransform, [('out', 'warp')]),
-        (WarpSelect, AnatTransform, [('out', 'warp')]),
+        (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
+        (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
+        (WarpSelect1, FODTransform, [('out', 'warp')]),
+        (WarpSelect1, AnatTransform, [('out', 'warp')]),
         (AnatTransform, gen5ttMask, [('out_file', 'in_file')]),
         (AnatTransform, genTract, [('out_file', 'act_file')]),
         (gen5ttMask, genTract, [('out_file', 'seed_gmwmi')]),
