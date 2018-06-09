@@ -78,6 +78,10 @@ def main():
     else:
         work_dir = op.join(bids_dir, "derivatives/scratch")
         crash_dir = op.join(op.abspath(bids_dir, "derivatives/crash"))
+    if args.out_dir:
+        out_dir = op.abspath(args.out_dir)
+    else:
+        out_dir = op.join(deriv_dir, 'mrtrix')
 
     config.update_config({'logging': {'log_directory': work_dir,
                                       'log_to_file': True,
@@ -116,7 +120,7 @@ def main():
                                             nthreads=nthreads)
 
     # Template datasink
-    templateSink = io.templateSink(op.join(deriv_dir, 'mrtrix'), wdir=work_dir)
+    templateSink = io.templateSink(out_dir, wdir=work_dir)
 
     # Rename nodes for subject sinking
     renameTract = io.renameFile(file_name='space-Template_variant-sift_streamlines-%d_tract' % nfibers,
@@ -129,7 +133,7 @@ def main():
                                 node_name='renameWarp2', wdir=work_dir)
 
     # Subject datasink
-    subjSink = io.subjSink(op.join(deriv_dir, 'mrtrix'), wdir=work_dir)
+    subjSink = io.subjSink(out_dir, wdir=work_dir)
     regex_sub = [('_subjid_sub-[0-9]*', ''),
                 ('_renameTract[0-9]*', ''),
                 ('_renameWarp[0-9]*', '')]
