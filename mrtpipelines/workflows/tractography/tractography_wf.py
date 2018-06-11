@@ -65,7 +65,7 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
 
     return workflow
 
-def genSubj_wf(nfibers=10000, wdir=None, nthreads=1, name='genSubj_wf'):
+def genSubj_wf(nfibers=100000, wdir=None, nthreads=1, name='genSubj_wf'):
     """
     Set up workflow to generate subject tracts
     """

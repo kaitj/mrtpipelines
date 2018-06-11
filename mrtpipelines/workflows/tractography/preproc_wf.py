@@ -96,12 +96,13 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
 
     # Generate tractography
     genTract = pe.MapNode(mrt.Tractography(), iterfield=['in_file',
-                                                         'act_file',
+
+    templateSink = io.templateSink(o     'act_file',
                                                          'seed_gmwmi'],
                                               name='genTract')
     genTract.base_dir = wdir
     genTract.inputs.backtrack
-    genTract.inputs.n_tracks = 200000
+    genTract.inputs.n_tracks = 500000
     genTract.inputs.out_file = 'space-Template_variant-tckgen_streamlines-200K_tract.tck'
     genTract.inputs.nthreads = nthreads
 
@@ -109,7 +110,7 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     siftTract = pe.MapNode(mrt.SIFT(), iterfield=['in_file', 'in_fod'],
                                        name='tcksift')
     siftTract.base_dir = wdir
-    siftTract.inputs.term_number = 100000
+    siftTract.inputs.term_number = 250000
     siftTract.inputs.out_file = 'space-Template_variant-sift_streamlines-100K_tract.tck'
     siftTract.inputs.nthreads = nthreads
 
