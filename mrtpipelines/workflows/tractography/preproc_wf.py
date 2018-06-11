@@ -96,8 +96,7 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
 
     # Generate tractography
     genTract = pe.MapNode(mrt.Tractography(), iterfield=['in_file',
-
-    templateSink = io.templateSink(o     'act_file',
+                                                         'act_file',
                                                          'seed_gmwmi'],
                                               name='genTract')
     genTract.base_dir = wdir
