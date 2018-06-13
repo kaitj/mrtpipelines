@@ -12,8 +12,10 @@ isodate==0.6.0
 lxml==4.2.1
 mock==2.0.0
 more-itertools==4.2.0
+mrtrix-pipelines==0.0.dev1
 networkx==2.1
 nibabel==2.2.1
+nipype==1.0.4.dev0+g877da60
 num2words==0.5.6
 numpy==1.14.4
 packaging==17.1
@@ -35,3 +37,4 @@ scipy==1.1.0
 simplejson==3.15.0
 six==1.11.0
 traits==4.6.0
+vtk==8.1.0
