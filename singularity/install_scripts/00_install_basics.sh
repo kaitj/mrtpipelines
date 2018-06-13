@@ -16,4 +16,4 @@ curl https://bootstrap.pypa.io/get-pip.py | python3
 
 # freesurfer
 apt-get install -y tcsh
-apt-get install -y liqt4-scripttools libqt4-dev libjpeg62 libxss1 libxft2
+apt-get install -y libqt4-scripttools libqt4-dev libjpeg62 libxss1 libxft2

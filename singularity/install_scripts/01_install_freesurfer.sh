@@ -5,8 +5,10 @@ echo -n "Installing freesurfer ..."
 S_DIR=/opt 
 VERSION=6.0.0
 
+mkdir -p $S_DIR/freesurfer
+
 # Get freesurfer
-wget ftp://surfer.nmr.mgh.harvard.edu.pub/dist/freesurfer/${VERSION}/freesurfer-Linux-centos6_x86_64-stable-oub-v${VERSION}.tar.gz
+wget ftp://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/${VERSION}/freesurfer-Linux-centos6_x86_64-stable-pub-v${VERSION}.tar.gz
 
 tar -xvzf freesurfer-Linux-centos6_x86_64-stable-pub-v${VERSION}.tar.gz -C $S_DIR \
     --exclude='freesurfer/trctrain' \
@@ -29,11 +31,15 @@ curl -L --retry 5 https://www.dropbox.com/s/38gghuq2w7h17pe/freesurfer_license -
 
 # Setup
 
-PROFILE=/.singularity.d/env/90-environment.sh
 FREESURFER_HOME=$S_DIR/freesurfer
+source $FREESURFER_HOME/SetUpFreeSurfer.sh
 
-echo "" >> $PROFILE
-echo "#freesurfer" >> $PROFILE
-echo "export PATH=$FREESURFER_HOME/bin:\$PATH" >> $PROFILE
-echo "export $FREESURFER_HOME" >> $PROFILE
-echo "source $FREESURFER_HOME/SetUpFreeSurfer.sh" >> $PROFILE
+#PROFILE=/environment
+#FREESURFER_HOME=$S_DIR/freesurfer
+
+#echo "" >> $PROFILE
+#echo "#freesurfer" >> $PROFILE
+#echo "export PATH=$FREESURFER_HOME/bin:\$PATH" >> $PROFILE
+#echo "export $FREESURFER_HOME" >> $PROFILE
+
+#source $PROFILE

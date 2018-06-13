@@ -3,10 +3,12 @@
 # Install graphviz (for pipeline visual)
 apt-get install -y graphviz
 
-cd /opt/git
+# Git
+DIR=/opt/git
+mkdir -p $DIR/nipype
 
-git clone https://github.com/kaitj/nipype
-cd /opt/git/nipype
+git clone https://github.com/kaitj/nipype $DIR/nipype
+cd $DIR/nipype
 git checkout kai_dev
 
 # Install requirements 

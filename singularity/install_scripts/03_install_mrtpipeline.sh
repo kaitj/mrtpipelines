@@ -1,9 +1,11 @@
 #!/bin/bash
 
-cd /opt/git
-git clone https://github.com/kaitj/mrtpipelines
+DIR=/opt/git/
+mkdir -p $DIR/mrtpipelines
 
-cd /opt/git/mrtpipelines
+# Git
+git clone https://github.com/kaitj/mrtpipelines $DIR/mrtpipelines
+cd $DIR/mrtpipelines
 
 # Install requirements
 pip3 install -r requirements.txt
