@@ -3,11 +3,11 @@ from distutils.core import setup
 setup(
     # Project information
     name='mrtrix_pipelines',
-    version='0.0.dev1',
+    version='0.0.1',
     description='Pipelines related to generating MRTrix tractography',
     packages=['mrtpipelines/interfaces',
-                     'mrtpipelines//workflows',
-                     'mrtpipelines/workflows/tractography'],
+              'mrtpipelines/workflows',
+              'mrtpipelines/workflows/tractography'],
     scripts=['mrtpipelines/pipelines/genACTTractography'],
 
     # Metadata
