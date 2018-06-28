@@ -51,6 +51,7 @@ def main():
     """
     Entry point of coide
     """
+    import os
     import os.path as op
 
     from bids.grabbids import BIDSLayout
@@ -78,6 +79,12 @@ def main():
     else:
         work_dir = op.join(bids_dir, "derivatives/scratch")
         crash_dir = op.join(op.abspath(bids_dir, "derivatives/crash"))
+
+    if not op.exists(work_dir):
+        os.makedirs(work_dir)
+    if not op.exists(crash_dir):
+        os.makedirs(crash_dir)
+
     if args.out_dir:
         out_dir = op.abspath(args.out_dir)
     else:
