@@ -48,6 +48,47 @@ def act_preproc_wf(wdir=None, nthreads=4, name='act_preproc_wf'):
 
     return workflow
 
+
+def dhollander_preproc_wf(wdir=None, nthreads=4,
+                          name='dhollander_preproc_wf'):
+    """
+    Set up dhollander response preproc workflow
+    """
+
+    # Define each node to use 4 cores if available
+    if nthreads >= 4:
+        nthreads = 4
+
+    # Convert from nii to mif
+    MRConvert = pe.Node(mrt.MRConvert(), name="MRConvert")
+    MRConvert.base_dir = wdir
+    MRConvert.inputs.nthreads = nthreads
+
+    # dwi2response
+    dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
+    dwi2response.inputs.algorithm = 'dhollander'
+    dwi2response.inputs.wm_file = 'space-dwi_wm.txt'
+    dwi2response.inputs.gm_file = 'space-dwi_gm.txt'
+    dwi2response.inputs.csf_file = 'space-dwi_csf.txt'
+    dwi2response.inputs.max_sh = [0, 8, 8]
+    dwi2response.inputs.nthreads = nthreads
+
+    # dwi2mask
+    dwi2mask = pe.Node(mrt.BrainMask(), name='dwi2mask')
+    dwi2mask.inputs.out_file = 'dwi_mask.mif'
+    dwi2mask.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (MRConvert, dwi2response, [('out_file', 'in_file')]),
+        (MRConvert, dwi2mask, [('out_file', 'in_file')])
+    ])
+
+    return workflow
+
+
 def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     """
     Set up workflow to generate Tractography
@@ -125,6 +166,80 @@ def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
         (AnatTransform, genTract, [('out_file', 'act_file')]),
         (gen5ttMask, genTract, [('out_file', 'seed_gmwmi')]),
         (FODTransform, genTract, [('out_file', 'in_file')]),
+        (genTract, siftTract, [('out_file', 'in_file')]),
+        (FODTransform, siftTract, [('out_file', 'in_fod')])
+    ])
+
+    return workflow
+
+
+def prepDhollTract_wf(wdir=None, nthreads=1, name='prepDhollTract_wf'):
+    """
+    Set up workflow to generate Tractography
+    """
+
+    # Define nodes to use 4 cores if available
+    if nthreads >= 4:
+        nthreads = 4
+
+    # Register subjects to template
+    MRRegister = pe.MapNode(mrt.MRRegister(), iterfield=['in_file', 'mask1'],
+                                              name='MRRegister')
+    MRRegister.base_wdir = wdir
+    MRRegister.inputs.nl_warp = ['mov_sub-tmp_warp.mif', 'sub-tmp_mov_warp.mif']
+    MRRegister.inputs.nthreads = nthreads
+
+    # Transform subjects' data into template space
+    WarpSelect1 = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                           name='WarpSelect1')
+    WarpSelect1.base_dir = wdir
+    WarpSelect1.inputs.index = [0]
+
+    WarpSelect2 = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                           name='WarpSelect2')
+    WarpSelect2.base_dir = wdir
+    WarpSelect2.inputs.index = [1]
+
+    FODTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                 name='FODTransform')
+    FODTransform.base_dir = wdir
+    FODTransform.inputs.out_file = 'space-Template_wmfod.mif'
+    FODTransform.inputs.nthreads = nthreads
+
+    MaskTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                  name='MaskTransform')
+    MaskTransform.base_dir = wdir
+    MaskTransform.inputs.out_file = 'space-Template_mask.mif'
+    MaskTransform.inputs.nthreads = nthreads
+
+    # Generate tractography
+    genTract = pe.MapNode(mrt.Tractography(), iterfield=['in_file',
+                                                         'seed_image'],
+                                              name='genTract')
+    genTract.base_dir = wdir
+    genTract.inputs.backtrack
+    genTract.inputs.n_tracks = 500000
+    genTract.inputs.out_file = 'space-Template_variant-tckgen_streamlines-200K_tract.tck'
+    genTract.inputs.nthreads = nthreads
+
+    # Sphereical-deconvoulution informed filtering of tractography
+    siftTract = pe.MapNode(mrt.SIFT(), iterfield=['in_file', 'in_fod'],
+                                       name='tcksift')
+    siftTract.base_dir = wdir
+    siftTract.inputs.term_number = 250000
+    siftTract.inputs.out_file = 'space-Template_variant-sift_streamlines-100K_tract.tck'
+    siftTract.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
+        (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
+        (WarpSelect1, FODTransform, [('out', 'warp')]),
+        (WarpSelect1, MaskTransform, [('out', 'warp')]),
+        (FODTransform, genTract, [('out_file', 'in_file')]),
+        (MaskTransform, genTract, [('out_file', 'seed_image')]),
         (genTract, siftTract, [('out_file', 'in_file')]),
         (FODTransform, siftTract, [('out_file', 'in_fod')])
     ])

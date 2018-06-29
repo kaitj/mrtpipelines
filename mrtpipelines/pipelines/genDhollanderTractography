@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """ genACTTractography
 
-Python command line interface for MRTrix3 ACT Tractography pipeline
+Python command line interface for MRTrix3 multi-shell multi-tissue
+constrained spherical deconvolution tractography pipeline with Dhollander
+response function
 
 """
 def get_parser():
@@ -10,8 +12,10 @@ def get_parser():
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
 
-    parser = ArgumentParser(description="Pipeline to generate MRTrix3 ACT "
-                                        "Tractography",
+    parser = ArgumentParser(description="Pipeline to generate MRTrix3 "
+                                        "multi-shell multi-tissue CSD "
+                                        "tractography with Dhollander "
+                                        "response",
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
@@ -107,15 +111,15 @@ def main():
     BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
-    act_preproc_wf = preproc_wf.act_preproc_wf(wdir=work_dir,
-                                               nthreads=nthreads)
+    dholl_preproc_wf = preproc_wf.dhollander_preproc_wf(wdir=work_dir,
+                                                    nthreads=nthreads)
 
     # MRTrix population template workflow
     template_proc_wf = population_wf.pop_template_wf(wdir=work_dir,
                                                 nthreads=nthreads)
 
     # MRTrix tractography preperation workflow
-    prepACTTract_wf = preproc_wf.prepACTTract_wf(wdir=work_dir,
+    prepDhollTract_wf = preproc_wf.prepDhollTract_wf(wdir=work_dir,
                                                  nthreads=nthreads)
 
     # MRTrix template tractography generation workflow
@@ -136,7 +140,7 @@ def main():
     renameWarp1 = io.renameFile(file_name='space-Template_warp',
                                 node_name='renameWarp1', wdir=work_dir)
 
-    renameWarp2 = io.renameFile(file_name='space-T1w_warp',
+    renameWarp2 = io.renameFile(file_name='space-dwi_warp',
                                 node_name='renameWarp2', wdir=work_dir)
 
     # Subject datasink
@@ -147,37 +151,36 @@ def main():
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
-    pl = pe.Workflow(name='genACTTractography')
+    pl = pe.Workflow(name='genDhollanderTractography')
     pl.base_dir = work_dir
 
     pl.connect([
                 # Input
                 (Subjid, BIDSDataGrabber, [
                     ('subjid', 'subjid')]),
-                (BIDSDataGrabber, act_preproc_wf, [
+                (BIDSDataGrabber, dholl_preproc_wf, [
                     ('nifti', 'MRConvert.in_file'),
                     ('bdata', 'MRConvert.grad_fsl'),
-                    ('parc', 'Generate5tt.in_file'),
                     ('bdata', 'dwi2response.grad_fsl'),
                     ('bdata', 'dwi2mask.grad_fsl')]),
 
                 # Workflows
-                (act_preproc_wf, template_proc_wf, [
+                (dholl_preproc_wf, template_proc_wf, [
                     ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                     ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
                     ('MRConvert.out_file', 'dwi2fod.in_file'),
                     ('dwi2mask.out_file', 'copyMask.in_file')]),
-                (template_proc_wf, prepACTTract_wf, [
+                (template_proc_wf, prepDhollTract_wf, [
                     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
                     ('population_template.out_file', 'MRRegister.ref_file'),
                     ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
-                (act_preproc_wf, prepACTTract_wf, [
+                (dholl_preproc_wf, prepDhollTract_wf, [
                     ('dwi2mask.out_file', 'MRRegister.mask1'),
-                    ('Generate5tt.out_file', 'AnatTransform.in_file')]),
-                (prepACTTract_wf, genTemplate_wf, [
+                    ('dwi2mask.out_file', 'MaskTransform.in_file')]),
+                (prepDhollTract_wf, genTemplate_wf, [
                     ('tcksift.out_file', 'tempConvert1.in_file')]),
-                (prepACTTract_wf, genSubj_wf, [
+                (prepDhollTract_wf, genSubj_wf, [
                     ('tcksift.out_file', 'subjSelect.in_file')]),
 
                 # File rename
@@ -187,11 +190,11 @@ def main():
                     ('subjConvert.out_file', 'in_file')]),
                 (Subjid, renameWarp1, [
                     ('subjid', 'subjid')]),
-                (prepACTTract_wf, renameWarp1, [
+                (prepDhollTract_wf, renameWarp1, [
                     ('WarpSelect1.out', 'in_file')]),
                 (Subjid, renameWarp2, [
                     ('subjid', 'subjid')]),
-                (prepACTTract_wf, renameWarp2, [
+                (prepDhollTract_wf, renameWarp2, [
                     ('WarpSelect2.out', 'in_file')]),
 
                 # Output

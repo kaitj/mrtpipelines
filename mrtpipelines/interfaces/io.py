@@ -35,10 +35,13 @@ def getData(bids_layout, subjid):
                            extensions=['bvec'])
 
     # Freesurfer parcellation (from fmriprep)
-    parc = bids_layout.get(subject=subjid, type='aseg', return_type='file',
-                           extensions=['mgz'])
+    parc = bids_layout.get(subject=subjid, type='aseg',
+                           return_type='file', extensions=['mgz'])
 
-    return nifti[0], (bvec[0], bval[0]), parc[0]
+    if not parc:
+        return nifti[0], (bvec[0], bval[0]), None
+    else:
+        return nifti[0], (bvec[0], bval[0]), parc[0]
 
 
 def getBIDS(layout, wdir=None):
