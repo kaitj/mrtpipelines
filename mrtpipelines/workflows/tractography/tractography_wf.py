@@ -43,8 +43,8 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
     # Select number of fibres for template
     tempSelect = pe.Node(mrt.TCKEdit(), name='tempSelect')
     tempSelect.base_dir = wdir
-    tempSelect.inputs.number = 10000
-    tempSelect.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-10K_tract.tck'
+    tempSelect.inputs.number = 100000
+    tempSelect.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-100K_tract.tck'
     tempSelect.inputs.nthreads = nthreads
 
     # Convert template to vtk

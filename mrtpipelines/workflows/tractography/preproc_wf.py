@@ -89,6 +89,45 @@ def dhollander_preproc_wf(wdir=None, nthreads=4,
     return workflow
 
 
+def hcp_preproc_wf(wdir=None, nthreads=4, name='hcp_preproc_wf'):
+    """
+    Set up dhollander response preproc workflow
+    """
+
+    # Define each node to use 4 cores if available
+    if nthreads >= 4:
+        nthreads = 4
+
+    # Convert from nii to mif
+    MRConvert = pe.Node(mrt.MRConvert(), name="MRConvert")
+    MRConvert.base_dir = wdir
+    MRConvert.inputs.nthreads = nthreads
+
+    # dwi2response
+    dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
+    dwi2response.inputs.algorithm = 'dhollander'
+    dwi2response.inputs.wm_file = 'space-dwi_wm.txt'
+    dwi2response.inputs.gm_file = 'space-dwi_gm.txt'
+    dwi2response.inputs.csf_file = 'space-dwi_csf.txt'
+    dwi2response.inputs.max_sh = [0, 8, 8, 8]
+    dwi2response.inputs.nthreads = nthreads
+
+    # dwi2mask
+    dwi2mask = pe.Node(mrt.BrainMask(), name='dwi2mask')
+    dwi2mask.inputs.out_file = 'dwi_mask.mif'
+    dwi2mask.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (MRConvert, dwi2response, [('out_file', 'in_file')]),
+        (MRConvert, dwi2mask, [('out_file', 'in_file')])
+    ])
+
+    return workflow
+
+
 def prepACTTract_wf(wdir=None, nthreads=1, name='prepACTTract_wf'):
     """
     Set up workflow to generate Tractography
@@ -218,16 +257,16 @@ def prepDhollTract_wf(wdir=None, nthreads=1, name='prepDhollTract_wf'):
                                               name='genTract')
     genTract.base_dir = wdir
     genTract.inputs.backtrack
-    genTract.inputs.n_tracks = 500000
-    genTract.inputs.out_file = 'space-Template_variant-tckgen_streamlines-200K_tract.tck'
+    genTract.inputs.n_tracks = 1000000
+    genTract.inputs.out_file = 'space-Template_variant-tckgen_streamlines-1M_tract.tck'
     genTract.inputs.nthreads = nthreads
 
     # Sphereical-deconvoulution informed filtering of tractography
     siftTract = pe.MapNode(mrt.SIFT(), iterfield=['in_file', 'in_fod'],
                                        name='tcksift')
     siftTract.base_dir = wdir
-    siftTract.inputs.term_number = 250000
-    siftTract.inputs.out_file = 'space-Template_variant-sift_streamlines-100K_tract.tck'
+    siftTract.inputs.term_number = 500000
+    siftTract.inputs.out_file = 'space-Template_variant-sift_streamlines-500K_tract.tck'
     siftTract.inputs.nthreads = nthreads
 
     # Build workflow
