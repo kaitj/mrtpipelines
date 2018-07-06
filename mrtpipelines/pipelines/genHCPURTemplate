@@ -59,7 +59,9 @@ def main():
     import os.path as op
 
     from bids.grabbids import BIDSLayout
-
+    # MRTrix subject tractography generation workflow
+    genSubj_wf = tractography_wf.genSubj_wf(nfibers=nfibers, wdir=work_dir,
+                                            nthreads=nthreads)
     from nipype import config, logging
     from nipype.pipeline import engine as pe
 

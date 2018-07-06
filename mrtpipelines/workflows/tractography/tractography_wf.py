@@ -50,7 +50,7 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
     # Convert template to vtk
     tempConvert3 = pe.Node(mrt.TCKConvert(), name='tempConvert3')
     tempConvert3.base_dir = wdir
-    tempConvert3.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-10K_tract.vtk'
+    tempConvert3.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-100K_tract.vtk'
     tempConvert3.inputs.nthreads = nthreads
 
     # Build workflow
