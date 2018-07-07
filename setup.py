@@ -9,7 +9,8 @@ setup(
               'mrtpipelines/workflows',
               'mrtpipelines/workflows/tractography'],
     scripts=['mrtpipelines/pipelines/genACTTractography',
-             'mrtpipelines/pipelines/genDhollanderTractography'],
+             'mrtpipelines/pipelines/genDhollanderTractography',
+             'mrtpipelines/pipelines/genHCPURtemplate'],
 
     # Metadata
     author='Jason Kai',
