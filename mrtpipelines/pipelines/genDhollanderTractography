@@ -166,7 +166,7 @@ def main():
                     ('bdata', 'dwi2mask.grad_fsl')]),
 
                 # Workflows
-                (dholl__wf, template_proc_wf, [
+                (dholl_preproc_wf, template_proc_wf, [
                     ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                     ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
@@ -176,7 +176,7 @@ def main():
                     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
                     ('population_template.out_file', 'MRRegister.ref_file'),
                     ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
-                (act_preproc_wf, prepACTTract_wf, [
+                (dholl_preproc_wf, prepACTTract_wf, [
                     ('dwi2mask.out_file', 'MRRegister.mask1'),
                     ('Generate5tt.out_file', 'AnatTransform.in_file')]),
                 (prepACTTract_wf, genTemplate_wf, [

@@ -107,7 +107,7 @@ def main():
 
     # Create necessary nodes not part of existing workflows
     # BIDSDataGrabber
-    layout = BIDSLayout(deriv_dir)
+    layout = BIDSLayout(bids_dir)
     BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
@@ -178,8 +178,6 @@ def main():
                     ('tcksift.out_file', 'tempConvert1.in_file')]),
 
                 # File rename
-                (Subjid, renameTract, [
-                    ('subjid', 'subjid')]),
                 (Subjid, renameWarp1, [
                     ('subjid', 'subjid')]),
                 (prepDhollTract_wf, renameWarp1, [
