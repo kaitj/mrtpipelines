@@ -13,7 +13,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
 
     # Define each node to use 4 cores if available
     if nthreads >= 4:
-        nthreads = 4
+        int_nthreads = 4
 
     # Estimate group response for each tissue type
     avg_wm = pe.JoinNode(mrt.AverageResponse(), joinsource='SubjectID',
@@ -38,7 +38,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     dwi2fod = pe.MapNode(mrt.EstimateFOD(), iterfield=['in_file'],
                                             name='dwi2fod')
     dwi2fod.inputs.algorithm = 'msmt_csd'
-    dwi2fod.inputs.nthreads = nthreads
+    dwi2fod.inputs.nthreads = int_nthreads
 
     # Copy FOD and masks
     copyFOD = pe.JoinNode(niu.Function(function=io.copyFile,

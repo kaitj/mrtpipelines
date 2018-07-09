@@ -12,8 +12,8 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
     """
 
     # Define nodes to use 4 cores if available
-    if nthreads >= 4:
-        nthreads = 4
+    # if nthreads >= 4:
+    #     nthreads = 4
 
     # Convert to VTK
     tempConvert1 = pe.MapNode(mrt.TCKConvert(), iterfield=['in_file'],

@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     # Project information
     name='mrtrix_pipelines',
-    version='1.0.1',
+    version='1.0.2',
     description='Pipelines related to generating MRTrix tractography',
     packages=['mrtpipelines/interfaces',
               'mrtpipelines/workflows',
