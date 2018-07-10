@@ -11,10 +11,6 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
     Set up workflow to generate template tracts
     """
 
-    # Define nodes to use 4 cores if available
-    # if nthreads >= 4:
-    #     nthreads = 4
-
     # Convert to VTK
     tempConvert1 = pe.MapNode(mrt.TCKConvert(), iterfield=['in_file'],
                                                 name='tempConvert1')
@@ -69,10 +65,6 @@ def genSubj_wf(nfibers=100000, wdir=None, nthreads=1, name='genSubj_wf'):
     """
     Set up workflow to generate subject tracts
     """
-
-    # Define nodes to use 4 cores if available
-    if nthreads >= 4:
-        nthreads = 4
 
     # Subject select
     subjSelect = pe.MapNode(mrt.TCKEdit(), iterfield=['in_file'],

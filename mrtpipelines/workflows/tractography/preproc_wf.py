@@ -89,14 +89,10 @@ def dhollander_preproc_wf(wdir=None, nthreads=4,
     return workflow
 
 
-def hcp_preproc_wf(wdir=None, nthreads=4, name='hcp_preproc_wf'):
+def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     """
     Set up dhollander response preproc workflow
     """
-
-    # Define each node to use 4 cores if available
-    if nthreads >= 32:
-        nthreads = 32
 
     # Convert from nii to mif
     MRConvert = pe.Node(mrt.MRConvert(), name="MRConvert")
@@ -216,10 +212,6 @@ def prepDhollTract_wf(wdir=None, nthreads=1, name='prepDhollTract_wf'):
     """
     Set up workflow to generate Tractography
     """
-
-    # Define nodes to use 4 cores if available
-    if nthreads >= 4:
-        nthreads = 4
 
     # Register subjects to template
     MRRegister = pe.MapNode(mrt.MRRegister(), iterfield=['in_file', 'mask1'],
