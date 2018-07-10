@@ -130,9 +130,6 @@ def main():
     templateSink = io.templateSink(out_dir, wdir=work_dir)
 
     # Rename nodes for subject sinking
-    renameTract = io.renameFile(file_name='space-Template_variant-sift_streamlines-%d_tract' % nfibers,
-                  node_name='renameTract', wdir=work_dir)
-
     renameWarp1 = io.renameFile(file_name='space-Template_warp',
                                 node_name='renameWarp1', wdir=work_dir)
 
@@ -207,7 +204,7 @@ def main():
     pl.write_graph(graph2use='colored', format='svg')
 
     if nthreads >= 4:
-        pl.run(plugin='MultiProc')
+        pl.run(plugin='MultiProc', plugin_args={'n_procs': nthreads})
     else:
         pl.run(plugin='Linear')
 
