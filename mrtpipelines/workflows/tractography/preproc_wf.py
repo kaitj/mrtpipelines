@@ -95,8 +95,8 @@ def hcp_preproc_wf(wdir=None, nthreads=4, name='hcp_preproc_wf'):
     """
 
     # Define each node to use 4 cores if available
-    if nthreads >= 4:
-        nthreads = 4
+    if nthreads >= 32:
+        nthreads = 32
 
     # Convert from nii to mif
     MRConvert = pe.Node(mrt.MRConvert(), name="MRConvert")

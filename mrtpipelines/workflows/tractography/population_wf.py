@@ -12,8 +12,8 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     """
 
     # Define each node to use 4 cores if available
-    if nthreads >= 4:
-        int_nthreads = 4
+    if nthreads >= 32:
+        int_nthreads = 32
 
     # Estimate group response for each tissue type
     avg_wm = pe.JoinNode(mrt.AverageResponse(), joinsource='SubjectID',
