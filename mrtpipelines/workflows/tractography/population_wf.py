@@ -33,8 +33,18 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     # dwi2fod
     dwi2fod = pe.MapNode(mrt.EstimateFOD(), iterfield=['in_file'],
                                             name='dwi2fod')
+    dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
     dwi2fod.inputs.nthreads = nthreads
+
+    # mtnormalise
+    mtnormalise = pe.MapNode(mrt.MTNormalise(), iterfield=['in_wm',
+                                                           'in_gm',
+                                                           'in_csf',
+                                                           'mask'],
+                                                name='mtnormalise')
+    mtnormalise.base_dir = wdir
+    mtnormalise.inputs.nthreads = nthreads
 
     # Copy FOD and masks
     copyFOD = pe.JoinNode(niu.Function(function=io.copyFile,
@@ -67,7 +77,10 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
         (avg_wm, dwi2fod, [('out_file', 'wm_txt')]),
         (avg_gm, dwi2fod, [('out_file', 'gm_txt')]),
         (avg_csf, dwi2fod, [('out_file', 'csf_txt')]),
-        (dwi2fod, copyFOD, [('wm_odf', 'in_file')]),
+        (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
+                                ('gm_odf', 'in_gm'),
+                                ('csf_odf', 'in_csf')]),
+        (mtnormalise, copyFOD, [('out_wm', 'in_file')]),
         (copyFOD, popTemplate, [('out_dir', 'in_dir')]),
         (copyMask, popTemplate, [('out_dir', 'mask_dir')])
     ])

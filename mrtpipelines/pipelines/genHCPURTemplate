@@ -152,52 +152,53 @@ def main():
                 (Subjid, BIDSDataGrabber, [
                     ('subjid', 'subjid')]),
                 (BIDSDataGrabber, hcp_preproc_wf, [
-                    ('nifti', 'MRConvert.in_file'),
-                    ('bdata', 'MRConvert.grad_fsl'),
+                    ('nifti', 'dataConvert.in_file'),
+                    ('bdata', 'dataConvert.grad_fsl'),
                     ('bdata', 'dwi2response.grad_fsl'),
-                    ('bdata', 'dwi2mask.grad_fsl')]),
+                    ('mask', 'maskConvert.in_file')]),
 
                 # Workflows
                 (hcp_preproc_wf, template_proc_wf, [
                     ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                     ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
-                    ('MRConvert.out_file', 'dwi2fod.in_file'),
-                    ('dwi2mask.out_file', 'copyMask.in_file')]),
-                (template_proc_wf, prepDhollTract_wf, [
-                    ('dwi2fod.wm_odf', 'MRRegister.in_file'),
-                    ('population_template.out_file', 'MRRegister.ref_file'),
-                    ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
-                (hcp_preproc_wf, prepDhollTract_wf, [
-                    ('dwi2mask.out_file', 'MRRegister.mask1'),
-                    ('dwi2mask.out_file', 'MaskTransform.in_file')]),
-                (prepDhollTract_wf, genTemplate_wf, [
-                    ('tcksift.out_file', 'tempConvert1.in_file')]),
+                    ('dataConvert.out_file', 'dwi2fod.in_file'),
+                    ('maskConvert.out_file', 'mtnormalise.mask'),
+                    ('maskConvert.out_file', 'copyMask.in_file')]),
+                # (template_proc_wf, prepDhollTract_wf, [
+                #     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
+                #     ('population_template.out_file', 'MRRegister.ref_file'),
+                #     ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
+                # (hcp_preproc_wf, prepDhollTract_wf, [
+                #     ('dwi2mask.out_file', 'MRRegister.mask1'),
+                #     ('dwi2mask.out_file', 'MaskTransform.in_file')]),
+                # (prepDhollTract_wf, genTemplate_wf, [
+                #     ('tcksift.out_file', 'tempConvert1.in_file')]),
 
                 # File rename
-                (Subjid, renameWarp1, [
-                    ('subjid', 'subjid')]),
-                (prepDhollTract_wf, renameWarp1, [
-                    ('WarpSelect1.out', 'in_file')]),
-                (Subjid, renameWarp2, [
-                    ('subjid', 'subjid')]),
-                (prepDhollTract_wf, renameWarp2, [
-                    ('WarpSelect2.out', 'in_file')]),
+                # (Subjid, renameWarp1, [
+                #     ('subjid', 'subjid')]),
+                # (prepDhollTract_wf, renameWarp1, [
+                #     ('WarpSelect1.out', 'in_file')]),
+                # (Subjid, renameWarp2, [
+                #     ('subjid', 'subjid')]),
+                # (prepDhollTract_wf, renameWarp2, [
+                #     ('WarpSelect2.out', 'in_file')]),
 
                 # Output
                 (template_proc_wf, templateSink, [
                     ('population_template.out_file', 'response.@template'),
                     ('avgResponse_csf.out_file', 'response.@csf'),
                     ('avgResponse_gm.out_file', 'response.@gm'),
-                    ('avgResponse_wm.out_file', 'response.@wm')]),
-                (genTemplate_wf, templateSink, [
-                    ('tempConvert3.out_file', 'tractography.@tract')]),
-                (Subjid, subjSink, [
-                    ('subjid', 'container')]),
-                (renameWarp1, subjSink, [
-                    ('out_file', 'transform.@warp1')]),
-                (renameWarp2, subjSink, [
-                    ('out_file', 'transform.@warp2')])
+                    ('avgResponse_wm.out_file', 'response.@wm')])
+                # (genTemplate_wf, templateSink, [
+                #     ('tempConvert3.out_file', 'tractography.@tract')]),
+                # (Subjid, subjSink, [
+                #     ('subjid', 'container')]),
+                # (renameWarp1, subjSink, [
+                #     ('out_file', 'transform.@warp1')]),
+                # (renameWarp2, subjSink, [
+                #     ('out_file', 'transform.@warp2')])
             ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)

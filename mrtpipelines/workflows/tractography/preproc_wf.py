@@ -95,12 +95,13 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     """
 
     # Convert from nii to mif
-    MRConvert = pe.Node(mrt.MRConvert(), name="MRConvert")
-    MRConvert.base_dir = wdir
-    MRConvert.inputs.nthreads = nthreads
+    dataConvert = pe.Node(mrt.MRConvert(), name="DataConvert")
+    dataConvert.base_dir = wdir
+    dataConvert.inputs.nthreads = nthreads
 
     # dwi2response
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
+    dwi2response.base_dir = wdir
     dwi2response.inputs.algorithm = 'dhollander'
     dwi2response.inputs.wm_file = 'space-dwi_wm.txt'
     dwi2response.inputs.gm_file = 'space-dwi_gm.txt'
@@ -109,16 +110,15 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     dwi2response.inputs.nthreads = nthreads
 
     # dwi2mask
-    dwi2mask = pe.Node(mrt.BrainMask(), name='dwi2mask')
-    dwi2mask.inputs.out_file = 'dwi_mask.mif'
-    dwi2mask.inputs.nthreads = nthreads
+    maskConvert = pe.Node(mrt.MRConvert(), name='MaskConvert')
+    maskConvert.base_dir = wdir
+    maskConvert.inputs.nthreads = nthreads
 
     # Build workflow
     workflow = pe.Workflow(name=name)
 
     workflow.connect([
-        (MRConvert, dwi2response, [('out_file', 'in_file')]),
-        (MRConvert, dwi2mask, [('out_file', 'in_file')])
+        (dataConvert, dwi2response, [('out_file', 'in_file')]),
     ])
 
     return workflow

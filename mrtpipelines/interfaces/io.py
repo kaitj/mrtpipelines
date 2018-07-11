@@ -33,15 +33,18 @@ def getData(bids_layout, subjid):
     bvec = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
                            type='preproc', return_type='file',
                            extensions=['bvec'])
+    mask = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
+                           type='brainmask', return_type='file',
+                           extensions=['nii', 'nii.gz'])
 
     # Freesurfer parcellation (from fmriprep)
     parc = bids_layout.get(subject=subjid, type='aseg',
                            return_type='file', extensions=['mgz'])
 
     if not parc:
-        return nifti[0], (bvec[0], bval[0]), None
+        return nifti[0], (bvec[0], bval[0]), mask[0], None
     else:
-        return nifti[0], (bvec[0], bval[0]), parc[0]
+        return nifti[0], (bvec[0], bval[0]), mask[0], parc[0]
 
 
 def getBIDS(layout, wdir=None):
@@ -53,7 +56,9 @@ def getBIDS(layout, wdir=None):
     BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
                                            input_names=['bids_layout',
                                                         'subjid'],
-                                           output_names=['nifti', 'bdata',
+                                           output_names=['nifti',
+                                                         'bdata',
+                                                         'mask',
                                                          'parc']),
                                            name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = wdir
