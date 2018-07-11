@@ -117,6 +117,7 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     # Build workflow
     workflow = pe.Workflow(name=name)
 
+    workflow.add_nodes([maskConvert])
     workflow.connect([
         (dataConvert, dwi2response, [('out_file', 'in_file')]),
     ])
