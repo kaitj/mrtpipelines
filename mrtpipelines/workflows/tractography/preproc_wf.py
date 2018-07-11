@@ -95,7 +95,7 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     """
 
     # Convert from nii to mif
-    dataConvert = pe.Node(mrt.MRConvert(), name="DataConvert")
+    dataConvert = pe.Node(mrt.MRConvert(), name="dataConvert")
     dataConvert.base_dir = wdir
     dataConvert.inputs.nthreads = nthreads
 
@@ -110,7 +110,7 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     dwi2response.inputs.nthreads = nthreads
 
     # dwi2mask
-    maskConvert = pe.Node(mrt.MRConvert(), name='MaskConvert')
+    maskConvert = pe.Node(mrt.MRConvert(), name='maskConvert')
     maskConvert.base_dir = wdir
     maskConvert.inputs.nthreads = nthreads
 
