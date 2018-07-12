@@ -72,7 +72,6 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     FODTemplate = pe.Node(mrt.PopulationTemplate(), name='FODTemplate')
     FODTemplate.base_dir = wdir
     FODTemplate.inputs.out_file = 'sub-tmp_space-Template_wmfod.mif'
-    FODTemplate.inputs.template_mask = 'sub-tmp_space-Template_mask.mif'
     FODTemplate.inputs.nthreads = nthreads
     # Build workflow
     workflow = pe.Workflow(name=name)
