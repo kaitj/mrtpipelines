@@ -280,3 +280,48 @@ def prepDhollTract_wf(wdir=None, nthreads=1, name='prepDhollTract_wf'):
     ])
 
     return workflow
+
+
+def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
+    """
+    Set up workflow to generate Tractography
+    """
+
+    if nthreads >= 8:
+        nthreads = 8
+
+    # Register subjects to template
+    MRRegister = pe.MapNode(mrt.MRRegister(), iterfield=['in_file', 'mask1'],
+                                              name='MRRegister')
+    MRRegister.base_wdir = wdir
+    MRRegister.inputs.nl_warp = ['subj2template_warp.mif',
+                                 'template2subj_warp.mif']
+    MRRegister.inputs.nthreads = nthreads
+
+    # Transform subjects' data into template space
+    WarpSelect1 = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                           name='WarpSelect1')
+    WarpSelect1.base_dir = wdir
+    WarpSelect1.inputs.index = [0]
+
+    WarpSelect2 = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                           name='WarpSelect2')
+    WarpSelect2.base_dir = wdir
+    WarpSelect2.inputs.index = [1]
+
+    MaskTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                  name='MaskTransform')
+    MaskTransform.base_dir = wdir
+    MaskTransform.inputs.out_file = 'space-Template_mask.mif'
+    MaskTransform.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
+        (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
+        (WarpSelect1, MaskTransform, [('out', 'warp')]),
+    ])
+
+    return workflow
