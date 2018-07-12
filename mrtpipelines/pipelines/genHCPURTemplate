@@ -188,6 +188,7 @@ def main():
                 # Output
                 (template_proc_wf, templateSink, [
                     ('population_template.out_file', 'response.@template'),
+                    ('population_template.template_mask', 'dwi.@mask')
                     ('avgResponse_csf.out_file', 'response.@csf'),
                     ('avgResponse_gm.out_file', 'response.@gm'),
                     ('avgResponse_wm.out_file', 'response.@wm')])
