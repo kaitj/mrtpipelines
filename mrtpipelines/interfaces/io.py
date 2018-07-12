@@ -9,6 +9,7 @@ def getSubj(subjFile, work_dir):
         for subj in f:
             # temp = subj.lstrip('sub-')
             temp = subj.rstrip('\n')
+            temp = 'sub-' + temp
             subjids.append(temp)
             noSubj += 1
 

@@ -139,7 +139,6 @@ def main():
     # Subject datasink
     subjSink = io.subjSink(out_dir, wdir=work_dir)
     regex_sub = [('_subjid_sub-[0-9]*', ''),
-                ('_renameTract[0-9]*', ''),
                 ('_renameWarp[0-9]*', '')]
     subjSink.inputs.regexp_substitutions = regex_sub
 
