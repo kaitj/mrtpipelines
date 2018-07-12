@@ -94,6 +94,9 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     Set up dhollander response preproc workflow
     """
 
+    if nthreads >= 8:
+        nthreads = 8
+
     # Convert from nii to mif
     dataConvert = pe.Node(mrt.MRConvert(), name="dataConvert")
     dataConvert.base_dir = wdir

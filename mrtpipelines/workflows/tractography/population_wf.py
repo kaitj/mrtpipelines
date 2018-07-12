@@ -11,6 +11,9 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     Set up population template workflow
     """
 
+    if nthreads >= 8:
+        int_nthreads = 8
+
     # Estimate group response for each tissue type
     avg_wm = pe.JoinNode(mrt.AverageResponse(), joinsource='SubjectID',
                                                 joinfield=['in_files'],
@@ -35,7 +38,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                             name='dwi2fod')
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
-    dwi2fod.inputs.nthreads = nthreads
+    dwi2fod.inputs.nthreads = int_nthreads
 
     # mtnormalise
     mtnormalise = pe.MapNode(mrt.MTNormalise(), iterfield=['in_wm',
@@ -44,7 +47,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                                            'mask'],
                                                 name='mtnormalise')
     mtnormalise.base_dir = wdir
-    mtnormalise.inputs.nthreads = nthreads
+    mtnormalise.inputs.nthreads = int_nthreads
 
     # Copy FOD and masks
     copyFOD = pe.JoinNode(niu.Function(function=io.copyFile,
