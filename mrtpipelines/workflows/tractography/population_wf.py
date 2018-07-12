@@ -69,11 +69,11 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     copyMask.inputs.out_dir = op.join(copyFOD.base_dir + '/tmpFiles/Mask')
 
     # Population template
-    popTemplate = pe.Node(mrt.PopulationTemplate(), name='population_template')
-    popTemplate.base_dir = wdir
-    popTemplate.inputs.out_file = 'sub-tmp_space-Template_wmfod.mif'
-    popTemplate.inputs.template_mask = 'sub-tmp_space-Template_mask.mif'
-    popTemplate.inputs.nthreads = nthreads
+    FODTemplate = pe.Node(mrt.PopulationTemplate(), name='FODTemplate')
+    FODTemplate.base_dir = wdir
+    FODTemplate.inputs.out_file = 'sub-tmp_space-Template_wmfod.mif'
+    FODTemplate.inputs.template_mask = 'sub-tmp_space-Template_mask.mif'
+    FODTemplate.inputs.nthreads = nthreads
     # Build workflow
     workflow = pe.Workflow(name=name)
 
@@ -85,8 +85,8 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                 ('gm_odf', 'in_gm'),
                                 ('csf_odf', 'in_csf')]),
         (mtnormalise, copyFOD, [('out_wm', 'in_file')]),
-        (copyFOD, popTemplate, [('out_dir', 'in_dir')]),
-        (copyMask, popTemplate, [('out_dir', 'mask_dir')])
+        (copyFOD, FODTemplate, [('out_dir', 'in_dir')]),
+        (copyMask, FODTemplate, [('out_dir', 'mask_dir')])
     ])
 
     return workflow

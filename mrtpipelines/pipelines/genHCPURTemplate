@@ -167,7 +167,7 @@ def main():
                     ('maskConvert.out_file', 'copyMask.in_file')]),
                 (template_proc_wf, prepTensor_wf, [
                     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
-                    ('population_template.out_file', 'MRRegister.ref_file')]),
+                    ('FODTemplate.out_file', 'MRRegister.ref_file')]),
                 (hcp_preproc_wf, prepTensor_wf, [
                     ('maskConvert.out_file', 'MRRegister.mask1'),
                     ('maskConvert.out_file', 'MaskTransform.in_file')]),
@@ -184,8 +184,8 @@ def main():
 
                 # Output
                 (template_proc_wf, templateSink, [
-                    ('population_template.out_file', 'response.@template'),
-                    ('population_template.template_mask', 'dwi.@mask'),
+                    ('FODTemplate.out_file', 'response.@template'),
+                    ('FODTemplate.template_mask', 'dwi.@mask'),
                     ('avgResponse_csf.out_file', 'response.@csf'),
                     ('avgResponse_gm.out_file', 'response.@gm'),
                     ('avgResponse_wm.out_file', 'response.@wm')]),
