@@ -198,7 +198,7 @@ def main():
                     ('TensorMetrics.out_fa', 'copyFA.in_file'),
                     ('TensorMetrics.out_adc', 'copyMD.in_file'),
                     ('TensorMetrics.out_ad', 'copyAD.in_file'),
-                    ('TensorMetrics.out_rd', 'copyRD.in_file')])
+                    ('TensorMetrics.out_rd', 'copyRD.in_file')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -249,7 +249,6 @@ def main():
                     ('MDTemplate.out_file', 'dti.@md'),
                     ('ADTemplate.out_file', 'dti.@ad'),
                     ('RDTemplate.out_file', 'dti@.rd')]),
-
 
                 # Subject Sink
                 (Subjid, subjSink, [
