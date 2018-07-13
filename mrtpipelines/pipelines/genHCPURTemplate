@@ -182,6 +182,7 @@ def main():
                     ('WarpSelect2.out', 'in_file')]),
 
                 # Output
+                # Template sink
                 (template_proc_wf, templateSink, [
                     ('FODTemplate.out_file', 'response.@template'),
                     ('avgResponse_csf.out_file', 'response.@csf'),
@@ -189,6 +190,7 @@ def main():
                     ('avgResponse_wm.out_file', 'response.@wm')]),
                 # (genTemplate_wf, templateSink, [
                 #     ('tempConvert3.out_file', 'tractography.@tract')]),
+                # Subject Sink
                 (Subjid, subjSink, [
                     ('subjid', 'container')]),
                 (renameWarp1, subjSink, [

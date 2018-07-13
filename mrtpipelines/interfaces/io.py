@@ -100,7 +100,7 @@ def templateSink(out_dir, wdir=None):
                                        name='templateSink')
     tempSink.base_dir = wdir
     tempSink.inputs.base_directory = out_dir
-    tempSink.inputs.container = 'sub-tmp'
+    tempSink.inputs.container = 'template'
 
     return tempSink
 

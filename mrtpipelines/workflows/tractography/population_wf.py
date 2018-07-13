@@ -19,19 +19,19 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                                 joinfield=['in_files'],
                                                 name='avgResponse_wm')
     avg_wm.base_dir = wdir
-    avg_wm.inputs.out_file = 'sub-tmp_wm.txt'
+    avg_wm.inputs.out_file = 'template_wmresponse.txt'
 
     avg_gm = pe.JoinNode(mrt.AverageResponse(), joinsource='SubjectID',
                                                 joinfield=['in_files'],
                                                 name='avgResponse_gm')
     avg_gm.base_dir = wdir
-    avg_gm.inputs.out_file = 'sub-tmp_gm.txt'
+    avg_gm.inputs.out_file = 'template_gmresponse.txt'
 
     avg_csf = pe.JoinNode(mrt.AverageResponse(), joinsource='SubjectID',
                                                  joinfield=['in_files'],
                                                  name='avgResponse_csf')
     avg_csf.base_dir = wdir
-    avg_csf.inputs.out_file = 'sub-tmp_csf.txt'
+    avg_csf.inputs.out_file = 'template_csfresponse.txt'
 
     # dwi2fod
     dwi2fod = pe.MapNode(mrt.EstimateFOD(), iterfield=['in_file'],
@@ -71,7 +71,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     # Population template
     FODTemplate = pe.Node(mrt.PopulationTemplate(), name='FODTemplate')
     FODTemplate.base_dir = wdir
-    FODTemplate.inputs.out_file = 'sub-tmp_space-Template_wmfod.mif'
+    FODTemplate.inputs.out_file = 'template_wmfod.mif'
     FODTemplate.inputs.nthreads = nthreads
     # Build workflow
     workflow = pe.Workflow(name=name)
