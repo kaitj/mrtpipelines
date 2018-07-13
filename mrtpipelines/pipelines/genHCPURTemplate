@@ -187,7 +187,7 @@ def main():
                     ('dataConvert.out_file', 'dwi2fod.in_file'),
                     ('maskConvert.out_file', 'mtnormalise.mask'),
                     ('maskConvert.out_file', 'copyMask.in_file')]),
-                (fodtemplate_wf, prepTensor_wf, [
+                (fodTemplate_wf, prepTensor_wf, [
                     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
                     ('FODTemplate.out_file', 'MRRegister.ref_file')]),
                 (hcp_preproc_wf, prepTensor_wf, [
@@ -242,12 +242,12 @@ def main():
 
                 # Output
                 # Template sink
-                (fodtemplate_wf, templateSink, [
+                (fodTemplate_wf, templateSink, [
                     ('FODTemplate.out_file', 'response.@template'),
                     ('avgResponse_csf.out_file', 'response.@csf'),
                     ('avgResponse_gm.out_file', 'response.@gm'),
                     ('avgResponse_wm.out_file', 'response.@wm')]),
-                (tensortemplate_wf, templateSink, [
+                (tensorTemplate_wf, templateSink, [
                     ('FATemplate.out_file', 'dti.@fa'),
                     ('MDTemplate.out_file', 'dti.@md'),
                     ('ADTemplate.out_file', 'dti.@ad'),
