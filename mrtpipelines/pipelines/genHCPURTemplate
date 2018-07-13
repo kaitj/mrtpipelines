@@ -258,7 +258,7 @@ def main():
                 (renameWarp2, subjSink, [
                     ('out_file', 'transform.@warp2')]),
                 (renameMask, subjSink, [
-                    ('out_file', 'dwi.@mask')])
+                    ('out_file', 'dwi.@mask')]),
                 (renameDWINorm, subjSink, [
                     ('out_file', 'dwi.@data')]),
                 (renameDTI, subjSink, [
@@ -270,7 +270,7 @@ def main():
                 (renameAD, subjSink, [
                     ('out_file', 'dti.@ad')]),
                 (renameRD, subjSink, [
-                    ('out_file', 'dti.@rd')]),
+                    ('out_file', 'dti.@rd')])
             ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
