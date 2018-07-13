@@ -315,6 +315,34 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     MaskTransform.inputs.out_file = 'space-Template_mask.mif'
     MaskTransform.inputs.nthreads = nthreads
 
+    DWINormalise = pe.MapNode(mrt.DWINormalise(), iterfield=['in_file'],
+                                                  name='DWINormalise')
+    DWINormalise.base_dir = wdir
+    DWINormalise.inputs.out_file = 'space-T1w_norm.mif'
+    DWINormalise.inputs.nthreads = nthreads
+
+    DWITransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                  name='DWITransform')
+    DWITransform.base_dir = wdir
+    DWITransform.inputs.out_file = 'space-Template_norm.mif'
+    DWITransform.inputs.nthreads = nthreads
+
+    FitTensor = pe.MapNode(mrt.FitTensor(), iterfield=['in_file', 'in_mask'],
+                                            name='FitTensor')
+    FitTensor.base_dir = wdir
+    FitTensor.inputs.out_file = 'space-Template_tensor.mif'
+    FitTensor.inputs.nthreads = nthreads
+
+    TensorMetrics = pe.MapNode(mrt.TensorMetrics(), iterfield=['in_file',
+                                                               'in_mask'],
+                                                    name='TensorMetrics')
+    TensorMetrics.base_dir = wdir
+    TensorMetrics.inputs.out_fa = 'space-Template_fa.mif'
+    TensorMetrics.inputs.out_adc = 'space-Template_md.mif'
+    TensorMetrics.inputs.out_ad = 'space-Template_ad.mif'
+    TensorMetrics.inputs.out_rd = 'space-Template_rd.mif'
+    TensorMetrics.inputs.nthreads = nthreads
+
     # Build workflow
     workflow = pe.Workflow(name=name)
 
@@ -322,6 +350,12 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
         (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
         (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
         (WarpSelect1, MaskTransform, [('out', 'warp')]),
+        (DWINormalise, DWITransform, [('out_file', 'in_file')]),
+        (WarpSelect1, DWITransform, [('out', 'warp')]),
+        (DWITransform, FitTensor, [('out_file', 'in_file')]),
+        (MaskTransform, FitTensor, [('out_file', 'in_mask')]),
+        (FitTensor, TensorMetrics, [('out_file', 'in_file')]),
+        (MaskTransform, TensorMetrics, [('out_file', 'in_mask')])
     ])
 
     return workflow

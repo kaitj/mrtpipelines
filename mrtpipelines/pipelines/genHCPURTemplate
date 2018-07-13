@@ -133,8 +133,29 @@ def main():
     renameWarp1 = io.renameFile(file_name='space-Template_warp',
                                 node_name='renameWarp1', wdir=work_dir)
 
-    renameWarp2 = io.renameFile(file_name='space-dwi_warp',
+    renameWarp2 = io.renameFile(file_name='space-T1w_warp',
                                 node_name='renameWarp2', wdir=work_dir)
+
+    renameMask = io.renameFile(file_name='space-Template_brainmask',
+                               node_name='renameMask', wdir=work_dir)
+
+    renameDWINorm = io.renameFile(file_name='dwi_space-Template_norm.mif',
+                                  node_name='renameDWINorm', wdir=work_dir)
+
+    renameDTI = io.renameFile(file_name='dti_space-Template_tensor.mif',
+                              node_name='renameDTI', wdir=work_dir)
+
+    renameFA = io.renameFile(file_name='dti_space-Template_fa.mif',
+                             node_name='renameFA', wdir=work_dir)
+
+    renameMD = io.renameFile(file_name='dti_space-Template_md.mif',
+                             node_name='renameMD', wdir=work_dir)
+
+    renameAD = io.renameFile(file_name='dti_space-Template_ad.mif',
+                             node_name='renameAD', wdir=work_dir)
+
+    renameRD = io.renameFile(file_name='dti_space-Template_rd.mif',
+                             node_name='renameRD', wdir=work_dir)
 
     # Subject datasink
     subjSink = io.subjSink(out_dir, wdir=work_dir)
@@ -169,7 +190,15 @@ def main():
                     ('FODTemplate.out_file', 'MRRegister.ref_file')]),
                 (hcp_preproc_wf, prepTensor_wf, [
                     ('maskConvert.out_file', 'MRRegister.mask1'),
-                    ('maskConvert.out_file', 'MaskTransform.in_file')]),
+                    ('maskConvert.out_file', 'MaskTransform.in_file'),
+                    ('dataConvert.out_file', 'DWINormalise.in_file'),
+                    ('maskConvert.out_file', 'DWINormalise.in_mask')]),
+                (prepTensor_wf, template_proc_wf, [
+                    ('MaskTransform.out_file', 'copyTempMask.in_file'),
+                    ('TensorMetrics.out_fa', 'copyFA.in_file'),
+                    ('TensorMetrics.out_adc', 'copyMD.in_file'),
+                    ('TensorMetrics.out_ad', 'copyAD.in_file'),
+                    ('TensorMetrics.out_rd', 'copyRD.in_file')])
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -180,6 +209,34 @@ def main():
                     ('subjid', 'subjid')]),
                 (prepTensor_wf, renameWarp2, [
                     ('WarpSelect2.out', 'in_file')]),
+                (Subjid, renameMask, [
+                    ('subjid', 'subjid')]),
+                (prepTensor_wf, renameMask, [
+                    ('MaskTransform.out_file', 'in_file')]),
+                (Subjid, renameDWINorm, [
+                    ('subjid', 'subjid')]),
+                (prepTensor_wf, renameDWINorm, [
+                    ('DWITransform.out_file', 'in_file')]),
+                (Subjid, renameDTI, [
+                    ('subjid', 'subjid')]),
+                (prepTensor_wf, renameDTI, [
+                    ('FitTensor.out_file', 'in_file')]),
+                (Subjid, renameFA, [
+                    ('subjid', 'subjid')]),
+                (prepTensor_wf, renameFA, [
+                    ('TensorMetrics.out_fa', 'in_file')]),
+                (Subjid, renameMD, [
+                    ('subjid', 'subjid')]),
+                (prepTensor_wf, renameMD, [
+                    ('TensorMetrics.out_adc', 'in_file')]),
+                (Subjid, renameAD, [
+                    ('subjid', 'subjid')]),
+                (prepTensor_wf, renameAD, [
+                    ('TensorMetrics.out_ad', 'in_file')]),
+                (Subjid, renameRD, [
+                    ('subjid', 'subjid')]),
+                (prepTensor_wf, renameRD, [
+                    ('TensorMetrics.out_rd', 'in_file')]),
 
                 # Output
                 # Template sink
@@ -187,16 +244,34 @@ def main():
                     ('FODTemplate.out_file', 'response.@template'),
                     ('avgResponse_csf.out_file', 'response.@csf'),
                     ('avgResponse_gm.out_file', 'response.@gm'),
-                    ('avgResponse_wm.out_file', 'response.@wm')]),
-                # (genTemplate_wf, templateSink, [
-                #     ('tempConvert3.out_file', 'tractography.@tract')]),
+                    ('avgResponse_wm.out_file', 'response.@wm'),
+                    ('FATemplate.out_file', 'dti.@fa'),
+                    ('MDTemplate.out_file', 'dti.@md'),
+                    ('ADTemplate.out_file', 'dti.@ad'),
+                    ('RDTemplate.out_file', 'dti@.rd')]),
+
+
                 # Subject Sink
                 (Subjid, subjSink, [
                     ('subjid', 'container')]),
                 (renameWarp1, subjSink, [
                     ('out_file', 'transform.@warp1')]),
                 (renameWarp2, subjSink, [
-                    ('out_file', 'transform.@warp2')])
+                    ('out_file', 'transform.@warp2')]),
+                (renameMask, subjSink, [
+                    ('out_file', 'dwi.@mask')])
+                (renameDWINorm, subjSink, [
+                    ('out_file', 'dwi.@data')]),
+                (renameDTI, subjSink, [
+                    ('out_file', 'dti.@tensor')]),
+                (renameFA, subjSink, [
+                    ('out_file', 'dti.@fa')]),
+                (renameMD, subjSink, [
+                    ('out_file', 'dti.@md')]),
+                (renameAD, subjSink, [
+                    ('out_file', 'dti.@ad')]),
+                (renameRD, subjSink, [
+                    ('out_file', 'dti.@rd')]),
             ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
