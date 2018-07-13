@@ -6,9 +6,9 @@ from ...interfaces import io
 
 import os.path as op
 
-def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
+def fodTemplate_wf(wdir=None, nthreads=1, name='fodTemplate_wf'):
     """
-    Set up population template workflow
+    Set up population fod template workflow
     """
 
     if nthreads >= 8:
@@ -68,6 +68,36 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     copyMask.base_dir = wdir
     copyMask.inputs.out_dir = op.join(copyFOD.base_dir + '/tmpFiles/Mask')
 
+    # Population template
+    FODTemplate = pe.Node(mrt.PopulationTemplate(), name='FODTemplate')
+    FODTemplate.base_dir = wdir
+    FODTemplate.inputs.out_file = 'template_wmfod.mif'
+    FODTemplate.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (avg_wm, dwi2fod, [('out_file', 'wm_txt')]),
+        (avg_gm, dwi2fod, [('out_file', 'gm_txt')]),
+        (avg_csf, dwi2fod, [('out_file', 'csf_txt')]),
+        (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
+                                ('gm_odf', 'in_gm'),
+                                ('csf_odf', 'in_csf')]),
+        (mtnormalise, copyFOD, [('out_wm', 'in_file')]),
+        (copyFOD, FODTemplate, [('out_dir', 'in_dir')]),
+        (copyMask, FODTemplate, [('out_dir', 'mask_dir')])
+    ])
+
+    return workflow
+
+
+def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
+    """
+    Set up population tensor template workflow
+    """
+
+    # Copy nodes for necessary files
     copyFA = pe.JoinNode(niu.Function(function=io.copyFile,
                                       input_names=['in_file', 'out_dir'],
                                       output_names=['out_dir']),
@@ -75,7 +105,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                       joinfield=['in_file'],
                                       name='copyFA')
     copyFA.base_dir = wdir
-    copyFA.inputs.out_dir = op.join(copyFOD.base_dir + '/tmpFiles/FA')
+    copyFA.inputs.out_dir = op.join(copyFA.base_dir + '/tmpFiles/FA')
 
     copyMD = pe.JoinNode(niu.Function(function=io.copyFile,
                                       input_names=['in_file', 'out_dir'],
@@ -84,7 +114,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                       joinfield=['in_file'],
                                       name='copyMD')
     copyMD.base_dir = wdir
-    copyMD.inputs.out_dir = op.join(copyFOD.base_dir + '/tmpFiles/MD')
+    copyMD.inputs.out_dir = op.join(copyMD.base_dir + '/tmpFiles/MD')
 
     copyAD = pe.JoinNode(niu.Function(function=io.copyFile,
                                       input_names=['in_file', 'out_dir'],
@@ -93,7 +123,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                       joinfield=['in_file'],
                                       name='copyAD')
     copyAD.base_dir = wdir
-    copyAD.inputs.out_dir = op.join(copyFOD.base_dir + '/tmpFiles/AD')
+    copyAD.inputs.out_dir = op.join(copyAD.base_dir + '/tmpFiles/AD')
 
     copyRD = pe.JoinNode(niu.Function(function=io.copyFile,
                                       input_names=['in_file', 'out_dir'],
@@ -102,7 +132,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                       joinfield=['in_file'],
                                       name='copyRD')
     copyRD.base_dir = wdir
-    copyRD.inputs.out_dir = op.join(copyFOD.base_dir + '/tmpFiles/RD')
+    copyRD.inputs.out_dir = op.join(copyRD.base_dir + '/tmpFiles/RD')
 
     copyTempMask = pe.JoinNode(niu.Function(function=io.copyFile,
                                             input_names=['in_file', 'out_dir'],
@@ -111,15 +141,10 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
                                             joinfield=['in_file'],
                                             name='copyTempMask')
     copyTempMask.base_dir = wdir
-    copyTempMask.inputs.out_dir = op.join(copyFOD.base_dir +
+    copyTempMask.inputs.out_dir = op.join(copyTempMask.base_dir +
                                           '/tmpFiles/TempMask')
 
     # Population template
-    FODTemplate = pe.Node(mrt.PopulationTemplate(), name='FODTemplate')
-    FODTemplate.base_dir = wdir
-    FODTemplate.inputs.out_file = 'template_wmfod.mif'
-    FODTemplate.inputs.nthreads = nthreads
-
     FATemplate = pe.Node(mrt.PopulationTemplate(), name='FATemplate')
     FATemplate.base_dir = wdir
     FATemplate.inputs.out_file = 'template_fa.mif'
@@ -144,15 +169,6 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
     workflow = pe.Workflow(name=name)
 
     workflow.connect([
-        (avg_wm, dwi2fod, [('out_file', 'wm_txt')]),
-        (avg_gm, dwi2fod, [('out_file', 'gm_txt')]),
-        (avg_csf, dwi2fod, [('out_file', 'csf_txt')]),
-        (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
-                                ('gm_odf', 'in_gm'),
-                                ('csf_odf', 'in_csf')]),
-        (mtnormalise, copyFOD, [('out_wm', 'in_file')]),
-        (copyFOD, FODTemplate, [('out_dir', 'in_dir')]),
-        (copyMask, FODTemplate, [('out_dir', 'mask_dir')]),
         (copyFA, FATemplate, [('out_dir', 'in_dir')]),
         (copyTempMask, FATemplate, [('out_dir', 'mask_dir')]),
         (copyMD, MDTemplate, [('out_dir', 'in_dir')]),
@@ -160,7 +176,7 @@ def pop_template_wf(wdir=None, nthreads=1, name='population_template_wf'):
         (copyAD, ADTemplate, [('out_dir', 'in_dir')]),
         (copyTempMask, ADTemplate, [('out_dir', 'mask_dir')]),
         (copyRD, RDTemplate, [('out_dir', 'in_dir')]),
-        (copyTempMask, RDTemplate, [('out_dir', 'mask_dir')]),
+        (copyTempMask, RDTemplate, [('out_dir', 'mask_dir')])
     ])
 
     return workflow

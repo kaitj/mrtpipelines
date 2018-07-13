@@ -111,16 +111,18 @@ def main():
     BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
-    hcp_preproc_wf = preproc_wf.hcp_preproc_wf(wdir=work_dir,
-                                                    nthreads=nthreads)
+    hcp_preproc_wf = preproc_wf.hcp_preproc_wf(wdir=work_dir, nthreads=nthreads)
 
-    # MRTrix population template workflow
-    template_proc_wf = population_wf.pop_template_wf(wdir=work_dir,
-                                                nthreads=nthreads)
+    # MRTrix population fod template workflow
+    fodTemplate_wf = population_wf.fodTemplate_wf(wdir=work_dir,
+                                                  nthreads=nthreads)
+
+    tensorTemplate_wf = population_wf.tensorTemplate_wf(wdir=work_dir,
+                                                        nthreads=nthreads)
 
     # MRTrix tractography preperation workflow
     prepTensor_wf = preproc_wf.prepTensor_wf(wdir=work_dir,
-                                                 nthreads=nthreads)
+                                             nthreads=nthreads)
 
     # MRTrix template tractography generation workflow
     # genTemplate_wf = tractography_wf.genTemplate_wf(wdir=work_dir,
@@ -178,14 +180,14 @@ def main():
                     ('mask', 'maskConvert.in_file')]),
 
                 # Workflows
-                (hcp_preproc_wf, template_proc_wf, [
+                (hcp_preproc_wf, fodTemplate_wf, [
                     ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                     ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
                     ('dataConvert.out_file', 'dwi2fod.in_file'),
                     ('maskConvert.out_file', 'mtnormalise.mask'),
                     ('maskConvert.out_file', 'copyMask.in_file')]),
-                (template_proc_wf, prepTensor_wf, [
+                (fodtemplate_wf, prepTensor_wf, [
                     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
                     ('FODTemplate.out_file', 'MRRegister.ref_file')]),
                 (hcp_preproc_wf, prepTensor_wf, [
@@ -193,7 +195,7 @@ def main():
                     ('maskConvert.out_file', 'MaskTransform.in_file'),
                     ('dataConvert.out_file', 'DWINormalise.in_file'),
                     ('maskConvert.out_file', 'DWINormalise.in_mask')]),
-                (prepTensor_wf, template_proc_wf, [
+                (prepTensor_wf, tensorTemplate_wf, [
                     ('MaskTransform.out_file', 'copyTempMask.in_file'),
                     ('TensorMetrics.out_fa', 'copyFA.in_file'),
                     ('TensorMetrics.out_adc', 'copyMD.in_file'),
@@ -240,11 +242,12 @@ def main():
 
                 # Output
                 # Template sink
-                (template_proc_wf, templateSink, [
+                (fodtemplate_wf, templateSink, [
                     ('FODTemplate.out_file', 'response.@template'),
                     ('avgResponse_csf.out_file', 'response.@csf'),
                     ('avgResponse_gm.out_file', 'response.@gm'),
-                    ('avgResponse_wm.out_file', 'response.@wm'),
+                    ('avgResponse_wm.out_file', 'response.@wm')]),
+                (tensortemplate_wf, templateSink, [
                     ('FATemplate.out_file', 'dti.@fa'),
                     ('MDTemplate.out_file', 'dti.@md'),
                     ('ADTemplate.out_file', 'dti.@ad'),
