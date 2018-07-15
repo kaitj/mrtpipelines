@@ -169,7 +169,7 @@ def main():
                 ('_renameMD[0-9]*', ''),
                 ('_renameRD[0-9]*', ''),
                 ('_renameDWINorm[0-9]*', ''),
-                ('_renameMask[0-9]*', ''),]
+                ('_renameMask[0-9]*', '')]
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
