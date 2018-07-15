@@ -162,7 +162,14 @@ def main():
     # Subject datasink
     subjSink = io.subjSink(out_dir, wdir=work_dir)
     regex_sub = [('_subjid_sub-[0-9]*', ''),
-                ('_rename*[0-9]*', '')]
+                ('_renameWarp[0-9]*', ''),
+                ('_renameAD[0-9]*', ''),
+                ('_renameDTI[0-9]*', ''),
+                ('_renameFA[0-9]*', ''),
+                ('_renameMD[0-9]*', ''),
+                ('_renameRD[0-9]*', ''),
+                ('_renameDWINorm[0-9]*', ''),
+                ('_renameMask[0-9]*', ''),]
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
