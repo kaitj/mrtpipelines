@@ -251,7 +251,7 @@ def main():
                     ('FATemplate.out_file', 'dti.@fa'),
                     ('MDTemplate.out_file', 'dti.@md'),
                     ('ADTemplate.out_file', 'dti.@ad'),
-                    ('RDTemplate.out_file', 'dti@.rd')]),
+                    ('RDTemplate.out_file', 'dti.@rd')]),
 
                 # Subject Sink
                 (Subjid, subjSink, [
