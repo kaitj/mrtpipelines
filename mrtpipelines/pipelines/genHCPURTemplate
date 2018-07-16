@@ -140,7 +140,7 @@ def main():
 
     renameMask = io.renameFile(file_name='space-Template_brainmask',
                                node_name='renameMask', wdir=work_dir)
-Tract
+
     renameDWINorm = io.renameFile(file_name='dwi_space-Template_norm',
                                   node_name='renameDWINorm', wdir=work_dir)
 

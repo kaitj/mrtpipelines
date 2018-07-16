@@ -1,10 +1,5 @@
 from nipype.pipeline import engine as pe
-from nipype.interfaces import utility as niu
 from nipype.interfaces import mrtrix3 as mrt
-
-from ...interfaces import utils
-
-import os.path as op
 
 def genTemplate_wf(wdir=None, nthreads=1, name='genTemplateTract_wf'):
     """
@@ -38,36 +33,6 @@ def genTemplate_wf(wdir=None, nthreads=1, name='genTemplateTract_wf'):
     workflow.connect([
         (genTract, siftTract, [('out_file', 'in_file')]),
         (siftTract, tractConvert, [('out_file', 'in_file')])
-    ])
-
-    return workflow
-
-
-def genSubj_wf(nfibers=100000, wdir=None, nthreads=1, name='genSubj_wf'):
-    """
-    Set up workflow to generate subject tracts
-    """
-
-    # Subject select
-    subjSelect = pe.MapNode(mrt.TCKEdit(), iterfield=['in_file'],
-                                         name='subjSelect')
-    subjSelect.base_dir = wdir
-    subjSelect.inputs.number = nfibers
-    subjSelect.inputs.out_file = 'space-Template_variant-sift_streamlines_%d_tract.tck' % nfibers
-    subjSelect.nthreads = nthreads
-
-    # Subject convert
-    subjConvert = pe.MapNode(mrt.TCKConvert(), iterfield=['in_file'],
-                                              name='subjConvert')
-    subjConvert.base_dir = wdir
-    subjConvert.inputs.out_file = 'space-Template_variant-sift_streamlines_%d_tract.vtk' % nfibers
-    subjConvert.inputs.nthreads = nthreads
-
-    # Build workflow
-    workflow = pe.Workflow(name=name)
-
-    workflow.connect([
-        (subjSelect, subjConvert, [('out_file', 'in_file')])
     ])
 
     return workflow
