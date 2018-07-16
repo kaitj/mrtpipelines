@@ -203,6 +203,7 @@ def main():
                     ('dataConvert.out_file', 'DWINormalise.in_file'),
                     ('maskConvert.out_file', 'DWINormalise.in_mask')]),
                 (prepTensor_wf, tensorTemplate_wf, [
+                    ('MaskTransform.out_file', 'maskTemplate.in_file'),
                     ('MaskTransform.out_file', 'copyTempMask.in_file'),
                     ('TensorMetrics.out_fa', 'copyFA.in_file'),
                     ('TensorMetrics.out_adc', 'copyMD.in_file'),
@@ -255,6 +256,7 @@ def main():
                     ('avgResponse_gm.out_file', 'response.@gm'),
                     ('avgResponse_wm.out_file', 'response.@wm')]),
                 (tensorTemplate_wf, templateSink, [
+                    ('maskTemplate.out_file', 'dwi.@mask'),
                     ('FATemplate.out_file', 'dti.@fa'),
                     ('MDTemplate.out_file', 'dti.@md'),
                     ('ADTemplate.out_file', 'dti.@ad'),
