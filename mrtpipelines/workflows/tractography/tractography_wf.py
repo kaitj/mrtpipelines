@@ -6,60 +6,42 @@ from ...interfaces import utils
 
 import os.path as op
 
-def genTemplate_wf(wdir=None, nthreads=1, name='genTemplate_wf'):
+def genTemplate_wf(wdir=None, nthreads=1, name='genTemplateTract_wf'):
     """
-    Set up workflow to generate template tracts
+    Set up workflow to generate Tractography
     """
 
-    # Convert to VTK
-    tempConvert1 = pe.MapNode(mrt.TCKConvert(), iterfield=['in_file'],
-                                                name='tempConvert1')
-    tempConvert1.base_dir = wdir
-    tempConvert1.inputs.out_file = 'space-Template_variant-sift_tract.vtk'
-    tempConvert1.inputs.nthreads = nthreads
+    # Register subjects to template
+    # Generate tractography
+    genTract = pe.Node(mrt.Tractography(), name='template_tckgen')
+    genTract.base_dir = wdir
+    genTract.inputs.backtrack
+    genTract.inputs.n_tracks = 1000000
+    genTract.inputs.out_file = 'template_variant-tckgen_streamlines-1M_tract.tck'
+    genTract.inputs.nthreads = nthreads
 
-    # Craete template tract
-    genTemplate = pe.JoinNode(niu.Function(function=utils.createTemplateTract,
-                                           input_names=['in_tracts',
-                                                        'out_tract'],
-                                           output_names=['out_tract']),
-                                           joinsource='SubjectID',
-                                           joinfield=['in_tracts'],
-                                           name='genTemplate')
-    genTemplate.base_dir = wdir
-    genTemplate.inputs.out_tract = op.join(genTemplate.base_dir,
-                                           'tmpFiles/sub-tmp_space-Template_variant-sift_tract.vtk')
+    # Sphereical-deconvoulution informed filtering of tractography
+    siftTract = pe.Node(mrt.SIFT(), name='template_tcksift')
+    siftTract.base_dir = wdir
+    siftTract.inputs.term_number = 500000
+    siftTract.inputs.out_file = 'template_variant-sift_streamlines-500K_tract.tck'
+    siftTract.inputs.nthreads = nthreads
 
-    # Convert to tck to select number of fibers
-    tempConvert2 = pe.Node(mrt.TCKConvert(), name='tempConvert2')
-    tempConvert2.base_dir = wdir
-    tempConvert2.inputs.out_file = 'sub-tmp_space-Template_variant-sift_tract.tck'
-    tempConvert2.inputs.nthreads = nthreads
-
-    # Select number of fibres for template
-    tempSelect = pe.Node(mrt.TCKEdit(), name='tempSelect')
-    tempSelect.base_dir = wdir
-    tempSelect.inputs.number = 100000
-    tempSelect.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-100K_tract.tck'
-    tempSelect.inputs.nthreads = nthreads
-
-    # Convert template to vtk
-    tempConvert3 = pe.Node(mrt.TCKConvert(), name='tempConvert3')
-    tempConvert3.base_dir = wdir
-    tempConvert3.inputs.out_file = 'sub-tmp_space-Template_variant-sift_streamlines-100K_tract.vtk'
-    tempConvert3.inputs.nthreads = nthreads
+    tractConvert = pe.Node(mrt.TCKConvert(), name='template_tckconvert')
+    tractConvert.base_dir = wdir
+    tractConvert.inputs.out_file = 'template_variant_sift_streamlines-500K_tract.vtk'
+    tractConvert.inputs.nthreads = nthreads
 
     # Build workflow
     workflow = pe.Workflow(name=name)
 
     workflow.connect([
-        (tempConvert1, genTemplate, [('out_file', 'in_tracts')]),
-        (genTemplate, tempConvert2, [('out_tract', 'in_file')]),
-        (tempConvert2, tempSelect, [('out_file', 'in_file')]),
-        (tempSelect, tempConvert3, [('out_file', 'in_file')])
+        (genTract, siftTract, [('out_file', 'in_file')]),
+        (siftTract, tractConvert, [('out_file', 'in_file')])
     ])
 
     return workflow
+
 
 def genSubj_wf(nfibers=100000, wdir=None, nthreads=1, name='genSubj_wf'):
     """

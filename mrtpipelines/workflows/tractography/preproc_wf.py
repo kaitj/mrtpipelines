@@ -282,6 +282,37 @@ def prepDhollTract_wf(wdir=None, nthreads=1, name='prepDhollTract_wf'):
     return workflow
 
 
+def genTemplateTract_wf(wdir=None, nthreads=1, name='genTemplateTract_wf'):
+    """
+    Set up workflow to generate Tractography
+    """
+
+    # Register subjects to template
+    # Generate tractography
+    genTract = pe.Node(mrt.Tractography(), name='template_tckgen')
+    genTract.base_dir = wdir
+    genTract.inputs.backtrack
+    genTract.inputs.n_tracks = 1000000
+    genTract.inputs.out_file = 'template_variant-tckgen_streamlines-1M_tract.tck'
+    genTract.inputs.nthreads = nthreads
+
+    # Sphereical-deconvoulution informed filtering of tractography
+    siftTract = pe.Node(mrt.SIFT(), name='template_tcksift')
+    siftTract.base_dir = wdir
+    siftTract.inputs.term_number = 500000
+    siftTract.inputs.out_file = 'template_variant-sift_streamlines-500K_tract.tck'
+    siftTract.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (genTract, siftTract, [('out_file', 'in_file')]),
+    ])
+
+    return workflow
+
+
 def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     """
     Set up workflow to generate Tractography

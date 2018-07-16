@@ -62,7 +62,7 @@ def fodTemplate_wf(wdir=None, nthreads=1, name='fodTemplate_wf'):
     copyMask = pe.JoinNode(niu.Function(function=io.copyFile,
                                         input_names=['in_file', 'out_dir'],
                                         output_names=['out_dir']),
-                                        joinsource='SubjectID',
+                                        joinsourfixelce='SubjectID',
                                         joinfield=['in_file'],
                                         name='copyMask')
     copyMask.base_dir = wdir
@@ -99,7 +99,7 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
 
     # Copy nodes for necessary files
     copyFA = pe.JoinNode(niu.Function(function=io.copyFile,
-                                      input_names=['in_file', 'out_dir'],
+                                      input_namefixels=['in_file', 'out_dir'],
                                       output_names=['out_dir']),
                                       joinsource='SubjectID',
                                       joinfield=['in_file'],
@@ -178,6 +178,7 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
     workflow = pe.Workflow(name=name)
 
     workflow.add_nodes([maskTemplate])
+
     workflow.connect([
         (copyFA, FATemplate, [('out_dir', 'in_dir')]),
         (copyTempMask, FATemplate, [('out_dir', 'mask_dir')]),

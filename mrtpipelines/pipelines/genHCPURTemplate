@@ -125,8 +125,8 @@ def main():
                                              nthreads=nthreads)
 
     # MRTrix template tractography generation workflow
-    # genTemplate_wf = tractography_wf.genTemplate_wf(wdir=work_dir,
-    #                                                 nthreads=nthreads)
+    genTract_wf = tractography_wf.genTemplate_wf(wdir=work_dir,
+                                                         nthreads=nthreads)
 
     # Template datasink
     templateSink = io.templateSink(out_dir, wdir=work_dir)
@@ -140,14 +140,14 @@ def main():
 
     renameMask = io.renameFile(file_name='space-Template_brainmask',
                                node_name='renameMask', wdir=work_dir)
-
+Tract
     renameDWINorm = io.renameFile(file_name='dwi_space-Template_norm',
                                   node_name='renameDWINorm', wdir=work_dir)
 
     renameDTI = io.renameFile(file_name='dti_space-Template_tensor',
                               node_name='renameDTI', wdir=work_dir)
 
-    renameFA = io.renameFile(file_name='dti_space-Template_fa',
+    renameFA = io.TractrenameFile(file_name='dti_space-Template_fa',
                              node_name='renameFA', wdir=work_dir)
 
     renameMD = io.renameFile(file_name='dti_space-Template_md',
@@ -209,6 +209,11 @@ def main():
                     ('TensorMetrics.out_adc', 'copyMD.in_file'),
                     ('TensorMetrics.out_ad', 'copyAD.in_file'),
                     ('TensorMetrics.out_rd', 'copyRD.in_file')]),
+                (fodTemplate_wf, genTract_wf, [
+                    ('FODTemplate_wf.wm_odf', 'genTract.in_file'),
+                    ('FODTemplate_wf.wm_odf, siftTract.in_fod')]),
+                (tensorTemplate_wf, genTract_wf, [
+                    ('maskTemplate.out_file', 'genTract.seed_image')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -261,6 +266,8 @@ def main():
                     ('MDTemplate.out_file', 'dti.@md'),
                     ('ADTemplate.out_file', 'dti.@ad'),
                     ('RDTemplate.out_file', 'dti.@rd')]),
+                (genTract_wf, templateSink, [
+                    ('tractConvert.out_file', 'tractography.@sift')])
 
                 # Subject Sink
                 (Subjid, subjSink, [
