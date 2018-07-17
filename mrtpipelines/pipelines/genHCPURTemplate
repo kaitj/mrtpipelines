@@ -147,7 +147,7 @@ def main():
     renameDTI = io.renameFile(file_name='dti_space-Template_tensor',
                               node_name='renameDTI', wdir=work_dir)
 
-    renameFA = io.TractrenameFile(file_name='dti_space-Template_fa',
+    renameFA = io.renameFile(file_name='dti_space-Template_fa',
                              node_name='renameFA', wdir=work_dir)
 
     renameMD = io.renameFile(file_name='dti_space-Template_md',
