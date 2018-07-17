@@ -64,8 +64,8 @@ def main():
     from nipype.pipeline import engine as pe
 
     from mrtpipelines.interfaces import io
-    from mrtpipelines.workflows.tractography import (population_wf, preproc_wf,
-                                                     tractography_wf)
+    from mrtpipelines.workflows import (population_wf, preproc_wf,
+                                        tractography_wf)
 
     args = get_parser().parse_args()
 

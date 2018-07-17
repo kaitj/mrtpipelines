@@ -2,7 +2,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3 as mrt
 from nipype.interfaces import utility as niu
 
-from ...interfaces import io
+from ..interfaces import io
 
 import os.path as op
 
@@ -13,6 +13,8 @@ def fodTemplate_wf(wdir=None, nthreads=1, name='fodTemplate_wf'):
 
     if nthreads >= 8:
         int_nthreads = 8
+    else:
+        int_nthreads = nthreads
 
     # Estimate group response for each tissue type
     avg_wm = pe.JoinNode(mrt.AverageResponse(), joinsource='SubjectID',
