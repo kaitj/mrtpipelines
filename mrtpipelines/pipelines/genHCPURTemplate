@@ -267,7 +267,7 @@ def main():
                     ('ADTemplate.out_file', 'dti.@ad'),
                     ('RDTemplate.out_file', 'dti.@rd')]),
                 (genTract_wf, templateSink, [
-                    ('tractConvert.out_file', 'tractography.@sift')])
+                    ('tractConvert.out_file', 'tractography.@sift')]),
 
                 # Subject Sink
                 (Subjid, subjSink, [
