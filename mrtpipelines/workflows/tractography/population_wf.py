@@ -62,7 +62,7 @@ def fodTemplate_wf(wdir=None, nthreads=1, name='fodTemplate_wf'):
     copyMask = pe.JoinNode(niu.Function(function=io.copyFile,
                                         input_names=['in_file', 'out_dir'],
                                         output_names=['out_dir']),
-                                        joinsourfixelce='SubjectID',
+                                        joinsource='SubjectID',
                                         joinfield=['in_file'],
                                         name='copyMask')
     copyMask.base_dir = wdir
