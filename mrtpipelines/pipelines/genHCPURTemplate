@@ -125,8 +125,8 @@ def main():
                                              nthreads=nthreads)
 
     # MRTrix template tractography generation workflow
-    genTract_wf = tractography_wf.genTemplate_wf(wdir=work_dir,
-                                                         nthreads=nthreads)
+    genTemplateTract_wf = tractography_wf.genTemplateTract_wf(wdir=work_dir,
+                                                 nthreads=nthreads)
 
     # Template datasink
     templateSink = io.templateSink(out_dir, wdir=work_dir)
@@ -209,11 +209,11 @@ def main():
                     ('TensorMetrics.out_adc', 'copyMD.in_file'),
                     ('TensorMetrics.out_ad', 'copyAD.in_file'),
                     ('TensorMetrics.out_rd', 'copyRD.in_file')]),
-                (fodTemplate_wf, genTract_wf, [
-                    ('FODTemplate_wf.wm_odf', 'genTract.in_file'),
-                    ('FODTemplate_wf.wm_odf, siftTract.in_fod')]),
-                (tensorTemplate_wf, genTract_wf, [
-                    ('maskTemplate.out_file', 'genTract.seed_image')]),
+                (fodTemplate_wf, genTemplateTract_wf, [
+                    ('FODTemplate.out_file', 'template_tckgen.in_file'),
+                    ('FODTemplate.out_file', 'template_tcksift.in_fod')]),
+                (tensorTemplate_wf, genTemplateTract_wf, [
+                    ('maskTemplate.out_file', 'template_tckgen.seed_image')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -266,8 +266,8 @@ def main():
                     ('MDTemplate.out_file', 'dti.@md'),
                     ('ADTemplate.out_file', 'dti.@ad'),
                     ('RDTemplate.out_file', 'dti.@rd')]),
-                (genTract_wf, templateSink, [
-                    ('tractConvert.out_file', 'tractography.@sift')]),
+                (genTemplateTract_wf, templateSink, [
+                    ('template_tckconvert.out_file', 'tractography.@tract')]),
 
                 # Subject Sink
                 (Subjid, subjSink, [
