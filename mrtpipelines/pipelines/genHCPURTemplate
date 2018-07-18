@@ -126,7 +126,8 @@ def main():
 
     # MRTrix template tractography generation workflow
     genTemplateTract_wf = tractography_wf.genTemplateTract_wf(wdir=work_dir,
-                                                 nthreads=nthreads)
+                                                              nfibers=nfibers,
+                                                              nthreads=nthreads)
 
     # Template datasink
     templateSink = io.templateSink(out_dir, wdir=work_dir)
