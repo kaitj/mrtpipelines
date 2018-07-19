@@ -11,9 +11,9 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
         nthreads = 8
 
     # Convert from nii to mif
-    dataConvert = pe.Node(mrt.MRConvert(), name="dataConvert")
-    dataConvert.base_dir = wdir
-    dataConvert.inputs.nthreads = nthreads
+    dwiConvert = pe.Node(mrt.MRConvert(), name="dwiConvert")
+    dwiConvert.base_dir = wdir
+    dwiConvert.inputs.nthreads = nthreads
 
     # dwi2response
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
@@ -35,7 +35,7 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
 
     workflow.add_nodes([maskConvert])
     workflow.connect([
-        (dataConvert, dwi2response, [('out_file', 'in_file')])
+        (dwiConvert, dwi2response, [('out_file', 'in_file')])
     ])
 
     return workflow

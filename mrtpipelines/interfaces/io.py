@@ -25,7 +25,7 @@ def getData(bids_layout, subjid):
     subjid = subjid.lstrip('sub-')
 
     # Diffusion
-    nifti = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
+    dwi = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
                             type='preproc', return_type='file',
                             extensions=['nii', 'nii.gz'])
     bval = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
@@ -43,9 +43,9 @@ def getData(bids_layout, subjid):
                            return_type='file', extensions=['mgz'])
 
     if not parc:
-        return nifti[0], (bvec[0], bval[0]), mask[0], None
+        return dwi[0], (bvec[0], bval[0]), mask[0], None
     else:
-        return nifti[0], (bvec[0], bval[0]), mask[0], parc[0]
+        return dwi[0], (bvec[0], bval[0]), mask[0], parc[0]
 
 
 def getBIDS(layout, wdir=None):
@@ -57,7 +57,7 @@ def getBIDS(layout, wdir=None):
     BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
                                            input_names=['bids_layout',
                                                         'subjid'],
-                                           output_names=['nifti',
+                                           output_names=['dwi',
                                                          'bdata',
                                                          'mask',
                                                          'parc']),

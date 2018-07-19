@@ -182,8 +182,8 @@ def main():
                 (Subjid, BIDSDataGrabber, [
                     ('subjid', 'subjid')]),
                 (BIDSDataGrabber, hcp_preproc_wf, [
-                    ('nifti', 'dataConvert.in_file'),
-                    ('bdata', 'dataConvert.grad_fsl'),
+                    ('dwi', 'dwiConvert.in_file'),
+                    ('bdata', 'dwiConvert.grad_fsl'),
                     ('bdata', 'dwi2response.grad_fsl'),
                     ('mask', 'maskConvert.in_file')]),
 
@@ -192,7 +192,7 @@ def main():
                     ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                     ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
-                    ('dataConvert.out_file', 'dwi2fod.in_file'),
+                    ('dwiConvert.out_file', 'dwi2fod.in_file'),
                     ('maskConvert.out_file', 'mtnormalise.mask'),
                     ('maskConvert.out_file', 'copyMask.in_file')]),
                 (fodTemplate_wf, prepTensor_wf, [
@@ -201,7 +201,7 @@ def main():
                 (hcp_preproc_wf, prepTensor_wf, [
                     ('maskConvert.out_file', 'MRRegister.mask1'),
                     ('maskConvert.out_file', 'MaskTransform.in_file'),
-                    ('dataConvert.out_file', 'DWINormalise.in_file'),
+                    ('dwiConvert.out_file', 'DWINormalise.in_file'),
                     ('maskConvert.out_file', 'DWINormalise.in_mask')]),
                 (prepTensor_wf, tensorTemplate_wf, [
                     ('MaskTransform.out_file', 'copyTempMask.in_file'),
