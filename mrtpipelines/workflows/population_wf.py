@@ -2,7 +2,7 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3 as mrt
 from nipype.interfaces import utility as niu
 
-from ..interfaces import io
+from ..interfaces import io, utils
 
 import os.path as op
 
@@ -168,9 +168,12 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
     RDTemplate.inputs.nthreads = nthreads
 
     # Template mask
-    MaskTemplate = pe.JoinNode(mrt.MRMath(), joinsource='SubjectID',
-                                             joinfield=['in_file'],
-                                             name='MaskTemplate')
+    selectMasks = pe.Node(niu.Function(function=utils.selectAll,
+                                       input_names=['in_dir'],
+                                       output_names=['out_files']),
+                                       name='selectMasks')
+
+    MaskTemplate = pe.Node(mrt.MRMath(), name='MaskTemplate')
     MaskTemplate.base_dir = wdir
     MaskTemplate.inputs.out_file = 'template_brainmask.mif'
     MaskTemplate.inputs.operation ='min'
@@ -179,7 +182,6 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
     # Build workflow
     workflow = pe.Workflow(name=name)
 
-    workflow.add_nodes([MaskTemplate])
     workflow.connect([
         (copyFA, FATemplate, [('out_dir', 'in_dir')]),
         (copyTempMask, FATemplate, [('out_dir', 'mask_dir')]),
@@ -189,6 +191,8 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
         (copyTempMask, ADTemplate, [('out_dir', 'mask_dir')]),
         (copyRD, RDTemplate, [('out_dir', 'in_dir')]),
         (copyTempMask, RDTemplate, [('out_dir', 'mask_dir')]),
+        (copyTempMask, selectMasks, [('out_dir', 'in_dir')]),
+        (selectMasks, MaskTemplate, [('out_files', 'in_file')])
     ])
 
     return workflow

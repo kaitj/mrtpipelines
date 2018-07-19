@@ -205,7 +205,6 @@ def main():
                     ('maskConvert.out_file', 'DWINormalise.in_mask')]),
                 (prepTensor_wf, tensorTemplate_wf, [
                     ('MaskTransform.out_file', 'copyTempMask.in_file'),
-                    ('MaskTransform.out_file', 'MaskTemplate.in_file'),
                     ('TensorMetrics.out_fa', 'copyFA.in_file'),
                     ('TensorMetrics.out_adc', 'copyMD.in_file'),
                     ('TensorMetrics.out_ad', 'copyAD.in_file'),
