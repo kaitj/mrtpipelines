@@ -93,19 +93,6 @@ def copyFile(in_file, out_dir):
     return out_dir
 
 
-def templateSink(out_dir, wdir=None):
-    from nipype.pipeline import engine as pe
-    from nipype.interfaces import io as nio
-
-    tempSink = pe.Node(nio.DataSink(), parameterization=False,
-                                       name='templateSink')
-    tempSink.base_dir = wdir
-    tempSink.inputs.base_directory = out_dir
-    tempSink.inputs.container = 'template'
-
-    return tempSink
-
-
 def renameFile(file_name, node_name, wdir=None):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
@@ -117,6 +104,19 @@ def renameFile(file_name, node_name, wdir=None):
     renameFile.inputs.file_name = file_name
 
     return renameFile
+
+
+def templateSink(out_dir, wdir=None):
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces import io as nio
+
+    tempSink = pe.Node(nio.DataSink(), parameterization=False,
+                                       name='templateSink')
+    tempSink.base_dir = wdir
+    tempSink.inputs.base_directory = out_dir
+    tempSink.inputs.container = 'template'
+
+    return tempSink
 
 
 def subjSink(out_dir, wdir=None):
