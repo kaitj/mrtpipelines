@@ -119,7 +119,7 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
         (DWITransform, FitTensor, [('out_file', 'in_file')]),
         (MaskTransform, FitTensor, [('out_file', 'in_mask')]),
         (FitTensor, TensorMetrics, [('out_file', 'in_file')]),
-        (MaskTransform, TensorMetrics, [('out_file', 'in_mask')])
+        (MaskTransform, TensorMetrics, [('out_file', 'in_mask')]),
         (MaskTransform, MaskSelect, [('out_file', 'inlist')])
     ])
 
