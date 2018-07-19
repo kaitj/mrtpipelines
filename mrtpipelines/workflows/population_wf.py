@@ -168,11 +168,6 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
     RDTemplate.inputs.nthreads = nthreads
 
     # Template mask
-    maskSelect = pe.MapNode(niu.Select(), iterfield=['inlist'],
-                                          name='maskSelect')
-    maskSelect.base_dir = wdir
-    maskSelect.inputs.index = [0]
-
     maskTemplate = pe.JoinNode(mrt.MRMath(), joinsource='SubjectID',
                                              joinfield=['in_file'],
                                              name='maskTemplate')
@@ -184,6 +179,7 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
     # Build workflow
     workflow = pe.Workflow(name=name)
 
+    workflow.add_nodes([maskTemplate])
     workflow.connect([
         (copyFA, FATemplate, [('out_dir', 'in_dir')]),
         (copyTempMask, FATemplate, [('out_dir', 'mask_dir')]),
@@ -193,7 +189,6 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
         (copyTempMask, ADTemplate, [('out_dir', 'mask_dir')]),
         (copyRD, RDTemplate, [('out_dir', 'in_dir')]),
         (copyTempMask, RDTemplate, [('out_dir', 'mask_dir')]),
-        (maskSelect, maskTemplate, [('out', 'in_file')])
     ])
 
     return workflow

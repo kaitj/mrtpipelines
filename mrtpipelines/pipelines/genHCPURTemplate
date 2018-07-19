@@ -205,11 +205,11 @@ def main():
                     ('maskConvert.out_file', 'DWINormalise.in_mask')]),
                 (prepTensor_wf, tensorTemplate_wf, [
                     ('MaskTransform.out_file', 'copyTempMask.in_file'),
-                    ('MaskTransform.out_file', 'maskSelect.inlist'),
                     ('TensorMetrics.out_fa', 'copyFA.in_file'),
                     ('TensorMetrics.out_adc', 'copyMD.in_file'),
                     ('TensorMetrics.out_ad', 'copyAD.in_file'),
-                    ('TensorMetrics.out_rd', 'copyRD.in_file')]),
+                    ('TensorMetrics.out_rd', 'copyRD.in_file'),
+                    ('MaskSelect.out', 'maskTemplate.in_file')]),
                 (fodTemplate_wf, genTemplateTract_wf, [
                     ('FODTemplate.out_file', 'template_tckgen.in_file'),
                     ('FODTemplate.out_file', 'template_tcksift.in_fod')]),

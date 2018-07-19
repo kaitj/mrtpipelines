@@ -74,6 +74,11 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     MaskTransform.inputs.out_file = 'space-Template_mask.mif'
     MaskTransform.inputs.nthreads = nthreads
 
+    MaskSelect = pe.MapNode(niu.Select(), iterfield=['inlist'],
+                                          name='MaskSelect')
+    MaskSelect.base_dir = wdir
+    MaskSelect.inputs.index = [0]
+
     DWINormalise = pe.MapNode(mrt.DWINormalise(), iterfield=['in_file'],
                                                   name='DWINormalise')
     DWINormalise.base_dir = wdir
@@ -115,6 +120,7 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
         (MaskTransform, FitTensor, [('out_file', 'in_mask')]),
         (FitTensor, TensorMetrics, [('out_file', 'in_file')]),
         (MaskTransform, TensorMetrics, [('out_file', 'in_mask')])
+        (MaskTransform, MaskSelect, [('out_file', 'inlist')])
     ])
 
     return workflow
