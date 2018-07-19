@@ -142,22 +142,22 @@ def main():
     renameMask = io.renameFile(file_name='space-Template_brainmask',
                                node_name='renameMask', wdir=work_dir)
 
-    renameDWINorm = io.renameFile(file_name='dwi_space-Template_norm',
+    renameDWINorm = io.renameFile(file_name='space-Template_norm',
                                   node_name='renameDWINorm', wdir=work_dir)
 
-    renameDTI = io.renameFile(file_name='dti_space-Template_tensor',
+    renameDTI = io.renameFile(file_name='space-Template_tensor',
                               node_name='renameDTI', wdir=work_dir)
 
-    renameFA = io.renameFile(file_name='dti_space-Template_fa',
+    renameFA = io.renameFile(file_name='space-Template_fa',
                              node_name='renameFA', wdir=work_dir)
 
-    renameMD = io.renameFile(file_name='dti_space-Template_md',
+    renameMD = io.renameFile(file_name='space-Template_md',
                              node_name='renameMD', wdir=work_dir)
 
-    renameAD = io.renameFile(file_name='dti_space-Template_ad',
+    renameAD = io.renameFile(file_name='space-Template_ad',
                              node_name='renameAD', wdir=work_dir)
 
-    renameRD = io.renameFile(file_name='dti_space-Template_rd',
+    renameRD = io.renameFile(file_name='space-Template_rd',
                              node_name='renameRD', wdir=work_dir)
 
     # Subject datasink
