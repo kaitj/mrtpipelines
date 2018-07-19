@@ -53,8 +53,8 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     MRRegister = pe.MapNode(mrt.MRRegister(), iterfield=['in_file', 'mask1'],
                                               name='MRRegister')
     MRRegister.base_wdir = wdir
-    MRRegister.inputs.nl_warp = ['subj2template_warp.mif',
-                                 'template2subj_warp.mif']
+    MRRegister.inputs.nl_warp = ['subj_2_template.mif',
+                                 'template_2_subj.mif']
     MRRegister.inputs.nthreads = nthreads
 
     # Transform subjects' data into template space
@@ -81,7 +81,7 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     DWINormalise.inputs.nthreads = nthreads
 
     DWITransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
-                                                  name='DWITransform')
+                                                 name='DWITransform')
     DWITransform.base_dir = wdir
     DWITransform.inputs.out_file = 'space-Template_norm.mif'
     DWITransform.inputs.nthreads = nthreads
