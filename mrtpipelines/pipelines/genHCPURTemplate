@@ -214,7 +214,7 @@ def main():
                     ('FODTemplate.out_file', 'template_tckgen.in_file'),
                     ('FODTemplate.out_file', 'template_tcksift.in_fod')]),
                 (tensorTemplate_wf, genTemplateTract_wf, [
-                    ('maskTemplate.out_file', 'template_tckgen.seed_image')]),
+                    ('MaskTemplate.out_file', 'template_tckgen.seed_image')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
