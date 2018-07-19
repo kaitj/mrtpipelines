@@ -20,7 +20,7 @@ def get_parser():
 
     # Version option
     parser.add_argument("-v", "--version", dest="version",
-                        action="version", version="1.0.1")
+                        action="version", version="0.0.1")
 
     # Required arguments
     g_req = parser.add_argument_group("Required arguments")
@@ -39,7 +39,7 @@ def get_parser():
                                               "Defaults 100,000 streamlines")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
-                                            "<bids_dir>/derivatives/MRtrix/work")
+                                           "<bids_dir>/derivatives/MRtrix/work")
     g_opt.add_argument("-o", "--out_dir", dest="out_dir",
                                           help="Output directory. Defaults to "
                                            "<bids_dir>/derivatives/MRtrix")
