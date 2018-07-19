@@ -38,14 +38,14 @@ def getData(bids_layout, subjid):
                            type='brainmask', return_type='file',
                            extensions=['nii', 'nii.gz'])
 
-    # Freesurfer parcellation (from fmriprep)
-    parc = bids_layout.get(subject=subjid, type='aseg',
-                           return_type='file', extensions=['mgz'])
+    # Anatomical
+    t1w = bids_layout.get(subject=subjid, modality='anat', type='T1w',
+                          return_type='file', extensions=['nii', 'nii.gz'])
+    t2w = bids_layout.get(subject=subjid, modality='anat', space='T1w',
+                          type='T2w', return_type='file',
+                          extensions=['nii', 'nii.gz'])
 
-    if not parc:
-        return dwi[0], (bvec[0], bval[0]), mask[0], None
-    else:
-        return dwi[0], (bvec[0], bval[0]), mask[0], parc[0]
+    return dwi[0], (bvec[0], bval[0]), mask[0], t1w[0], t2w[0]
 
 
 def getBIDS(layout, wdir=None):
@@ -60,7 +60,8 @@ def getBIDS(layout, wdir=None):
                                            output_names=['dwi',
                                                          'bdata',
                                                          'mask',
-                                                         'parc']),
+                                                         't1w',
+                                                         't2w']),
                                            name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = wdir
     BIDSDataGrabber.inputs.bids_layout = layout
