@@ -7,6 +7,7 @@ MRTrix3 processing for to create a template using data collected as part of the
 * [Available pipelines](#avail_pipelines)
 * [Disclaimer](#disclaimer)
 * [Support](#support)
+* [References](#references)
 
 ### <a name="avail_pipelines"></a> Available pipelines
 Details regarding usage and workflows coming soon...
@@ -30,7 +31,7 @@ This branch of `mrtpipelines` is still in the development and may undergo major 
 ### <a name="support"></a> Support and communication
 All bugs, concerns, and requests for features can be requested via the github repository found [here](https://github.com/kaitj/mrtpipelines/issues).
 
-### <a name="references"</a> References
+### <a name="references"></a> References
 D. C. Van Essen, S.M. Smith, D.M. Barch, T.E.J. Behrens, E. Yacoub, K. Ugurbil, for the WU-Minn HCP Consortium. (2013). The WU-Minn Human Connectome Project: An overview. NeuroImage 80(2013):62-79.
 
 J.-D. Tournier, F. Calamante, A. Connelly. MRtrix: Diffusion tractography in crossing fiber regions. Int J Imag Syst Tech 22(2012):53-66.
