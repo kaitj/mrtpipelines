@@ -6,4 +6,7 @@ build/
 notebooks/
 .ipynb_checkpoints
 
+# Scripts
+scripts/
+
 *.swp
