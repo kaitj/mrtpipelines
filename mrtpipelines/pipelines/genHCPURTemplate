@@ -304,8 +304,7 @@ def main():
                     ('template_tckconvert.out_file', 'tractography.@tract')]),
                 (anatTemplate_wf, templateSink, [
                     ('T1wTemplate.out_file', 'anat.@t1w'),
-                    ('T2wTemplate.out_file', 'anat.@t2w'),
-                ])
+                    ('T2wTemplate.out_file', 'anat.@t2w')]),
 
                 # Subject Sink
                 (Subjid, subjSink, [
