@@ -164,6 +164,12 @@ def main():
     renameRD = io.renameFile(file_name='space-Template_rd',
                              node_name='renameRD', wdir=work_dir)
 
+    renameT1w = io.renameFile(file_name='space-Template_T1w',
+                              node_name='renameT1w', wdir=work_dir)
+
+    renameT2w = io.renameFile(file_name='space-Template_T2w',
+                              node_name='renameT2w', wdir=work_dir)
+
     # Subject datasink
     subjSink = io.subjSink(out_dir, wdir=work_dir)
     regex_sub = [('_subjid_sub-[0-9]*', ''),
@@ -174,7 +180,9 @@ def main():
                 ('_renameMD[0-9]*', ''),
                 ('_renameRD[0-9]*', ''),
                 ('_renameDWINorm[0-9]*', ''),
-                ('_renameMask[0-9]*', '')]
+                ('_renameMask[0-9]*', ''),
+                ('_renameT1w[0-9]*', ''),
+                ('_renameT2w[0-9]*', '')]
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
@@ -231,7 +239,7 @@ def main():
                     ('t2wTransform.out_file', 'copyT2w.in_file')]),
                 (tensorTemplate_wf, anatTemplate_wf, [
                     ('copyTempMask.out_dir', 'T1wTemplate.mask_dir'),
-                    ('copyTempMask,out_dir', 'T2wTemplate.mask_dir')]),
+                    ('copyTempMask.out_dir', 'T2wTemplate.mask_dir')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -270,6 +278,14 @@ def main():
                     ('subjid', 'subjid')]),
                 (prepTensor_wf, renameRD, [
                     ('TensorMetrics.out_rd', 'in_file')]),
+                (Subjid, renameT1w, [
+                    ('subjid', 'subjid')]),
+                (prepAnat_wf, renameT1w, [
+                    ('t1wTransform.out_file', 'in_file')]),
+                (Subjid, renameT2w, [
+                    ('subjid', 'subjid')]),
+                (prepAnat_wf, renameT2w, [
+                    ('t2wTransform.out_file', 'in_file')]),
 
                 # Output
                 # Template sink
@@ -311,7 +327,11 @@ def main():
                 (renameAD, subjSink, [
                     ('out_file', 'dti.@ad')]),
                 (renameRD, subjSink, [
-                    ('out_file', 'dti.@rd')])
+                    ('out_file', 'dti.@rd')]),
+                (renameT1w, subjSink, [
+                    ('out_file', 'anat.@t1w')]),
+                (renameT2w, subjSink, [
+                    ('out_file', 'anat.@t2w')])
             ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
