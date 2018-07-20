@@ -20,7 +20,7 @@ def get_parser():
 
     # Version option
     parser.add_argument("-v", "--version", dest="version",
-                        action="version", version="0.0.1")
+                        action="version", version="0.0.2")
 
     # Required arguments
     g_req = parser.add_argument_group("Required arguments")
@@ -113,18 +113,22 @@ def main():
     # MRTrix preprocessing workflow
     hcp_preproc_wf = preproc_wf.hcp_preproc_wf(wdir=work_dir, nthreads=nthreads)
 
-    # MRTrix population fod template workflow
+    prepAnat_wf = preproc_wf.prepAnat_wf(wdir=work_dir, nthreads=nthreads)
+
+    # MRTrix population template workflow
     fodTemplate_wf = population_wf.fodTemplate_wf(wdir=work_dir,
                                                   nthreads=nthreads)
 
     tensorTemplate_wf = population_wf.tensorTemplate_wf(wdir=work_dir,
                                                         nthreads=nthreads)
 
-    # MRTrix tractography preperation workflow
-    prepTensor_wf = preproc_wf.prepTensor_wf(wdir=work_dir,
-                                             nthreads=nthreads)
+    anatTemplate_wf = population_wf.anatTemplate_wf(wdir=work_dir,
+                                                   nthreads=nthreads)
 
-    # MRTrix template tractography generation workflow
+    # MRTrix tractography/tensor workflow
+    prepTensor_wf = preproc_wf.prepTensor_wf(wdir=work_dir, nthreads=nthreads)
+
+    # MRTrix tractography generation workflow
     genTemplateTract_wf = tractography_wf.genTemplateTract_wf(wdir=work_dir,
                                                               nfibers=nfibers,
                                                               nthreads=nthreads)
@@ -186,8 +190,11 @@ def main():
                     ('bdata', 'dwiConvert.grad_fsl'),
                     ('bdata', 'dwi2response.grad_fsl'),
                     ('mask', 'maskConvert.in_file')]),
+                (BIDSDataGrabber, prepAnat_wf, [
+                    ('t1w', 't1wConvert.in_file'),
+                    ('t2w', 't2wConvert.in_file')]),
 
-                # Workflows
+                # Diffusion / tractography Workflows
                 (hcp_preproc_wf, fodTemplate_wf, [
                     ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
@@ -214,6 +221,17 @@ def main():
                     ('FODTemplate.out_file', 'template_tcksift.in_fod')]),
                 (tensorTemplate_wf, genTemplateTract_wf, [
                     ('MaskTemplate.out_file', 'template_tckgen.seed_image')]),
+
+                # Anatomical workflows
+                (prepTensor_wf, prepAnat_wf, [
+                    ('WarpSelect1.out', 't1wTransform.warp'),
+                    ('WarpSelect1.out', 't2wTransform.warp')]),
+                (prepAnat_wf, anatTemplate_wf, [
+                    ('t1wTransform.out_file', 'copyT1w.in_file'),
+                    ('t2wTransform.out_file', 'copyT2w.in_file')]),
+                (tensorTemplate_wf, anatTemplate_wf, [
+                    ('copyTempMask.out_dir', 'T1wTemplate.mask_dir'),
+                    ('copyTempMask,out_dir', 'T2wTemplate.mask_dir')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -268,6 +286,10 @@ def main():
                     ('RDTemplate.out_file', 'dti.@rd')]),
                 (genTemplateTract_wf, templateSink, [
                     ('template_tckconvert.out_file', 'tractography.@tract')]),
+                (anatTemplate_wf, templateSink, [
+                    ('T1wTemplate.out_file', 'anat.@t1w'),
+                    ('T2wTemplate.out_file', 'anat.@t2w'),
+                ])
 
                 # Subject Sink
                 (Subjid, subjSink, [

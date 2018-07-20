@@ -118,3 +118,43 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     ])
 
     return workflow
+
+
+def prepAnat_wf(wdir=None, nthreads=1, name='prepAnat_wf'):
+    """
+    Set up workflow to generate anatomical templates
+    """
+
+    if nthreads >= 8:
+        nthreads = 8
+
+    # Necessary nodes to build workflow
+    t1wConvert = pe.Node(mrt.MRConvert(), name='t1wConvert')
+    t1wConvert.base_dir = wdir
+    t1wConvert.inputs.nthreads = nthreads
+
+    t2wConvert = pe.Node(mrt.MRConvert(), name='t2wConvert')
+    t2wConvert.base_dir = wdir
+    t2wConvert.inputs.nthreads = nthreads
+
+    t1wTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                 name='t1wTransform')
+    t1wTransform.base_dir = wdir
+    t1wTransform.inputs.out_file = 'space-Template_T1w.mif'
+    t1wTransform.inputs.nthreads = nthreads
+
+    t2wTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
+                                                  name='t2wTransform')
+    t2wTransform.base_dir = wdir
+    t2wTransform.inputs.out_file = 'space-Template_T2w.mif'
+    t2wTransform.inputs.nthreads = nthreads
+
+    # Build workflows
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (t1wConvert, t1wTransform, [('out_file', 'in_file')]),
+        (t2wConvert, t2wTransform, [('out_file', 'in_file')])
+    ])
+
+    return workflow

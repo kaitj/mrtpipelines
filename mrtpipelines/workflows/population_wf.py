@@ -196,3 +196,52 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
     ])
 
     return workflow
+
+
+def anatTemplate_wf(wdir=None, nthreads=1, name='anatTemplate_wf'):
+    """
+    Set up population template anatomical workflow
+    """
+
+    if nthreads >= 8:
+        nthreads = 8
+
+    # Copy nodes
+    copyT1w = pe.JoinNode(niu.Function(function=io.copyFile,
+                                       input_namefixels=['in_file', 'out_dir'],
+                                       output_names=['out_dir']),
+                                       joinsource='SubjectID',
+                                       joinfield=['in_file'],
+                                       name='copyT1w')
+    copyT1w.base_dir = wdir
+    copyT1w.inputs.out_dir = op.join(copyT1w.base_dir + '/tmpFiles/T1w')
+
+    copyT2w = pe.JoinNode(niu.Function(function=io.copyFile,
+                                       input_namefixels=['in_file', 'out_dir'],
+                                       output_names=['out_dir']),
+                                       joinsource='SubjectID',
+                                       joinfield=['in_file'],
+                                       name='copyT2w')
+    copyT2w.base_dir = wdir
+    copyT2w.inputs.out_dir = op.join(copyT1w.base_dir + '/tmpFiles/T2w')
+
+    # Template nodes
+    T1wTemplate = pe.Node(mrt.PopulationTemplate(), name='T1wTemplate')
+    T1wTemplate.base_dir = wdir
+    T1wTemplate.inputs.out_file = 'template_t1w.mif'
+    T1wTemplate.inputs.nthreads = nthreads
+
+    T2wTemplate = pe.Node(mrt.PopulationTemplate(), name='T2wTemplate')
+    T2wTemplate.base_dir = wdir
+    T2wTemplate.inputs.out_file = 'template_t2w.mif'
+    T2wTemplate.inputs.nthreads = nthreads
+
+    # Build workflow
+    workflow = pe.Workflow(name=name)
+
+    workflow.connect([
+        (copyT1w, T1wTemplate, [('out_dir', 'in_dir')]),
+        (copyT2w, T2wTemplate, [('out_dir', 'in_dir')])
+    ])
+
+    return workflow
