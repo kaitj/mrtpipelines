@@ -1,7 +1,7 @@
 from nipype import IdentityInterface
 from nipype.pipeline import engine as pe
 
-def getSubj(subjFile, work_dir):
+def getSubj(subjFile, work_dir, nthreads=1):
     # Retrieve individual subject ids & number of subjectss
     subjids = []
     noSubj = 0
@@ -16,6 +16,7 @@ def getSubj(subjFile, work_dir):
     Subjid = pe.Node(IdentityInterface(fields=['subjid']), name='SubjectID')
     Subjid.base_dir = work_dir
     Subjid.iterables = [('subjid', subjids)]
+    Subjid.interface.num_threads = nthreads
 
     return Subjid, noSubj
 
@@ -48,7 +49,7 @@ def getData(bids_layout, subjid):
     return dwi[0], (bvec[0], bval[0]), mask[0], t1w[0], t2w[0]
 
 
-def getBIDS(layout, wdir=None):
+def getBIDS(layout, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
@@ -65,6 +66,7 @@ def getBIDS(layout, wdir=None):
                                            name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = wdir
     BIDSDataGrabber.inputs.bids_layout = layout
+    BIDSDataGrabber.interface.num_threads = nthreads
 
     return BIDSDataGrabber
 
@@ -93,20 +95,24 @@ def copyFile(in_file, out_dir):
     return out_dir
 
 
-def renameFile(file_name, node_name, wdir=None):
+def renameFile(file_name, node_name, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
+
+    if nthreads >= 8:
+        nthreads = 8
 
     renameFile = pe.MapNode(niu.Rename(format_string="%(subjid)s_%(file_name)s"),
                           iterfield=['in_file'], name=node_name)
     renameFile.base_dir = wdir
     renameFile.inputs.keep_ext = True
     renameFile.inputs.file_name = file_name
+    renameFile.interface.num_threads = nthreads
 
     return renameFile
 
 
-def templateSink(out_dir, wdir=None):
+def templateSink(out_dir, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import io as nio
 
@@ -115,17 +121,22 @@ def templateSink(out_dir, wdir=None):
     tempSink.base_dir = wdir
     tempSink.inputs.base_directory = out_dir
     tempSink.inputs.container = 'template'
+    tempSink.interface.num_threads = nthreads
 
     return tempSink
 
 
-def subjSink(out_dir, wdir=None):
+def subjSink(out_dir, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import io as nio
+
+    if nthreads >= 8:
+        nthreads = 8
 
     subjSink = pe.Node(nio.DataSink(), parameterization=False,
                                        name='subjSink')
     subjSink.base_dir = wdir
     subjSink.inputs.base_directory = out_dir
+    subjSink.interface.num_threads = nthreads
 
     return subjSink

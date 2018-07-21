@@ -14,6 +14,7 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     dwiConvert = pe.Node(mrt.MRConvert(), name="dwiConvert")
     dwiConvert.base_dir = wdir
     dwiConvert.inputs.nthreads = nthreads
+    dwiConvert.interface.num_threads = nthreads
 
     # dwi2response
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
@@ -24,11 +25,13 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     dwi2response.inputs.csf_file = 'space-dwi_csf.txt'
     dwi2response.inputs.max_sh = [0, 8, 8, 8]
     dwi2response.inputs.nthreads = nthreads
+    dwi2response.interface.num_threads = nthreads
 
     # dwi2mask
     maskConvert = pe.Node(mrt.MRConvert(), name='maskConvert')
     maskConvert.base_dir = wdir
     maskConvert.inputs.nthreads = nthreads
+    maskConvert.interface.num_threads = nthreads
 
     # Build workflow
     workflow = pe.Workflow(name=name)
@@ -56,41 +59,48 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     MRRegister.inputs.nl_warp = ['subj_2_template.mif',
                                  'template_2_subj.mif']
     MRRegister.inputs.nthreads = nthreads
+    MRRegister.interface.num_threads = nthreads
 
     # Transform subjects' data into template space
     WarpSelect1 = pe.MapNode(niu.Select(), iterfield=['inlist'],
                                            name='WarpSelect1')
     WarpSelect1.base_dir = wdir
     WarpSelect1.inputs.index = [0]
+    WarpSelect1.interface.num_threads = nthreads
 
     WarpSelect2 = pe.MapNode(niu.Select(), iterfield=['inlist'],
                                            name='WarpSelect2')
     WarpSelect2.base_dir = wdir
     WarpSelect2.inputs.index = [1]
+    WarpSelect2.interface.num_threads = nthreads
 
     MaskTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                   name='MaskTransform')
     MaskTransform.base_dir = wdir
     MaskTransform.inputs.out_file = 'space-Template_mask.mif'
     MaskTransform.inputs.nthreads = nthreads
+    MaskTransform.interface.num_threads = nthreads
 
     DWINormalise = pe.MapNode(mrt.DWINormalise(), iterfield=['in_file'],
                                                   name='DWINormalise')
     DWINormalise.base_dir = wdir
     DWINormalise.inputs.out_file = 'space-T1w_norm.mif'
     DWINormalise.inputs.nthreads = nthreads
+    DWINormalise.interface.num_threads = nthreads
 
     DWITransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                  name='DWITransform')
     DWITransform.base_dir = wdir
     DWITransform.inputs.out_file = 'space-Template_norm.mif'
     DWITransform.inputs.nthreads = nthreads
+    DWITransform.interface.num_threads = nthreads
 
     FitTensor = pe.MapNode(mrt.FitTensor(), iterfield=['in_file', 'in_mask'],
                                             name='FitTensor')
     FitTensor.base_dir = wdir
     FitTensor.inputs.out_file = 'space-Template_tensor.mif'
     FitTensor.inputs.nthreads = nthreads
+    FitTensor.interface.num_threads = nthreads
 
     TensorMetrics = pe.MapNode(mrt.TensorMetrics(), iterfield=['in_file',
                                                                'in_mask'],
@@ -101,6 +111,7 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     TensorMetrics.inputs.out_ad = 'space-Template_ad.mif'
     TensorMetrics.inputs.out_rd = 'space-Template_rd.mif'
     TensorMetrics.inputs.nthreads = nthreads
+    TensorMetrics.interface.num_threads = nthreads
 
     # Build workflow
     workflow = pe.Workflow(name=name)
@@ -132,22 +143,26 @@ def prepAnat_wf(wdir=None, nthreads=1, name='prepAnat_wf'):
     t1wConvert = pe.Node(mrt.MRConvert(), name='t1wConvert')
     t1wConvert.base_dir = wdir
     t1wConvert.inputs.nthreads = nthreads
+    t1wConvert.interface.num_threads = nthreads
 
     t2wConvert = pe.Node(mrt.MRConvert(), name='t2wConvert')
     t2wConvert.base_dir = wdir
     t2wConvert.inputs.nthreads = nthreads
+    t2wConvert.interface.num_threads = nthreads
 
     t1wTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                  name='t1wTransform')
     t1wTransform.base_dir = wdir
     t1wTransform.inputs.out_file = 'space-Template_T1w.mif'
     t1wTransform.inputs.nthreads = nthreads
+    t1wTransform.interface.num_threads = nthreads
 
     t2wTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                   name='t2wTransform')
     t2wTransform.base_dir = wdir
     t2wTransform.inputs.out_file = 'space-Template_T2w.mif'
     t2wTransform.inputs.nthreads = nthreads
+    t2wTransform.interface.num_threads = nthreads
 
     # Build workflows
     workflow = pe.Workflow(name=name)
