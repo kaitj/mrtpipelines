@@ -5,6 +5,7 @@ from nipype.interfaces import utility as niu
 from ..interfaces import io, utils
 
 import os.path as op
+import numpy as np
 
 def fodTemplate_wf(wdir=None, nthreads=1, name='fodTemplate_wf'):
     """
@@ -12,7 +13,7 @@ def fodTemplate_wf(wdir=None, nthreads=1, name='fodTemplate_wf'):
     """
 
     if nthreads >= 8:
-        int_nthreads = 8
+        int_nthreads = np.int(nthreads / 4)
     else:
         int_nthreads = nthreads
 
@@ -224,7 +225,7 @@ def anatTemplate_wf(wdir=None, nthreads=1, name='anatTemplate_wf'):
     """
 
     if nthreads >= 8:
-        nthreads = 8
+        nthreads = np.int(nthreads / 4)
 
     # Copy nodes
     copyT1w = pe.JoinNode(niu.Function(function=io.copyFile,

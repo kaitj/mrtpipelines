@@ -33,7 +33,7 @@ def get_parser():
 
     # Optional arguments
     g_opt = parser.add_argument_group("Optional arguments")
-    g_opt.add_argument("-s", "--select", dest="select", default=100000,
+    g_opt.add_argument("-s", "--select", dest="select", default=25000,
                                          help="Number of streamlines to "
                                               "generate for each subject. "
                                               "Defaults 100,000 streamlines")

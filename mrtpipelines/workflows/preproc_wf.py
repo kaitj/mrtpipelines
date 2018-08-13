@@ -2,13 +2,15 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import mrtrix3 as mrt
 
+import numpy as np
+
 def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     """
     Set up dhollander response preproc workflow
     """
 
     if nthreads >= 8:
-        nthreads = 8
+        nthreads = np.int(nthreads / 4)
 
     # Convert from nii to mif
     dwiConvert = pe.Node(mrt.MRConvert(), name="dwiConvert")
@@ -27,7 +29,7 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     dwi2response.inputs.nthreads = nthreads
     dwi2response.interface.num_threads = nthreads
 
-    # dwi2mask
+    # Convert mask tp nii
     maskConvert = pe.Node(mrt.MRConvert(), name='maskConvert')
     maskConvert.base_dir = wdir
     maskConvert.inputs.nthreads = nthreads
@@ -50,12 +52,12 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     """
 
     if nthreads >= 8:
-        nthreads = 8
+        nthreads = np.int(nthreads / 4)
 
     # Register subjects to template
     MRRegister = pe.MapNode(mrt.MRRegister(), iterfield=['in_file', 'mask1'],
                                               name='MRRegister')
-    MRRegister.base_wdir = wdir
+    MRRegister.base_dir = wdir
     MRRegister.inputs.nl_warp = ['subj_2_template.mif',
                                  'template_2_subj.mif']
     MRRegister.inputs.nthreads = nthreads
@@ -137,7 +139,7 @@ def prepAnat_wf(wdir=None, nthreads=1, name='prepAnat_wf'):
     """
 
     if nthreads >= 8:
-        nthreads = 8
+        nthreads = np.int(nthreads / 4)
 
     # Necessary nodes to build workflow
     t1wConvert = pe.Node(mrt.MRConvert(), name='t1wConvert')

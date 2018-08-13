@@ -1,6 +1,8 @@
 from nipype import IdentityInterface
 from nipype.pipeline import engine as pe
 
+import numpy as np
+
 def getSubj(subjFile, work_dir, nthreads=1):
     # Retrieve individual subject ids & number of subjectss
     subjids = []
@@ -100,7 +102,7 @@ def renameFile(file_name, node_name, wdir=None, nthreads=1):
     from nipype.interfaces import utility as niu
 
     if nthreads >= 8:
-        nthreads = 8
+        nthreads = np.int(nthreads / 4)
 
     renameFile = pe.MapNode(niu.Rename(format_string="%(subjid)s_%(file_name)s"),
                           iterfield=['in_file'], name=node_name)
@@ -131,7 +133,7 @@ def subjSink(out_dir, wdir=None, nthreads=1):
     from nipype.interfaces import io as nio
 
     if nthreads >= 8:
-        nthreads = 8
+        nthreads = np.int(nthreads / 4)
 
     subjSink = pe.Node(nio.DataSink(), parameterization=False,
                                        name='subjSink')

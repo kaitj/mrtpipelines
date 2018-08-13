@@ -3,7 +3,8 @@ from nipype.interfaces import mrtrix3 as mrt
 
 import numpy as np
 
-def genTemplateTract_wf(wdir=None, nfibers=1000000, nthreads=1, name='genTemplateTract_wf'):
+def genTemplateTract_wf(wdir=None, nfibers=1000000, nthreads=1,
+                        name='genTemplateTract_wf'):
     """
 
     Set up workflow to generate Tractography
