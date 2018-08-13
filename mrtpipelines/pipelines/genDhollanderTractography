@@ -20,23 +20,28 @@ def get_parser():
 
     # Version option
     parser.add_argument("-v", "--version", dest="version",
-                        action="version", version="1.0.1")
+                        action="version", version="0.0.1")
 
     # Required arguments
     g_req = parser.add_argument_group("Required arguments")
     g_req.add_argument("bids_dir", help="Directory with input dataset, "
                                         "formatted according to the BIDS "
-                                        "standard.")
+                                        "standard")
+    g_req.add_argument("template_fod", help="A path to the template FOD "
+                                            "file for registration of subjects")
     g_req.add_argument('participant_label', help="A file containing label(s) "
                                                  "of participant(s) to perform "
                                                  "pipeline execution on")
 
     # Optional arguments
     g_opt = parser.add_argument_group("Optional arguments")
-    g_opt.add_argument("-s", "--select", dest="select", default=100000,
+    g_opt.add_argument("-s", "--select", dest="select", default=25000,
                                          help="Number of streamlines to "
                                               "generate for each subject. "
                                               "Defaults 100,000 streamlines")
+    g_opt.add_argument("-l", "--lmax", dest="lmax", default=[0, 8, 8],
+                                       help="maximum harmonic degree(s) for "
+                                            "response function estimation")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                             "<bids_dir>/derivatives/scratch")
@@ -53,7 +58,7 @@ def get_parser():
 
 def main():
     """
-    Entry point of coide
+    Entry point of code
     """
     import os
     import os.path as op
@@ -64,8 +69,7 @@ def main():
     from nipype.pipeline import engine as pe
 
     from mrtpipelines.interfaces import io
-    from mrtpipelines.workflows.tractography import (population_wf, preproc_wf,
-                                                     tractography_wf)
+    from mrtpipelines.workflows import (preproc_wf, tractography_wf)
 
     args = get_parser().parse_args()
 
@@ -73,6 +77,8 @@ def main():
     bids_dir = args.bids_dir
     deriv_dir = op.join(op.abspath(bids_dir), "derivatives")
     subjids = args.participant_label
+    lmax = args.lmax
+    template_fod = args.template_fod
     nfibers = int(args.select)
     nthreads = int(args.nthreads)
 
@@ -111,43 +117,62 @@ def main():
     BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
-    dholl_preproc_wf = preproc_wf.dhollander_preproc_wf(wdir=work_dir,
-                                                    nthreads=nthreads)
+    dholl_preproc_wf = preproc_wf.dhollander_preproc_wf(lmax=lmax,
+                                                        template=template_fod,
+                                                        wdir=work_dir,
+                                                        nthreads=nthreads)
 
-    # MRTrix population template workflow
-    template_proc_wf = population_wf.pop_template_wf(wdir=work_dir,
-                                                nthreads=nthreads)
-
-    # MRTrix tractography preperation workflow
-    prepDhollTract_wf = preproc_wf.prepDhollTract_wf(wdir=work_dir,
+    dholl_tract_wf = tractography_wf.genTract_wf(nfibers=nfibers,
+                                                 wdir=work_dir,
                                                  nthreads=nthreads)
 
-    # MRTrix template tractography generation workflow
-    genTemplate_wf = tractography_wf.genTemplate_wf(wdir=work_dir,
-                                                    nthreads=nthreads)
-
-    # MRTrix subject tractography generation workflow
-    genSubj_wf = tractography_wf.genSubj_wf(nfibers=nfibers, wdir=work_dir,
-                                            nthreads=nthreads)
-
-    # Template datasink
-    templateSink = io.templateSink(out_dir, wdir=work_dir)
-
-    # Rename nodes for subject sinking
-    renameTract = io.renameFile(file_name='space-Template_variant-sift_streamlines-%d_tract' % nfibers,
-                  node_name='renameTract', wdir=work_dir)
-
+    # Rename nodes for sinking
     renameWarp1 = io.renameFile(file_name='space-Template_warp',
-                                node_name='renameWarp1', wdir=work_dir)
-
+                                node_name='renameWarp1', wdir=work_dir,
+                                nthreads=nthreads)
     renameWarp2 = io.renameFile(file_name='space-dwi_warp',
-                                node_name='renameWarp2', wdir=work_dir)
+                                node_name='renameWarp2', wdir=work_dir,
+                                nthreads=nthreads)
+    renameResponse = io.renameFile(file_name='space-Template_wmfod_norm',
+                                   node_name='renameResponse', wdir=work_dir,
+                                   nthreads=nthreads)
+    renameMask = io.renameFile(file_name='space-Template_brainmask',
+                               node_name='renameMask', wdir=work_dir,
+                               nthreads=nthreads)
+    renameDWINorm = io.renameFile(file_name='space-Template_normalize',
+                                  node_name='renameDWINorm', wdir=work_dir,
+                                  nthreads=nthreads)
+    renameDTI = io.renameFile(file_name='space-Template_tensor',
+                              node_name='renameDTI', wdir=work_dir,
+                              nthreads=nthreads)
+    renameFA = io.renameFile(file_name='space-Template_fa',
+                             node_name='renameFA', wdir=work_dir,
+                             nthreads=nthreads)
+    renameMD = io.renameFile(file_name='space-Template_md',
+                             node_name='renameMD', wdir=work_dir,
+                             nthreads=nthreads)
+    renameAD = io.renameFile(file_name='space-Template_ad',
+                             node_name='renameAD', wdir=work_dir,
+                             nthreads=nthreads)
+    renameRD = io.renameFile(file_name='space-Template_rd',
+                             node_name='renameRD', wdir=work_dir,
+                             nthreads=nthreads)
+    renameTract = io.renameFile(file_name=('space-Template_variant-tcksift_streamlines-%d_tract.vtk' % nfibers),
+                                node_name='renameTract', wdir=work_dir,
+                                nthreads=nthreads)
 
     # Subject datasink
-    subjSink = io.subjSink(out_dir, wdir=work_dir)
+    subjSink = io.subjSink(out_dir, wdir=work_dir, nthreads=nthreads)
     regex_sub = [('_subjid_sub-[0-9]*', ''),
-                ('_renameTract[0-9]*', ''),
-                ('_renameWarp[0-9]*', '')]
+                 ('_renameWarp[0-9]*', ''),
+                 ('_renameResponse[0-9]*', ''),
+                 ('_renameAD[0-9]*', ''),
+                 ('_renameDTI[0-9]*', ''),
+                 ('_renameFA[0-9]*', ''),
+                 ('_renameMD[0-9]*', ''),
+                 ('_renameRD[0-9]*', ''),
+                 ('_renameDWINorm[0-9]*', ''),
+                 ('_renameMask[0-9]*', '')]
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
@@ -159,67 +184,95 @@ def main():
                 (Subjid, BIDSDataGrabber, [
                     ('subjid', 'subjid')]),
                 (BIDSDataGrabber, dholl_preproc_wf, [
-                    ('nifti', 'MRConvert.in_file'),
-                    ('bdata', 'MRConvert.grad_fsl'),
+                    ('nifti', 'dwiConvert.in_file'),
+                    ('bdata', 'dwiConvert.grad_fsl'),
                     ('bdata', 'dwi2response.grad_fsl'),
-                    ('bdata', 'dwi2mask.grad_fsl')]),
+                    ('mask', 'maskConvert.in_file')]),
 
                 # Workflows
-                (dholl_preproc_wf, template_proc_wf, [
-                    ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
-                    ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
-                    ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
-                    ('MRConvert.out_file', 'dwi2fod.in_file'),
-                    ('dwi2mask.out_file', 'copyMask.in_file')]),
-                (template_proc_wf, prepDhollTract_wf, [
-                    ('dwi2fod.wm_odf', 'MRRegister.in_file'),
-                    ('population_template.out_file', 'MRRegister.ref_file'),
-                    ('dwi2fod.wm_odf', 'FODTransform.in_file')]),
-                (dholl_preproc_wf, prepDhollTract_wf, [
-                    ('dwi2mask.out_file', 'MRRegister.mask1'),
-                    ('dwi2mask.out_file', 'MaskTransform.in_file')]),
-                (prepDhollTract_wf, genTemplate_wf, [
-                    ('tcksift.out_file', 'tempConvert1.in_file')]),
-                (prepDhollTract_wf, genSubj_wf, [
-                    ('tcksift.out_file', 'subjSelect.in_file')]),
+                (dholl_preproc_wf, dholl_tract_wf, [
+                    ('FODTransform.out_file', 'genTract.in_file'),
+                    ('FODTransform.out_file', 'genTract.in_fod'),
+                    ('maskConvert.out_file', 'genTract.seed_image')])
 
                 # File rename
-                (Subjid, renameTract, [
-                    ('subjid', 'subjid')]),
-                (genSubj_wf, renameTract, [
-                    ('subjConvert.out_file', 'in_file')]),
                 (Subjid, renameWarp1, [
                     ('subjid', 'subjid')]),
-                (prepDhollTract_wf, renameWarp1, [
+                (dholl_preproc_wf, renameWarp1, [
                     ('WarpSelect1.out', 'in_file')]),
                 (Subjid, renameWarp2, [
                     ('subjid', 'subjid')]),
-                (prepDhollTract_wf, renameWarp2, [
+                (dholl_preproc_wf, renameWarp2, [
                     ('WarpSelect2.out', 'in_file')]),
+                (Subjid, renameResponse, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameResponse, [
+                    ('FODTransform.out_file', 'in_file')]),
+                (Subjid, renameMask, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameMask, [
+                    ('MaskTransform.out_file', 'in_file')]),
+                (Subjid, renameDWINorm, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameDWINorm, [
+                    ('DWITransform.out_file', 'in_file')]),
+                (Subjid, renameDTI, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameDTI, [
+                    ('FitTensor.out_file', 'in_file')]),
+                (Subjid, renameFA, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameFA, [
+                    ('TensorMetrics.out_fa', 'in_file')]),
+                (Subjid, renameMD, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameMD, [
+                    ('TensorMetrics.out_adc', 'in_file')]),
+                (Subjid, renameAD, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameAD, [
+                    ('TensorMetrics.out_ad', 'in_file')]),
+                (Subjid, renameRD, [
+                    ('subjid', 'subjid')]),
+                (dholl_preproc_wf, renameRD, [
+                    ('TensorMetrics.out_rd', 'in_file')])
+                (Subjid, renameTract, [
+                    ('subjid', 'subjid')]),
+                (dholl_tract_wf, renameTract, [
+                    ('convTract.out_file', 'in_file')]),
 
                 # Output
-                (template_proc_wf, templateSink, [
-                    ('population_template.out_file', 'response.@template'),
-                    ('avgResponse_csf.out_file', 'response.@csf'),
-                    ('avgResponse_gm.out_file', 'response.@gm'),
-                    ('avgResponse_wm.out_file', 'response.@wm')]),
-                (genTemplate_wf, templateSink, [
-                    ('tempConvert3.out_file', 'tractography.@tract')]),
                 (Subjid, subjSink, [
                     ('subjid', 'container')]),
-                (renameTract, subjSink, [
-                    ('out_file', 'tractography.@tract')]),
                 (renameWarp1, subjSink, [
                     ('out_file', 'transform.@warp1')]),
                 (renameWarp2, subjSink, [
-                    ('out_file', 'transform.@warp2')])
+                    ('out_file', 'transform.@warp2')]),
+                (renameResponse, subjSink, [
+                    ('out_file', 'response.@wmfod')]),
+                (renameMask, subjSink, [
+                    ('out_file', 'dwi.@mask')]),
+                (renameDWINorm, subjSink, [
+                    ('out_file', 'dwi.@data')]),
+                (renameDTI, subjSink, [
+                    ('out_file', 'dti.@tensor')]),
+                (renameFA, subjSink, [
+                    ('out_file', 'dti.@fa')]),
+                (renameMD, subjSink, [
+                    ('out_file', 'dti.@md')]),
+                (renameAD, subjSink, [
+                    ('out_file', 'dti.@ad')]),
+                (renameRD, subjSink, [
+                    ('out_file', 'dti.@rd')]),
+                (renameTract, subjSink, [
+                    ('out_file', 'tractography.@tract')])
             ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
     pl.write_graph(graph2use='colored', format='svg')
 
-    if nthreads >= 2:
-        pl.run(plugin='MultiProc', plugin_args={'n_procs': nthreads})
+    if nthreads >= 8:
+        pl.run(plugin='MultiProc', plugin_args={'n_procs': 4})
     else:
         pl.run(plugin='Linear')
 

@@ -1,7 +1,9 @@
 from nipype import IdentityInterface
 from nipype.pipeline import engine as pe
 
-def getSubj(subjFile, work_dir):
+import numpy as np
+
+def getSubj(subjFile, work_dir, nthreads=1):
     # Retrieve individual subject ids & number of subjectss
     subjids = []
     noSubj = 0
@@ -15,6 +17,7 @@ def getSubj(subjFile, work_dir):
     Subjid = pe.Node(IdentityInterface(fields=['subjid']), name='SubjectID')
     Subjid.base_dir = work_dir
     Subjid.iterables = [('subjid', subjids)]
+    Subjid.interface.num_threads = nthreads
 
     return Subjid, noSubj
 
@@ -24,27 +27,26 @@ def getData(bids_layout, subjid):
     subjid = subjid.lstrip('sub-')
 
     # Diffusion
-    nifti = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
-                            type='preproc', return_type='file',
-                            extensions=['nii', 'nii.gz'])
-    bval = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
-                           type='preproc', return_type='file',
-                           extensions=['bval'])
-    bvec = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
-                           type='preproc', return_type='file',
-                           extensions=['bvec'])
+    nifti = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
+                            return_type='file', extensions=['nii', 'nii.gz'])
+    bval = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
+                           return_type='file', extensions=['bval'])
+    bvec = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
+                           return_type='file', extensions=['bvec'])
+    mask = bids_layout.get(subject=subjid, modality='dwi', type='brainmask',
+                           return_type='file', extensions=['nii', 'nii.gz'])
 
     # Freesurfer parcellation (from fmriprep)
     parc = bids_layout.get(subject=subjid, type='aseg',
                            return_type='file', extensions=['mgz'])
 
     if not parc:
-        return nifti[0], (bvec[0], bval[0]), None
+        return nifti[0], (bvec[0], bval[0]), mask[0], None
     else:
-        return nifti[0], (bvec[0], bval[0]), parc[0]
+        return nifti[0], (bvec[0], bval[0]), mask[0], parc[0]
 
 
-def getBIDS(layout, wdir=None):
+def getBIDS(layout, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
@@ -53,72 +55,45 @@ def getBIDS(layout, wdir=None):
     BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
                                            input_names=['bids_layout',
                                                         'subjid'],
-                                           output_names=['nifti', 'bdata',
+                                           output_names=['nifti',
+                                                         'bdata',
                                                          'parc']),
                                            name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = wdir
     BIDSDataGrabber.inputs.bids_layout = layout
+    BIDSDataGrabber.interface.num_threads = nthreads
 
     return BIDSDataGrabber
 
 
-def copyFile(in_file, out_dir):
-    import os, shutil, fnmatch
-
-    # Check if output directory exists
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-    for curFile in in_file:
-        if type(curFile) is list:
-            curFile = curFile[-1]
-
-        # Create new temp file with subjid label
-        file_list = curFile.split('/')
-        subjid = fnmatch.filter(file_list, '*subjid*')
-        subjid = subjid[0].strip('_')
-
-        out_file = subjid + '_' + file_list[-1]
-        out_file = os.path.join(out_dir, out_file)
-
-        shutil.copy2(curFile, out_file)
-
-    return out_dir
-
-
-def templateSink(out_dir, wdir=None):
-    from nipype.pipeline import engine as pe
-    from nipype.interfaces import io as nio
-
-    tempSink = pe.Node(nio.DataSink(), parameterization=False,
-                                       name='templateSink')
-    tempSink.base_dir = wdir
-    tempSink.inputs.base_directory = out_dir
-    tempSink.inputs.container = 'sub-tmp'
-
-    return tempSink
-
-
-def renameFile(file_name, node_name, wdir=None):
+def renameFile(file_name, node_name, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
-    renameFile = pe.MapNode(niu.Rename(format_string="%(subjid)s_%(file_name)s"),
-                          iterfield=['in_file'], name=node_name)
+    if nthreads >= 8:
+        nthreads = np.int(nthreads / 4)
+
+    renameFile = pe.Node(niu.Rename(format_string="%(subjid)s_%(file_name)s"),
+                                    name=node_name)
     renameFile.base_dir = wdir
     renameFile.inputs.keep_ext = True
     renameFile.inputs.file_name = file_name
+    renameFile.interface.num_threads = nthreads
 
     return renameFile
 
 
-def subjSink(out_dir, wdir=None):
+def subjSink(out_dir, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import io as nio
+
+    if nthreads >= 8:
+        nthreads = np.int(nthreads / 4)
 
     subjSink = pe.Node(nio.DataSink(), parameterization=False,
                                        name='subjSink')
     subjSink.base_dir = wdir
     subjSink.inputs.base_directory = out_dir
+    subjSink.interface.num_threads = nthreads
 
     return subjSink
