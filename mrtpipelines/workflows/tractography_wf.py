@@ -30,7 +30,7 @@ def genTemplateTract_wf(wdir=None, nfibers=1000000, nthreads=1,
 
     tractConvert = pe.Node(mrt.TCKConvert(), name='template_tckconvert')
     tractConvert.base_dir = wdir
-    tractConvert.inputs.out_file = 'template_variant_sift_streamlines-500K_tract.vtk'
+    tractConvert.inputs.out_file = 'template_variant_sift_streamlines-%d_tract.vtk' % np.int(nfibers / 2)
     tractConvert.inputs.nthreads = nthreads
     tractConvert.interface.num_threads = nthreads
 
