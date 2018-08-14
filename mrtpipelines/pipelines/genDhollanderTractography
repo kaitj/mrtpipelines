@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-""" genACTTractography
+#!/usr/bin/env python
+""" genDhollanderTractography
 
 Python command line interface for MRTrix3 multi-shell multi-tissue
 constrained spherical deconvolution tractography pipeline with Dhollander
