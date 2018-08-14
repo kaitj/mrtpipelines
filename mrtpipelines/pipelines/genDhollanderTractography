@@ -122,9 +122,9 @@ def main():
                                                         wdir=work_dir,
                                                         nthreads=nthreads)
 
-    dholl_tract_wf = tractography_wf.genTract_wf(nfibers=nfibers,
-                                                 wdir=work_dir,
-                                                 nthreads=nthreads)
+    dholl_tract_wf = tractography_wf.genDhollTract_wf(nfibers=nfibers,
+                                                      wdir=work_dir,
+                                                      nthreads=nthreads)
 
     # Rename nodes for sinking
     renameWarp1 = io.renameFile(file_name='space-Template_warp',
@@ -133,8 +133,8 @@ def main():
     renameWarp2 = io.renameFile(file_name='space-dwi_warp',
                                 node_name='renameWarp2', wdir=work_dir,
                                 nthreads=nthreads)
-    renameResponse = io.renameFile(file_name='space-Template_wmfod_norm',
-                                   node_name='renameResponse', wdir=work_dir,
+    renameFOD = io.renameFile(file_name='space-Template_wmfod_norm',
+                                   node_name='renameFOD', wdir=work_dir,
                                    nthreads=nthreads)
     renameMask = io.renameFile(file_name='space-Template_brainmask',
                                node_name='renameMask', wdir=work_dir,
@@ -165,7 +165,7 @@ def main():
     subjSink = io.subjSink(out_dir, wdir=work_dir, nthreads=nthreads)
     regex_sub = [('_subjid_sub-[0-9]*', ''),
                  ('_renameWarp[0-9]*', ''),
-                 ('_renameResponse[0-9]*', ''),
+                 ('_renameFOD[0-9]*', ''),
                  ('_renameAD[0-9]*', ''),
                  ('_renameDTI[0-9]*', ''),
                  ('_renameFA[0-9]*', ''),
@@ -193,7 +193,8 @@ def main():
                 (dholl_preproc_wf, dholl_tract_wf, [
                     ('FODTransform.out_file', 'genTract.in_file'),
                     ('FODTransform.out_file', 'genTract.in_fod'),
-                    ('maskConvert.out_file', 'genTract.seed_image')])
+                    ('maskConvert.out_file', 'genTract.seed_image'),
+                    ('FODTransform.out_file', 'siftTract.in_fod')])
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -204,9 +205,9 @@ def main():
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameWarp2, [
                     ('WarpSelect2.out', 'in_file')]),
-                (Subjid, renameResponse, [
+                (Subjid, renameFOD, [
                     ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameResponse, [
+                (dholl_preproc_wf, renameFOD, [
                     ('FODTransform.out_file', 'in_file')]),
                 (Subjid, renameMask, [
                     ('subjid', 'subjid')]),
@@ -248,7 +249,7 @@ def main():
                     ('out_file', 'transform.@warp1')]),
                 (renameWarp2, subjSink, [
                     ('out_file', 'transform.@warp2')]),
-                (renameResponse, subjSink, [
+                (renameFOD, subjSink, [
                     ('out_file', 'response.@wmfod')]),
                 (renameMask, subjSink, [
                     ('out_file', 'dwi.@mask')]),
