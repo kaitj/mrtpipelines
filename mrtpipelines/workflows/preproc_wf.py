@@ -29,13 +29,13 @@ def act_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     gen5tt.base_dir = wdir
     gen5tt.inputs.algorithm = 'freesurfer'
     gen5tt.inputs.args = '-nocrop'
-    gen5tt.inputs.out_file = 'space-T1w_5tt.mif'
+    gen5tt.inputs.out_file = 'space-T1w_5tt.nii.gz'
     gen5tt.inputs.nthreads = nthreads
     gen5tt.interface.num_threads = nthreads
 
     gen5ttMask = pe.Node(mrt.Generate5ttMask(), name='gen5ttMask')
     gen5ttMask.base_dir = wdir
-    gen5ttMask.inputs.out_file = 'space-Template_5ttMsk.mif'
+    gen5ttMask.inputs.out_file = 'space-Template_5ttMsk.nii.gz'
     gen5ttMask.inputs.nthreads = nthreads
     gen5ttMask.interface.num_threads = nthreads
 
@@ -92,47 +92,47 @@ def act_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     # Warp data
     MaskTransform = pe.Node(mrt.MRTransform(), name='MaskTransform')
     MaskTransform.base_dir = wdir
-    MaskTransform.inputs.out_file = 'space-Template_mask.mif'
+    MaskTransform.inputs.out_file = 'space-Template_mask.nii.gz'
     MaskTransform.inputs.nthreads = nthreads
     MaskTransform.interface.num_threads = nthreads
 
     FODTransform = pe.Node(mrt.MRTransform(), name='FODTransform')
     FODTransform.base_dir = wdir
-    FODTransform.inputs.out_file = 'space-Template_wmfod_norm.mif'
+    FODTransform.inputs.out_file = 'space-Template_wmfod_norm.nii.gz'
     FODTransform.inputs.nthreads = nthreads
     FODTransform.interface.num_threads = nthreads
 
     ttTransform = pe.Node(mrt.MRTransform(), name='5ttTransform')
     ttTransform.base_dir = wdir
-    ttTransform.inputs.out_file = 'space-Template_5tt.mif'
+    ttTransform.inputs.out_file = 'space-Template_5tt.nii.gz'
     ttTransform.inputs.nthreads = nthreads
     ttTransform.interface.num_threads = nthreads
 
     # Tensor processing
     DWINormalise = pe.Node(mrt.DWINormalise(), name='DWINormalise')
     DWINormalise.base_dir = wdir
-    DWINormalise.inputs.out_file = 'space-T1w_norm.mif'
+    DWINormalise.inputs.out_file = 'space-T1w_norm.nii.gz'
     DWINormalise.inputs.nthreads = nthreads
     DWINormalise.interface.num_threads = nthreads
 
     DWITransform = pe.Node(mrt.MRTransform(), name='DWITransform')
     DWITransform.base_dir = wdir
-    DWITransform.inputs.out_file = 'space-Template_norm.mif'
+    DWITransform.inputs.out_file = 'space-Template_norm.nii.gz'
     DWITransform.inputs.nthreads = nthreads
     DWITransform.interface.num_threads = nthreads
 
     FitTensor = pe.Node(mrt.FitTensor(), name='FitTensor')
     FitTensor.base_dir = wdir
-    FitTensor.inputs.out_file = 'space-Template_tensor.mif'
+    FitTensor.inputs.out_file = 'space-Template_tensor.nii.gz'
     FitTensor.inputs.nthreads = nthreads
     FitTensor.interface.num_threads = nthreads
 
     TensorMetrics = pe.Node(mrt.TensorMetrics(), name='TensorMetrics')
     TensorMetrics.base_dir = wdir
-    TensorMetrics.inputs.out_fa = 'space-Template_fa.mif'
-    TensorMetrics.inputs.out_adc = 'space-Template_md.mif'
-    TensorMetrics.inputs.out_ad = 'space-Template_ad.mif'
-    TensorMetrics.inputs.out_rd = 'space-Template_rd.mif'
+    TensorMetrics.inputs.out_fa = 'space-Template_fa.nii.gz'
+    TensorMetrics.inputs.out_adc = 'space-Template_md.nii.gz'
+    TensorMetrics.inputs.out_ad = 'space-Template_ad.nii.gz'
+    TensorMetrics.inputs.out_rd = 'space-Template_rd.nii.gz'
     TensorMetrics.inputs.nthreads = nthreads
     TensorMetrics.interface.num_threads = nthreads
 
@@ -249,41 +249,41 @@ def dholl_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     # Warp data
     MaskTransform = pe.Node(mrt.MRTransform(), name='MaskTransform')
     MaskTransform.base_dir = wdir
-    MaskTransform.inputs.out_file = 'space-Template_mask.mif'
+    MaskTransform.inputs.out_file = 'space-Template_mask.nii.gz'
     MaskTransform.inputs.nthreads = nthreads
     MaskTransform.interface.num_threads = nthreads
 
     FODTransform = pe.Node(mrt.MRTransform(), name='FODTransform')
     FODTransform.base_dir = wdir
-    FODTransform.inputs.out_file = 'space-Template_wmfod_norm.mif'
+    FODTransform.inputs.out_file = 'space-Template_wmfod_norm.nii.gz'
     FODTransform.inputs.nthreads = nthreads
     FODTransform.interface.num_threads = nthreads
 
     # Tensor processing
     DWINormalise = pe.Node(mrt.DWINormalise(), name='DWINormalise')
     DWINormalise.base_dir = wdir
-    DWINormalise.inputs.out_file = 'space-dwi_norm.mif'
+    DWINormalise.inputs.out_file = 'space-dwi_norm.nii.gz'
     DWINormalise.inputs.nthreads = nthreads
     DWINormalise.interface.num_threads = nthreads
 
     DWITransform = pe.Node(mrt.MRTransform(), name='DWITransform')
     DWITransform.base_dir = wdir
-    DWITransform.inputs.out_file = 'space-Template_norm.mif'
+    DWITransform.inputs.out_file = 'space-Template_norm.nii.gz'
     DWITransform.inputs.nthreads = nthreads
     DWITransform.interface.num_threads = nthreads
 
     FitTensor = pe.Node(mrt.FitTensor(), name='FitTensor')
     FitTensor.base_dir = wdir
-    FitTensor.inputs.out_file = 'space-Template_tensor.mif'
+    FitTensor.inputs.out_file = 'space-Template_tensor.nii.gz'
     FitTensor.inputs.nthreads = nthreads
     FitTensor.interface.num_threads = nthreads
 
     TensorMetrics = pe.Node(mrt.TensorMetrics(), name='TensorMetrics')
     TensorMetrics.base_dir = wdir
-    TensorMetrics.inputs.out_fa = 'space-Template_fa.mif'
-    TensorMetrics.inputs.out_adc = 'space-Template_md.mif'
-    TensorMetrics.inputs.out_ad = 'space-Template_ad.mif'
-    TensorMetrics.inputs.out_rd = 'space-Template_rd.mif'
+    TensorMetrics.inputs.out_fa = 'space-Template_fa.nii.gz'
+    TensorMetrics.inputs.out_adc = 'space-Template_md.nii.gz'
+    TensorMetrics.inputs.out_ad = 'space-Template_ad.nii.gz'
+    TensorMetrics.inputs.out_rd = 'space-Template_rd.nii.gz'
     TensorMetrics.inputs.nthreads = nthreads
     TensorMetrics.interface.num_threads = nthreads
 
