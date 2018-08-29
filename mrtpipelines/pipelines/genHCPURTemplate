@@ -313,6 +313,7 @@ def main():
                     ('ADTemplate.out_file', 'dti.@ad'),
                     ('RDTemplate.out_file', 'dti.@rd')]),
                 (genTemplateTract_wf, templateSink, [
+                    ('template_tcksift.out_file', 'tractography.@tck'),
                     ('template_tckconvert.out_file', 'tractography.@tract')]),
                 (anatTemplate_wf, templateSink, [
                     ('T1wTemplate.out_file', 'anat.@t1w'),
