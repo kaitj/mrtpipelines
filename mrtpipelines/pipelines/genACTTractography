@@ -162,6 +162,9 @@ def main():
     renameTract = io.renameFile(file_name=('space-Template_variant-ACTtcksift_streamlines-%d_tract.vtk' % nfibers),
                                 node_name='renameTract', wdir=work_dir,
                                 nthreads=nthreads)
+    renameTck = io.renameFile(file_name=('space-Template_variant-ACTtcksift_streamlines-%d_tract.vtk' % nfibers),
+                              node_name='renameTck', wdir=work_dir,
+                              nthreads=nthreads)
 
     # Subject datasink
     subjSink = io.subjSink(out_dir, wdir=work_dir, nthreads=nthreads)
@@ -176,7 +179,9 @@ def main():
                  ('_renameDWINorm[0-9]*', ''),
                  ('_renameMask[0-9]*', ''),
                  ('_rename5tt[0-9]*', ''),
-                 ('_rename5ttMask[0-9]*', '')]
+                 ('_rename5ttMask[0-9]*', ''),
+                 ('_renameTract[0-9]*', ''),
+                 ('_renameTck[0-9]*', '')]
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
@@ -255,6 +260,10 @@ def main():
                     ('subjid', 'subjid')]),
                 (act_tract_wf, renameTract, [
                     ('convTract.out_file', 'in_file')]),
+                (Subjid, renameTck, [
+                    ('subjid', 'subjid')]),
+                (act_tract_wf, renameTck, [
+                    ('siftTract.out_file', 'in_file')]),
 
                 # Output
                 (Subjid, subjSink, [
@@ -284,7 +293,9 @@ def main():
                 (renameRD, subjSink, [
                     ('out_file', 'dti.@rd')]),
                 (renameTract, subjSink, [
-                    ('out_file', 'tractography.@tract')])
+                    ('out_file', 'tractography.@tract')]),
+                (renameTck, subjSink, [
+                    ('out_file', 'tractography.@tck')])
             ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
