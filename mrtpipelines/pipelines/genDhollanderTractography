@@ -199,7 +199,7 @@ def main():
                     ('FODTransform.out_file', 'genTract.in_file'),
                     ('FODTransform.out_file', 'genTract.in_fod'),
                     ('maskConvert.out_file', 'genTract.seed_image'),
-                    ('FODTransform.out_file', 'siftTract.in_fod')])
+                    ('FODTransform.out_file', 'siftTract.in_fod')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -241,7 +241,7 @@ def main():
                 (Subjid, renameRD, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameRD, [
-                    ('TensorMetrics.out_rd', 'in_file')])
+                    ('TensorMetrics.out_rd', 'in_file')]),
                 (Subjid, renameTract, [
                     ('subjid', 'subjid')]),
                 (dholl_tract_wf, renameTract, [
