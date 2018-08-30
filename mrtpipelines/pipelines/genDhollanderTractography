@@ -117,10 +117,10 @@ def main():
     BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
-    dholl_preproc_wf = preproc_wf.dhollander_preproc_wf(lmax=lmax,
-                                                        template=template_fod,
-                                                        wdir=work_dir,
-                                                        nthreads=nthreads)
+    dholl_preproc_wf = preproc_wf.dholl_preproc_wf(lmax=lmax,
+                                                   template=template_fod,
+                                                   wdir=work_dir,
+                                                   nthreads=nthreads)
 
     dholl_tract_wf = tractography_wf.genDhollTract_wf(nfibers=nfibers,
                                                       wdir=work_dir,
