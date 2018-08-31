@@ -67,7 +67,7 @@ def genDhollTract_wf(nfibers=25000, wdir=None, nthreads=1,
     genTract.interface.num_threads = nthreads
 
     # Spherical-deconvolution informed filtering of tractography
-    siftTract = pe.Node(mrt.Tractography(), name='siftTract')
+    siftTract = pe.Node(mrt.SIFT(), name='siftTract')
     siftTract.base_dir = wdir
     siftTract.inputs.term_number = nfibers
     siftTract.inputs.out_file = 'variant-tcksift_streamlines-%d_tract.tck' % nfibers
