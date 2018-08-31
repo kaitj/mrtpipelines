@@ -197,7 +197,6 @@ def main():
                 # Workflows
                 (dholl_preproc_wf, dholl_tract_wf, [
                     ('FODTransform.out_file', 'genTract.in_file'),
-                    ('FODTransform.out_file', 'genTract.in_fod'),
                     ('maskConvert.out_file', 'genTract.seed_image'),
                     ('FODTransform.out_file', 'siftTract.in_fod')]),
 

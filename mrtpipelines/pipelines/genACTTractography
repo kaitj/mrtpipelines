@@ -202,7 +202,6 @@ def main():
                 # Workflows
                 (act_preproc_wf, act_tract_wf, [
                     ('FODTransform_out_file', 'genTract.in_file'),
-                    ('FODTransform.out_file', 'genTract.in_fod'),
                     ('gen5ttMask.out_file', 'genTract.seed_gmwmi'),
                     ('ttTransform.out_file', 'genTract.act_file'),
                     ('FODTransform.out_file', 'siftTract.in_fod')]),
