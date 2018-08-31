@@ -306,7 +306,7 @@ def dholl_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
         (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
         (maskConvert, MaskTransform, [('out_file', 'in_file')]),
         (WarpSelect1, MaskTransform, [('out', 'warp')]),
-        (mtnormalise, FODTransform, ['out_wm', 'in_file']),
+        (mtnormalise, FODTransform, [('out_wm', 'in_file')]),
         (WarpSelect1, FODTransform, [('out', 'warp')]),
         # Compute tensors
         (dwiConvert, DWINormalise, [('out_file', 'in_file')]),
