@@ -248,7 +248,7 @@ def main():
                     ('convTract.out_file', 'in_file')]),
                 (Subjid, renameTck, [
                     ('subjid', 'subjid')]),
-                (dholl_tract_wf, renameTract, [
+                (dholl_tract_wf, renameTck, [
                     ('siftTract.out_file', 'in_file')]),
 
                 # Output
