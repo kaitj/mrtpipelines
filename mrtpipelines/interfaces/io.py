@@ -41,7 +41,7 @@ def getData(bids_layout, subjid):
                            return_type='file', extensions=['mgz'])
 
     if not parc:
-        return nifti[0], (bvec[0], bval[0]), mask[0]
+        return nifti[0], (bvec[0], bval[0]), mask[0], None
     else:
         return nifti[0], (bvec[0], bval[0]), mask[0], parc[0]
 
@@ -57,6 +57,7 @@ def getBIDS(layout, wdir=None, nthreads=1):
                                                         'subjid'],
                                            output_names=['nifti',
                                                          'bdata',
+                                                         'mask',
                                                          'parc']),
                                            name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = wdir
