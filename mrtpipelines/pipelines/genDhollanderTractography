@@ -40,8 +40,10 @@ def get_parser():
                                               "generate for each subject. "
                                               "Defaults 100,000 streamlines")
     g_opt.add_argument("-l", "--lmax", dest="lmax", default=[0, 8, 8],
+                                       nargs='*',
                                        help="maximum harmonic degree(s) for "
-                                            "response function estimation")
+                                            "response function estimation "
+                                            "(eg. --lmax 0 8 8)")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                             "<bids_dir>/derivatives/scratch")
