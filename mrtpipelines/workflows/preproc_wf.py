@@ -79,28 +79,28 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
     MaskTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                   name='MaskTransform')
     MaskTransform.base_dir = wdir
-    MaskTransform.inputs.out_file = 'space-Template_mask.nii.gz'
+    MaskTransform.inputs.out_file = 'space-Template_mask.mif'
     MaskTransform.inputs.nthreads = nthreads
     MaskTransform.interface.num_threads = nthreads
 
     DWINormalise = pe.MapNode(mrt.DWINormalise(), iterfield=['in_file'],
                                                   name='DWINormalise')
     DWINormalise.base_dir = wdir
-    DWINormalise.inputs.out_file = 'space-T1w_norm.nii.gz'
+    DWINormalise.inputs.out_file = 'space-T1w_norm.mif'
     DWINormalise.inputs.nthreads = nthreads
     DWINormalise.interface.num_threads = nthreads
 
     DWITransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                  name='DWITransform')
     DWITransform.base_dir = wdir
-    DWITransform.inputs.out_file = 'space-Template_norm.nii.gz'
+    DWITransform.inputs.out_file = 'space-Template_norm.mif'
     DWITransform.inputs.nthreads = nthreads
     DWITransform.interface.num_threads = nthreads
 
     FitTensor = pe.MapNode(mrt.FitTensor(), iterfield=['in_file', 'in_mask'],
                                             name='FitTensor')
     FitTensor.base_dir = wdir
-    FitTensor.inputs.out_file = 'space-Template_tensor.nii.gz'
+    FitTensor.inputs.out_file = 'space-Template_tensor.mif'
     FitTensor.inputs.nthreads = nthreads
     FitTensor.interface.num_threads = nthreads
 
@@ -108,10 +108,10 @@ def prepTensor_wf(wdir=None, nthreads=1, name='prepTensor_wf'):
                                                                'in_mask'],
                                                     name='TensorMetrics')
     TensorMetrics.base_dir = wdir
-    TensorMetrics.inputs.out_fa = 'space-Template_fa.nii.gz'
-    TensorMetrics.inputs.out_adc = 'space-Template_md.nii.gz'
-    TensorMetrics.inputs.out_ad = 'space-Template_ad.nii.gz'
-    TensorMetrics.inputs.out_rd = 'space-Template_rd.nii.gz'
+    TensorMetrics.inputs.out_fa = 'space-Template_fa.mif'
+    TensorMetrics.inputs.out_adc = 'space-Template_md.mif'
+    TensorMetrics.inputs.out_ad = 'space-Template_ad.mif'
+    TensorMetrics.inputs.out_rd = 'space-Template_rd.mif'
     TensorMetrics.inputs.nthreads = nthreads
     TensorMetrics.interface.num_threads = nthreads
 
@@ -155,14 +155,14 @@ def prepAnat_wf(wdir=None, nthreads=1, name='prepAnat_wf'):
     t1wTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                  name='t1wTransform')
     t1wTransform.base_dir = wdir
-    t1wTransform.inputs.out_file = 'space-Template_T1w.nii.gz'
+    t1wTransform.inputs.out_file = 'space-Template_T1w.mif'
     t1wTransform.inputs.nthreads = nthreads
     t1wTransform.interface.num_threads = nthreads
 
     t2wTransform = pe.MapNode(mrt.MRTransform(), iterfield=['in_file', 'warp'],
                                                   name='t2wTransform')
     t2wTransform.base_dir = wdir
-    t2wTransform.inputs.out_file = 'space-Template_T2w.nii.gz'
+    t2wTransform.inputs.out_file = 'space-Template_T2w.mif'
     t2wTransform.inputs.nthreads = nthreads
     t2wTransform.interface.num_threads = nthreads
 

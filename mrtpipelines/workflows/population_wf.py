@@ -81,7 +81,7 @@ def fodTemplate_wf(wdir=None, nthreads=1, name='fodTemplate_wf'):
     # Population template
     FODTemplate = pe.Node(mrt.PopulationTemplate(), name='FODTemplate')
     FODTemplate.base_dir = wdir
-    FODTemplate.inputs.out_file = 'template_wmfod.nii.gz'
+    FODTemplate.inputs.out_file = 'template_wmfod.mif'
     FODTemplate.inputs.nthreads = nthreads
     FODTemplate.interface.num_threads = nthreads
 
@@ -163,25 +163,25 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
     # Population template
     FATemplate = pe.Node(mrt.PopulationTemplate(), name='FATemplate')
     FATemplate.base_dir = wdir
-    FATemplate.inputs.out_file = 'template_fa.nii.gz'
+    FATemplate.inputs.out_file = 'template_fa.mif'
     FATemplate.inputs.nthreads = nthreads
     FATemplate.interface.num_threads = nthreads
 
     MDTemplate = pe.Node(mrt.PopulationTemplate(), name='MDTemplate')
     MDTemplate.base_dir = wdir
-    MDTemplate.inputs.out_file = 'template_md.nii.gz'
+    MDTemplate.inputs.out_file = 'template_md.mif'
     MDTemplate.inputs.nthreads = nthreads
     MDTemplate.interface.num_threads = nthreads
 
     ADTemplate = pe.Node(mrt.PopulationTemplate(), name='ADTemplate')
     ADTemplate.base_dir = wdir
-    ADTemplate.inputs.out_file = 'template_ad.nii.gz'
+    ADTemplate.inputs.out_file = 'template_ad.mif'
     ADTemplate.inputs.nthreads = nthreads
     ADTemplate.interface.num_threads = nthreads
 
     RDTemplate = pe.Node(mrt.PopulationTemplate(), name='RDTemplate')
     RDTemplate.base_dir = wdir
-    RDTemplate.inputs.out_file = 'template_rd.nii.gz'
+    RDTemplate.inputs.out_file = 'template_rd.mif'
     RDTemplate.inputs.nthreads = nthreads
     RDTemplate.interface.num_threads = nthreads
 
@@ -195,7 +195,7 @@ def tensorTemplate_wf(wdir=None, nthreads=1, name='tensorTemplate_wf'):
 
     MaskTemplate = pe.Node(mrt.MRMath(), name='MaskTemplate')
     MaskTemplate.base_dir = wdir
-    MaskTemplate.inputs.out_file = 'template_brainmask.nii.gz'
+    MaskTemplate.inputs.out_file = 'template_brainmask.mif'
     MaskTemplate.inputs.operation ='min'
     MaskTemplate.inputs.nthreads = nthreads
     MaskTemplate.interface.num_threads = nthreads
@@ -251,13 +251,13 @@ def anatTemplate_wf(wdir=None, nthreads=1, name='anatTemplate_wf'):
     # Template nodes
     T1wTemplate = pe.Node(mrt.PopulationTemplate(), name='T1wTemplate')
     T1wTemplate.base_dir = wdir
-    T1wTemplate.inputs.out_file = 'template_t1w.nii.gz'
+    T1wTemplate.inputs.out_file = 'template_t1w.mif'
     T1wTemplate.inputs.nthreads = nthreads
     T1wTemplate.interface.num_threads = nthreads
 
     T2wTemplate = pe.Node(mrt.PopulationTemplate(), name='T2wTemplate')
     T2wTemplate.base_dir = wdir
-    T2wTemplate.inputs.out_file = 'template_t2w.nii.gz'
+    T2wTemplate.inputs.out_file = 'template_t2w.mif'
     T2wTemplate.inputs.nthreads = nthreads
     T2wTemplate.interface.num_threads = nthreads
 
