@@ -47,7 +47,7 @@ python setup.py install
 #### <a name="container"></a> Containerized package
 This pipeline is also available within a Singularity container. Currently, users will have to build the container via the Singularity recipe found in the singularity directory of this repository. Future updates will look to implement and support Docker.
 
-<strong>_It is highly advised to run this pipeline through the Singularity container. Some functionality may be lost if run locally due to custom additions to depedencies, which may yet to be implemented in original software._ <strong>
+<strong>_It is highly advised to run this pipeline through the Singularity container. Some functionality may be lost if run locally due to custom additions to depedencies, which may yet to be implemented in original software._ </strong>
 
 ### <a name="usage"></a> Usage
 
@@ -65,18 +65,15 @@ Usage: singularity exec <singularity_img> genHCPURTemplate <bids dir> <subject l
 
 #### <a name="reqargs"></a> Required arguments
 ```
-bids_dir                Directory with input dataset,
-                        formatted according to BIDS
+bids_dir                Directory with input dataset, formatted according to BIDS
 
-participant_label       A file containing label(s) of
-                        participant(s) to perform
-                        pipeline execution on
+participant_label       A file containing label(s) of participant(s) to perform pipeline
+                        execution on
 ```
 
 #### <a name="optargs"></a> Optional arguments
 ```
--s      Number of streamlines to generate for each
-        subject(s)
+-s      Number of streamlines to generate for each subject(s)
 
 -w      Work directory.
         Defaults to <bids_dir>/derivatives/MRTrix/work
@@ -84,8 +81,7 @@ participant_label       A file containing label(s) of
 -o      Output directory.
         Defaults to <bids_dir>/derivatives/MRTrix/out
 
--n      Number of threads to use for pipeline execution
-        where applicable
+-n      Number of threads to use for pipeline execution where applicable
 
 -h      Display help documentation
 ```
