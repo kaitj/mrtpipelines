@@ -41,7 +41,7 @@ python setup.py install
 #### <a name="container"></a> Containerized package
 This pipeline is also available within a Singularity container. Currently, users will have to build the container via the Singularity recipe found in the singularity directory of this repository. Future updates will look to implement and support Docker.
 
-<strong>_It is highly advised to run this pipeline through the Singularity container. Some functionality may be lost if run locally due to custom additions to depedencies, which may yet to be implemented in original software._ <strong>
+<strong>_It is highly advised to run this pipeline through the Singularity container. Some functionality may be lost if run locally due to custom additions to depedencies, which may yet to be implemented in original software._</strong>
 
 ### <a name="usage"></a> Usage
 
