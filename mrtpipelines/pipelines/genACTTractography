@@ -161,10 +161,10 @@ def main():
     renameRD = io.renameFile(file_name='space-Template_rd',
                              node_name='renameRD', wdir=work_dir,
                              nthreads=nthreads)
-    renameTract = io.renameFile(file_name=('space-Template_variant-ACTtcksift_streamlines-%d_tract.vtk' % nfibers),
+    renameTract = io.renameFile(file_name=('space-Template_variant-ACTtcksift_streamlines-%d_tract' % nfibers),
                                 node_name='renameTract', wdir=work_dir,
                                 nthreads=nthreads)
-    renameTck = io.renameFile(file_name=('space-Template_variant-ACTtcksift_streamlines-%d_tract.vtk' % nfibers),
+    renameTck = io.renameFile(file_name=('space-Template_variant-ACTtcksift_streamlines-%d_tract' % nfibers),
                               node_name='renameTck', wdir=work_dir,
                               nthreads=nthreads)
 
