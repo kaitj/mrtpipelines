@@ -1,6 +1,6 @@
 # mrtpipelines
 
-MRTrix3 processing for to create a template using data collected as part of the
+MRTrix3 processing to create a template using data collected as part of the
 <sup>1</sup>[Human Connectome Project (HCP)](https://www.humanconnectome.org).
 
 ## Contents
