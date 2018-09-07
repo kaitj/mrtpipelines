@@ -48,39 +48,31 @@ This pipeline is also available within a Singularity container. Currently, users
 Shown here is an example of the command line interface to run the pipeline:
 
 ```
-Usage: genDhollanderTractography <bids dir> \
-<template_fod> <subject list/subject id>
+Usage: genDhollanderTractography <bids dir> <template_fod> <subject list/subject id>
 ```
 
 Or if running through singularity:
 
 ```
-Usage: singularity exec <singularity_img> \
-genDhollanderTractography <bids dir>  <template_fod> \
-subject list/subject id>
+Usage: singularity exec <singularity_img> genDhollanderTractography <bids dir> <template_fod> /
+<subject list/subject id>
 ```
 
 #### <a name="reqargs"></a> Required arguments
 ```
-bids_dir                Directory with input dataset,
-                        formatted according to BIDS
+bids_dir                Directory with input dataset, formatted according to BIDS
 
-template_fod            A path to the template FOD file
-                        for registration of subjects
+template_fod            A path to the template FOD file for registration of subjects
 
-participant_label       A file containing label(s) of
-                        participant(s) to perform
-                        pipeline execution on
+participant_label       A file containing label(s) of participant(s) to perform pipeline execution on
 ```
 _Note there may be pipeline specific arguments if using a different tracking algorithm (eg. 5-tissue segmentation for ACT pipeline)_
 
 #### <a name="optargs"></a> Optional arguments
 ```
--s      Number of streamlines to generate for each
-        subject(s)
+-s      Number of streamlines to generate for each subject(s)
 
--l      Maxinum harmonic degree(s) for response
-        function estimation (eg. -l 0 8 8)
+-l      Maxinum harmonic degree(s) for response function estimation (eg. -l 0 8 8)
 
 -w      Work directory.
         Defaults to <bids_dir>/derivatives/MRTrix/work
@@ -88,8 +80,7 @@ _Note there may be pipeline specific arguments if using a different tracking alg
 -o      Output directory.
         Defaults to <bids_dir>/derivatives/MRTrix/out
 
--n      Number of threads to use for pipeline execution
-        where applicable
+-n      Number of threads to use for pipeline execution where applicable
 
 -h      Display help documentation
 ```
