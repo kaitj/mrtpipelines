@@ -36,7 +36,7 @@ def get_parser():
                                               "generate for each subject. "
                                               "Defaults 100,000 streamlines")
     g_opt.add_argument("-l", "--lmax", dest="lmax", default=[0, 8, 8],
-                                       nargs='+',
+                                       nargs='+', type=int,
                                        help="maximum harmonic degree(s) for "
                                             "response function estimation "
                                             "(eg. --lmax 0 8 8)")
