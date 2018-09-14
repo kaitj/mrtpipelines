@@ -39,9 +39,19 @@ python setup.py install
 ```
 
 #### <a name="container"></a> Containerized package
-This pipeline is also available within a Singularity container. Currently, users will have to build the container via the Singularity recipe found in the singularity directory of this repository. Future updates will look to implement and support Docker.
+This pipeline is also available within a container via both Docker and Singularity.
 
-<strong>_It is highly advised to run this pipeline through the Singularity container. Some functionality may be lost if run locally due to custom additions to depedencies, which may yet to be implemented in original software._</strong>
+To use the Docker container, run the following command:
+
+`docker pull kaitj/mrtpipelines`
+
+To use the Singularity container, users will have to build the container from the recipe found within the container directory. To do so, run the following command:
+
+`singularity build mrtpipelines_0.0.3.img Singularity.0.0.2`
+
+_Note: sudo may be required to pull or build container_
+
+<strong>_It is highly advised to run this pipeline through the available container. Some functionality may be lost if run locally due to custom additions to dependencies, which may yet to be implemented in original software._</strong>
 
 ### <a name="usage"></a> Usage
 
