@@ -56,6 +56,7 @@ To use the Singularity container, users will have to build the container from th
 `singularity build mrtpipelines_hcp_0.0.4.img Singularity.0.0.2`
 
 _Note: `sudo` may be required to pull or build container_
+
 <strong>_It is highly advised to run this pipeline through the available container. Some functionality may be lost if run locally due to custom additions to dependencies, which may yet to be implemented in original software._ </strong>
 
 ### <a name="usage"></a> Usage
