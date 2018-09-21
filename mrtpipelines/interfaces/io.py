@@ -2,7 +2,6 @@ from nipype import IdentityInterface
 from nipype.pipeline import engine as pe
 
 import numpy as np
-import os.path as op
 
 def getSubj(subjFile, work_dir, nthreads=1):
     # Retrieve individual subject ids & number of subjectss
@@ -24,6 +23,8 @@ def getSubj(subjFile, work_dir, nthreads=1):
 
 
 def _getTemplate(template_dir, template_label, work_dir):
+    import os.path as op
+
     tempdir = op.abspath(op.join(template_dir, 'response'))
 
     wm_fod = template_label + '_wmfod.mif'
