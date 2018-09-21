@@ -45,7 +45,8 @@ def getTemplate(template_dir, template_label, wdir=None):
 
     getTemplate = pe.Node(niu.Function(function=io._getTemplate,
                                         input_names=['template_dir',
-                                                     'template_label'],
+                                                     'template_label',
+                                                     'work_dir'],
                                         output_names=['wm_fod',
                                                       'wm_response',
                                                       'gm_response',
@@ -55,6 +56,7 @@ def getTemplate(template_dir, template_label, wdir=None):
     getTemplate.base_dir = wdir
     getTemplate.inputs.template_dir = template_dir
     getTemplate.inputs.template_label = template_label
+    getTemplate.inputs.work_dir = wdir
 
     return getTemplate
 
