@@ -199,7 +199,7 @@ def main():
                 # Workflows
                 (dholl_preproc_wf, dholl_tract_wf, [
                     ('FODTransform.out_file', 'genTract.in_file'),
-                    ('maskConvert.out_file', 'genTract.seed_image'),
+                    ('MaskTransform.out_file', 'genTract.seed_image'),
                     ('FODTransform.out_file', 'siftTract.in_fod')]),
 
                 # File rename
