@@ -2,21 +2,28 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import mrtrix3 as mrt
 
+from mrtpipelines.interfaces import io
+
 import numpy as np
 
-def act_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
-                    name='act_preproc_wf'):
+def act_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
+                   wdir=None, nthreads=1, name='act_preproc_wf'):
     """
     Set up ACT response preproc workflow
     Assumes files are registered to T1w space
     """
 
-    if template is None:
-        print("Missing template FOD")
+    if template_dir is None or template_label is None:
+        print("Missing template info")
         raise IOError
 
     if nthreads >= 8:
         nthreads = np.int(nthreads / 4)
+
+    # Grab template data
+    templateGrabber = io.getTemplate(template_dir=template_dir,
+                                     template_label=template_label,
+                                     wdir=wdir)
 
     # Convert nii to mif
     dwiConvert = pe.Node(mrt.MRConvert(), name='dwiConvert')
@@ -39,7 +46,7 @@ def act_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     gen5ttMask.inputs.nthreads = nthreads
     gen5ttMask.interface.num_threads = nthreads
 
-    # dwi2response
+    # dwi2response - included but no longer used
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
     dwi2response.base_dir = wdir
     dwi2response.inputs.algorithm = 'msmt_5tt'
@@ -72,7 +79,7 @@ def act_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     # Registration
     MRRegister = pe.Node(mrt.MRRegister(), name='MRRegister')
     MRRegister.base_dir = wdir
-    MRRegister.inputs.ref_file = template
+    # MRRegister.inputs.ref_file = template
     MRRegister.inputs.nl_warp = ['subj_2_template.mif',
                                  'template_2_subj.mif']
     MRRegister.inputs.nthreads = nthreads
@@ -145,13 +152,14 @@ def act_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
         (gen5tt, dwi2response, [('out_file', 'mtt_file')]),
         (maskConvert, dwi2response, [('out_file', 'in_file')]),
         (dwiConvert, dwi2fod, [('out_file', 'in_file')]),
-        (dwi2response, dwi2fod, [('wm_file', 'wm_txt'),
-                                 ('gm_file', 'gm_txt'),
-                                 ('csf_file', 'csf_txt')]),
+        (templateGrabber, dwi2fod, [('wm_response', 'wm_txt'),
+                                    ('gm_response', 'gm_txt'),
+                                    ('csf_response', 'csf_txt')]),
         (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
                                 ('gm_odf', 'in_gm'),
                                 ('csf_odf', 'in_csf')]),
         (maskConvert, mtnormalise, [('out_file', 'mask')]),
+        (templateGrabber, MRRegister, [('wm_fod', 'ref_file')]),
         (mtnormalise, MRRegister, [('out_wm', 'in_file')]),
         (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
         (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
@@ -176,19 +184,24 @@ def act_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     return workflow
 
 
-def dholl_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
-                     name='dholl_preproc_wf'):
+def dholl_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
+                     wdir=None, nthreads=1, name='dholl_preproc_wf'):
     """
     Set up Dhollander response preproc workflow
     No assumption of registration to T1w space is made
     """
 
-    if template is None:
-        print("Missing template FOD")
+    if template_dir is None or template_label is None:
+        print("Missing template info")
         raise IOError
 
     if nthreads >= 8:
         nthreads = np.int(nthreads / 4)
+
+    # Grab template data
+    templateGrabber = io.getTemplate(template_dir=template_dir,
+                                     template_label=template_label,
+                                     wdir=wdir)
 
     # Convert nii to mif
     dwiConvert = pe.Node(mrt.MRConvert(), name='dwiConvert')
@@ -196,7 +209,7 @@ def dholl_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     dwiConvert.inputs.nthreads = nthreads
     dwiConvert.interface.num_threads = nthreads
 
-    # dwi2response
+    # dwi2response - included but not used
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
     dwi2response.base_dir = wdir
     dwi2response.inputs.algorithm = 'dhollander'
@@ -229,7 +242,7 @@ def dholl_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
     # Registration
     MRRegister = pe.Node(mrt.MRRegister(), name='MRRegister')
     MRRegister.base_dir = wdir
-    MRRegister.inputs.ref_file = template
+    # MRRegister.inputs.ref_file = template
     MRRegister.inputs.nl_warp = ['subj_2_template.mif',
                                  'template_2_subj.mif']
     MRRegister.inputs.nthreads = nthreads
@@ -294,13 +307,14 @@ def dholl_preproc_wf(lmax=[0, 8, 8], template=None, wdir=None, nthreads=1,
         # Compute FOD
         (dwiConvert, dwi2response, [('out_file', 'in_file')]),
         (dwiConvert, dwi2fod, [('out_file', 'in_file')]),
-        (dwi2response, dwi2fod, [('wm_file', 'wm_txt'),
-                                 ('gm_file', 'gm_txt'),
-                                 ('csf_file', 'csf_txt')]),
+        (templateGrabber, dwi2fod, [('wm_response', 'wm_txt'),
+                                    ('gm_response', 'gm_txt'),
+                                    ('csf_response', 'csf_txt')]),
         (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
                                 ('gm_odf', 'in_gm'),
                                 ('csf_odf', 'in_csf')]),
         (maskConvert, mtnormalise, [('out_file', 'mask')]),
+        (templateGrabber, MRRegister, [('wm_fod', 'ref_file')]),
         (mtnormalise, MRRegister, [('out_wm', 'in_file')]),
         (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
         (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),

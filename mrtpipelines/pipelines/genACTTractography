@@ -23,8 +23,11 @@ def get_parser():
     g_req.add_argument("bids_dir", help="Directory with input dataset, "
                                         "formatted according to the BIDS "
                                         "standard.")
-    g_req.add_argument("template_fod", help="A path to the template FOD "
-                                            "file for registration of subjects")
+    g_req.add_argument("template_dir", help="Directory with template dataset,"
+                                            "formatted according to the BIDS "
+                                            "standard")
+    g_req.add_argument("template_label", help="Label for template "
+                                              "(e.g. sub-MNI2009b_*)")
     g_req.add_argument('participant_label', help="A file containing label(s) "
                                                  "of participant(s) to perform "
                                                  "pipeline execution on")
@@ -76,7 +79,8 @@ def main():
     deriv_dir = op.join(op.abspath(bids_dir), "derivatives")
     subjids = args.participant_label
     lmax = args.lmax
-    template_fod = op.abspath(args.template_fod)
+    temp_dir = op.abspath(args.template_dir)
+    temp_label = args.template_label
     nfibers = int(args.select)
     nthreads = int(args.nthreads)
 
@@ -116,7 +120,8 @@ def main():
 
     # MRTrix preprocessing workflow
     act_preproc_wf = preproc_wf.act_preproc_wf(lmax=lmax,
-                                               template=template_fod,
+                                               template_dir=temp_dir,
+                                               template_label=temp_label
                                                wdir=work_dir,
                                                nthreads=nthreads)
 

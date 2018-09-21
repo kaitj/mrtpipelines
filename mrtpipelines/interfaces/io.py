@@ -2,6 +2,7 @@ from nipype import IdentityInterface
 from nipype.pipeline import engine as pe
 
 import numpy as np
+import os.path as op
 
 def getSubj(subjFile, work_dir, nthreads=1):
     # Retrieve individual subject ids & number of subjectss
@@ -22,7 +23,43 @@ def getSubj(subjFile, work_dir, nthreads=1):
     return Subjid, noSubj
 
 
-def getData(bids_layout, subjid):
+def _getTemplate(template_dir, template_label, work_dir):
+    tempdir = op.abspath(op.join(template_dir, 'response'))
+
+    wm_fod = template_label + '_wmfod.mif'
+    wm_fod = op.join(tempdir, wm_fod)
+    wm_response = template_label + '_wmresponse.txt'
+    wm_response = op.join(tempdir, wm_response)
+    gm_response = template_label + '_gmresponse.txt'
+    gm_response = op.join(tempdir, gm_response)
+    csf_response = template_label + '_csfresponse.txt'
+    csf_response = op.join(tempdir, csf_response)
+
+    return wm_fod, wm_response, gm_response, csf_response
+
+def getTemplate(template_dir, template_label, wdir=None):
+    from nipype.pipeline import engine as pe
+    from nipype.interfaces import utility as niu
+
+    from mrtpipelines.interfaces import io
+
+    getTemplate = pe.Node(niu.Function(function=io._getTemplate,
+                                        input_names=['template_dir',
+                                                     'template_label'],
+                                        output_names=['wm_fod',
+                                                      'wm_response',
+                                                      'gm_response',
+                                                      'csf_response']),
+                                        name='getTemplate')
+
+    getTemplate.base_dir = wdir
+    getTemplate.inputs.template_dir = template_dir
+    getTemplate.inputs.template_label = template_label
+
+    return getTemplate
+
+
+def _getData(bids_layout, subjid):
     # Strip leading 'sub-'
     subjid = subjid.lstrip('sub-')
 
@@ -52,7 +89,7 @@ def getBIDS(layout, wdir=None, nthreads=1):
 
     from mrtpipelines.interfaces import io
 
-    BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
+    BIDSDataGrabber = pe.Node(niu.Function(function=io._getData,
                                            input_names=['bids_layout',
                                                         'subjid'],
                                            output_names=['nifti',
