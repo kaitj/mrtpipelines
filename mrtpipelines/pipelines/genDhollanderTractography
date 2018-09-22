@@ -38,10 +38,17 @@ def get_parser():
 
     # Optional arguments
     g_opt = parser.add_argument_group("Optional arguments")
-    g_opt.add_argument("-s", "--select", dest="select", default=25000,
+    g_opt.add_argument("-N", "--select", dest="select", default=25000,
                                          help="Number of streamlines to "
                                               "generate for each subject. "
-                                              "Defaults 100,000 streamlines")
+                                              "Defaults 50,000 streamlines")
+    g_opt.add_argument("-s", "--shells", dest="shells", default=[0, 1000, 2000],
+                                         nargs='+', type=float,
+                                         help="b-values to use during "
+                                              "processing of fiber "
+                                              "orientation distribution "
+                                              "computation "
+                                              "(eg. --shells 0 1000 2000)")
     g_opt.add_argument("-l", "--lmax", dest="lmax", default=[0, 8, 8],
                                        nargs='+', type=int,
                                        help="maximum harmonic degree(s) for "
@@ -82,6 +89,7 @@ def main():
     bids_dir = args.bids_dir
     deriv_dir = op.join(op.abspath(bids_dir), "derivatives")
     subjids = args.participant_label
+    shells = args.shells
     lmax = args.lmax
     temp_dir = op.abspath(args.template_dir)
     temp_label = args.template_label
@@ -123,7 +131,7 @@ def main():
     BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
-    dholl_preproc_wf = preproc_wf.dholl_preproc_wf(lmax=lmax,
+    dholl_preproc_wf = preproc_wf.dholl_preproc_ls_wf(shells=shells, lmax=lmax,
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
                                                    wdir=work_dir,

@@ -184,7 +184,8 @@ def act_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
     return workflow
 
 
-def dholl_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
+def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8],
+                     template_dir=None, template_label=None,
                      wdir=None, nthreads=1, name='dholl_preproc_wf'):
     """
     Set up Dhollander response preproc workflow
@@ -230,6 +231,7 @@ def dholl_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
     dwi2fod = pe.Node(mrt.EstimateFOD(), name='dwi2fod')
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
+    dwi2fod.inputs.shells = shells
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
 

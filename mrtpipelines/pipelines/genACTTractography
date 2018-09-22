@@ -121,7 +121,7 @@ def main():
     # MRTrix preprocessing workflow
     act_preproc_wf = preproc_wf.act_preproc_wf(lmax=lmax,
                                                template_dir=temp_dir,
-                                               template_label=temp_label
+                                               template_label=temp_label,
                                                wdir=work_dir,
                                                nthreads=nthreads)
 

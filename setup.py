@@ -7,8 +7,7 @@ setup(
     description='Pipelines related to generating MRTrix tractography',
     packages=['mrtpipelines/interfaces',
               'mrtpipelines/workflows'],
-    scripts=['mrtpipelines/pipelines/genACTTractography',
-             'mrtpipelines/pipelines/genDhollanderTractography'],
+    scripts=['mrtpipelines/pipelines/genDhollanderTractography'],
 
     # Metadata
     author='Jason Kai',
