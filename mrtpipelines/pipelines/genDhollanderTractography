@@ -131,7 +131,7 @@ def main():
     BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
 
     # MRTrix preprocessing workflow
-    dholl_preproc_wf = preproc_wf.dholl_preproc_ls_wf(shells=shells, lmax=lmax,
+    dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
                                                    wdir=work_dir,
