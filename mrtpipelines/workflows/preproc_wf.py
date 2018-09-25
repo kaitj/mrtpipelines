@@ -6,8 +6,9 @@ from mrtpipelines.interfaces import io
 
 import numpy as np
 
-def act_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
-                   wdir=None, nthreads=1, name='act_preproc_wf'):
+def act_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], template_dir=None,
+                   template_label=None, wdir=None, nthreads=1,
+                   name='act_preproc_wf'):
     """
     Set up ACT response preproc workflow
     Assumes files are registered to T1w space
@@ -53,6 +54,7 @@ def act_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
     dwi2response.inputs.wm_file = 'space-T1w_wm.txt'
     dwi2response.inputs.gm_file = 'space-T1w_gm.txt'
     dwi2response.inputs.csf_file = 'space-dwi_csf.txt'
+    dwi2response.inputs.shell = shells
     dwi2response.inputs.max_sh = lmax
     dwi2response.inputs.nthreads = nthreads
     dwi2response.interface.num_threads = nthreads
@@ -67,6 +69,8 @@ def act_preproc_wf(lmax=[0, 8, 8], template_dir=None, template_label=None,
     dwi2fod = pe.Node(mrt.EstimateFOD(), name='dwi2fod')
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
+    dwi2fod.inputs.shell = shells
+    dwi2fod.inputs.max_sh = lmax
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
 
@@ -218,6 +222,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8],
     dwi2response.inputs.gm_file = 'space-dwi_gm.txt'
     dwi2response.inputs.csf_file = 'space-dwi_csf.txt'
     dwi2response.inputs.max_sh = lmax
+    dwi2response.inputs.shell = shells
     dwi2response.inputs.nthreads = nthreads
     dwi2response.interface.num_threads = nthreads
 
@@ -231,6 +236,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8],
     dwi2fod = pe.Node(mrt.EstimateFOD(), name='dwi2fod')
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
+    dwi2fod.inputs.max_sh = lmax
     dwi2fod.inputs.shell = shells
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
