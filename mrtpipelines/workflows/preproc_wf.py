@@ -70,7 +70,6 @@ def act_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], template_dir=None,
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
     dwi2fod.inputs.shell = shells
-    dwi2fod.inputs.max_sh = lmax
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
 
@@ -236,7 +235,6 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8],
     dwi2fod = pe.Node(mrt.EstimateFOD(), name='dwi2fod')
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
-    dwi2fod.inputs.max_sh = lmax
     dwi2fod.inputs.shell = shells
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
