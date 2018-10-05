@@ -33,10 +33,21 @@ def get_parser():
 
     # Optional arguments
     g_opt = parser.add_argument_group("Optional arguments")
-    g_opt.add_argument("-s", "--select", dest="select", default=25000,
+    g_opt.add_argument("-N", "--select", dest="select", default=50000,
                                          help="Number of streamlines to "
                                               "generate for each subject. "
-                                              "Defaults 100,000 streamlines")
+                                              "Defaults 50,000 streamlines")
+    g_opt.add_argument("-s", "--shells", dest="shells", default=[0, 1000, 2000],
+                                         nargs="+", type=float,
+                                         help="b-values to use during "
+                                              "processing of fiber oreintation "
+                                              "distribution computation "
+                                              "(eg. --shells 0 1000 2000)")
+    g_opt.add_argument("-l", "--lmax", dest="lmax", default=[0, 8, 8],
+                                       nargs='+', type=int,
+                                       help="maximum harmonic degree(s) for "
+                                            "response function estimation "
+                                            "(eg. --lmax 0 8 8)")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                            "<bids_dir>/derivatives/MRtrix/work")
@@ -73,6 +84,8 @@ def main():
     bids_dir = args.bids_dir
     deriv_dir = op.join(op.abspath(bids_dir), "derivatives")
     subjids = args.participant_label
+    shells = args.shells
+    lmax = args.lmax
     nfibers = int(args.select)
     nthreads = int(args.nthreads)
 
@@ -112,9 +125,8 @@ def main():
                                  nthreads=nthreads)
 
     # MRTrix preprocessing workflow
-    hcp_preproc_wf = preproc_wf.hcp_preproc_wf(wdir=work_dir, nthreads=nthreads)
-
-    prepAnat_wf = preproc_wf.prepAnat_wf(wdir=work_dir, nthreads=nthreads)
+    temp_preproc_wf = preproc_wf.preproc_wf(shells=shells, lmax=lmax,
+                                            wdir=work_dir, nthreads=nthreads)
 
     # MRTrix population template workflow
     fodTemplate_wf = population_wf.fodTemplate_wf(wdir=work_dir,
@@ -122,9 +134,6 @@ def main():
 
     tensorTemplate_wf = population_wf.tensorTemplate_wf(wdir=work_dir,
                                                         nthreads=nthreads)
-
-    anatTemplate_wf = population_wf.anatTemplate_wf(wdir=work_dir,
-                                                   nthreads=nthreads)
 
     # MRTrix tractography/tensor workflow
     prepTensor_wf = preproc_wf.prepTensor_wf(wdir=work_dir, nthreads=nthreads)
@@ -174,14 +183,6 @@ def main():
                              node_name='renameRD', wdir=work_dir,
                              nthreads=nthreads)
 
-    renameT1w = io.renameFile(file_name='space-Template_T1w',
-                              node_name='renameT1w', wdir=work_dir,
-                              nthreads=nthreads)
-
-    renameT2w = io.renameFile(file_name='space-Template_T2w',
-                              node_name='renameT2w', wdir=work_dir,
-                              nthreads=nthreads)
-
     # Subject datasink
     subjSink = io.subjSink(out_dir, wdir=work_dir, nthreads=nthreads)
     regex_sub = [('_subjid_sub-[0-9]*', ''),
@@ -192,9 +193,7 @@ def main():
                 ('_renameMD[0-9]*', ''),
                 ('_renameRD[0-9]*', ''),
                 ('_renameDWINorm[0-9]*', ''),
-                ('_renameMask[0-9]*', ''),
-                ('_renameT1w[0-9]*', ''),
-                ('_renameT2w[0-9]*', '')]
+                ('_renameMask[0-9]*', '')]
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
@@ -205,17 +204,13 @@ def main():
                 # Input
                 (Subjid, BIDSDataGrabber, [
                     ('subjid', 'subjid')]),
-                (BIDSDataGrabber, hcp_preproc_wf, [
+                (BIDSDataGrabber, temp_preproc_wf, [
                     ('dwi', 'dwiConvert.in_file'),
                     ('bdata', 'dwiConvert.grad_fsl'),
                     ('bdata', 'dwi2response.grad_fsl'),
                     ('mask', 'maskConvert.in_file')]),
-                (BIDSDataGrabber, prepAnat_wf, [
-                    ('t1w', 't1wConvert.in_file'),
-                    ('t2w', 't2wConvert.in_file')]),
-
                 # Diffusion / tractography Workflows
-                (hcp_preproc_wf, fodTemplate_wf, [
+                (temp_preproc_wf, fodTemplate_wf, [
                     ('dwi2response.gm_file', 'avgResponse_gm.in_files'),
                     ('dwi2response.wm_file', 'avgResponse_wm.in_files'),
                     ('dwi2response.csf_file', 'avgResponse_csf.in_files'),
@@ -225,7 +220,7 @@ def main():
                 (fodTemplate_wf, prepTensor_wf, [
                     ('dwi2fod.wm_odf', 'MRRegister.in_file'),
                     ('FODTemplate.out_file', 'MRRegister.ref_file')]),
-                (hcp_preproc_wf, prepTensor_wf, [
+                (temp_preproc_wf, prepTensor_wf, [
                     ('maskConvert.out_file', 'MRRegister.mask1'),
                     ('maskConvert.out_file', 'MaskTransform.in_file'),
                     ('dwiConvert.out_file', 'DWINormalise.in_file'),
@@ -241,17 +236,6 @@ def main():
                     ('FODTemplate.out_file', 'template_tcksift.in_fod')]),
                 (tensorTemplate_wf, genTemplateTract_wf, [
                     ('MaskTemplate.out_file', 'template_tckgen.seed_image')]),
-
-                # Anatomical workflows
-                (prepTensor_wf, prepAnat_wf, [
-                    ('WarpSelect1.out', 't1wTransform.warp'),
-                    ('WarpSelect1.out', 't2wTransform.warp')]),
-                (prepAnat_wf, anatTemplate_wf, [
-                    ('t1wTransform.out_file', 'copyT1w.in_file'),
-                    ('t2wTransform.out_file', 'copyT2w.in_file')]),
-                (tensorTemplate_wf, anatTemplate_wf, [
-                    ('copyTempMask.out_dir', 'T1wTemplate.mask_dir'),
-                    ('copyTempMask.out_dir', 'T2wTemplate.mask_dir')]),
 
                 # File rename
                 (Subjid, renameWarp1, [
@@ -290,14 +274,6 @@ def main():
                     ('subjid', 'subjid')]),
                 (prepTensor_wf, renameRD, [
                     ('TensorMetrics.out_rd', 'in_file')]),
-                (Subjid, renameT1w, [
-                    ('subjid', 'subjid')]),
-                (prepAnat_wf, renameT1w, [
-                    ('t1wTransform.out_file', 'in_file')]),
-                (Subjid, renameT2w, [
-                    ('subjid', 'subjid')]),
-                (prepAnat_wf, renameT2w, [
-                    ('t2wTransform.out_file', 'in_file')]),
 
                 # Output
                 # Template sink
@@ -315,9 +291,6 @@ def main():
                 (genTemplateTract_wf, templateSink, [
                     ('template_tcksift.out_file', 'tractography.@tck'),
                     ('template_tckconvert.out_file', 'tractography.@tract')]),
-                (anatTemplate_wf, templateSink, [
-                    ('T1wTemplate.out_file', 'anat.@t1w'),
-                    ('T2wTemplate.out_file', 'anat.@t2w')]),
 
                 # Subject Sink
                 (Subjid, subjSink, [
@@ -340,10 +313,6 @@ def main():
                     ('out_file', 'dti.@ad')]),
                 (renameRD, subjSink, [
                     ('out_file', 'dti.@rd')]),
-                (renameT1w, subjSink, [
-                    ('out_file', 'anat.@t1w')]),
-                (renameT2w, subjSink, [
-                    ('out_file', 'anat.@t2w')])
             ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)

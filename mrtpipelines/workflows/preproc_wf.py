@@ -4,7 +4,8 @@ from nipype.interfaces import mrtrix3 as mrt
 
 import numpy as np
 
-def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
+def preproc_wf(shells=[0, 1000, 2000, 3000], lmax=[0, 8, 8, 8],
+               wdir=None, nthreads=1, name='preproc_wf'):
     """
     Set up dhollander response preproc workflow
     """
@@ -25,7 +26,7 @@ def hcp_preproc_wf(wdir=None, nthreads=1, name='hcp_preproc_wf'):
     dwi2response.inputs.wm_file = 'space-dwi_wm.txt'
     dwi2response.inputs.gm_file = 'space-dwi_gm.txt'
     dwi2response.inputs.csf_file = 'space-dwi_csf.txt'
-    dwi2response.inputs.max_sh = [0, 8, 8, 8]
+    dwi2response.inputs.max_sh = lmax
     dwi2response.inputs.nthreads = nthreads
     dwi2response.interface.num_threads = nthreads
 

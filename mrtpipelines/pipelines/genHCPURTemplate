@@ -33,10 +33,21 @@ def get_parser():
 
     # Optional arguments
     g_opt = parser.add_argument_group("Optional arguments")
-    g_opt.add_argument("-s", "--select", dest="select", default=25000,
+    g_opt.add_argument("-N", "--select", dest="select", default=25000,
                                          help="Number of streamlines to "
                                               "generate for each subject. "
                                               "Defaults 100,000 streamlines")
+    g_opt.add_argument("-s", "--shells", dest="shells", default=[0, 1000, 2000],
+                                         nargs="+", type=float,
+                                         help="b-values to use during "
+                                              "processing of fiber oreintation "
+                                              "distribution computation "
+                                              "(eg. --shells 0 1000 2000)")
+    g_opt.add_argument("-l", "--lmax", dest="lmax", default=[0, 8, 8],
+                                       nargs='+', type=int,
+                                       help="maximum harmonic degree(s) for "
+                                            "response function estimation "
+                                            "(eg. --lmax 0 8 8)")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                            "<bids_dir>/derivatives/MRtrix/work")
@@ -73,6 +84,8 @@ def main():
     bids_dir = args.bids_dir
     deriv_dir = op.join(op.abspath(bids_dir), "derivatives")
     subjids = args.participant_label
+    shells = args.shells
+    lmax = args.lmax
     nfibers = int(args.select)
     nthreads = int(args.nthreads)
 
@@ -112,7 +125,8 @@ def main():
                                  nthreads=nthreads)
 
     # MRTrix preprocessing workflow
-    hcp_preproc_wf = preproc_wf.hcp_preproc_wf(wdir=work_dir, nthreads=nthreads)
+    hcp_preproc_wf = preproc_wf.preproc_wf(shells=shells, lmax=lmax,
+                                           wdir=work_dir, nthreads=nthreads)
 
     prepAnat_wf = preproc_wf.prepAnat_wf(wdir=work_dir, nthreads=nthreads)
 

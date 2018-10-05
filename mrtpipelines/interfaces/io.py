@@ -28,27 +28,29 @@ def getData(bids_layout, subjid):
     subjid = subjid.lstrip('sub-')
 
     # Diffusion
-    dwi = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
-                            type='preproc', return_type='file',
-                            extensions=['nii', 'nii.gz'])
-    bval = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
-                           type='preproc', return_type='file',
-                           extensions=['bval'])
-    bvec = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
-                           type='preproc', return_type='file',
-                           extensions=['bvec'])
-    mask = bids_layout.get(subject=subjid, modality='dwi', space='T1w',
-                           type='brainmask', return_type='file',
-                           extensions=['nii', 'nii.gz'])
+    dwi = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
+                          return_type='file', extensions=['nii', 'nii.gz'])
+    bval = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
+                           return_type='file', extensions=['bval'])
+    bvec = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
+                           return_type='file', extensions=['bvec'])
+    mask = bids_layout.get(subject=subjid, modality='dwi', type='brainmask',
+                           return_type='file', extensions=['nii', 'nii.gz'])
 
     # Anatomical
     t1w = bids_layout.get(subject=subjid, modality='anat', type='T1w',
                           return_type='file', extensions=['nii', 'nii.gz'])
-    t2w = bids_layout.get(subject=subjid, modality='anat', space='T1w',
-                          type='T2w', return_type='file',
-                          extensions=['nii', 'nii.gz'])
+    t2w = bids_layout.get(subject=subjid, modality='anat', type='T2w', 
+                          return_type='file', extensions=['nii', 'nii.gz'])
 
-    return dwi[0], (bvec[0], bval[0]), mask[0], t1w[0], t2w[0]
+    if not t1w and not t2w:
+        return dwi[0], (bvec[0], bval[0]), mask[0], None, None
+    elif not t1w and t2w:
+        return dwi[0], (bvec[0], bval[0]), mask[0], None, t2w[0]
+    elif t1w and not t2w:
+        return dwi[0], (bvec[0], bval[0]), mask[0], t1w[0], None
+    else:
+        return dwi[0], (bvec[0], bval[0]), mask[0], t1w[0], t2w[0]
 
 
 def getBIDS(layout, wdir=None, nthreads=1):
