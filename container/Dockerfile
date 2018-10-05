@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN bash /src/install_scripts/00_install_basics.sh > log_00_basics
 RUN bash /src/install_scripts/01_install_freesurfer.sh > log_01_freesurfer
 RUN bash /src/install_scripts/02_install_mrtrix.sh > log_02_mrtrix
-RUN bash /src/install_scripts/03b_install_mrtpipeline_hcp.sh > log_03_mrtpipeline_hcp
+RUN bash /src/install_scripts/03b_install_mrtpipeline_template.sh > log_03_mrtpipeline_template
 RUN bash /src/install_scripts/04_install_nipype_custom.sh > log_04_nipype_custom
 
 # Remove install scripts

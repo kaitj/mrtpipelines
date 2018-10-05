@@ -7,7 +7,8 @@ setup(
     description='Pipeline to generate HCP UR100 Template using MRTrix3',
     packages=['mrtpipelines/interfaces',
               'mrtpipelines/workflows'],
-    scripts=['mrtpipelines/pipelines/genHCPURTemplate'],
+    scripts=['mrtpipelines/pipelines/genHCPURTemplate',
+             'mrtpipelines/pipelines/genTemplate'],
 
     # Metadata
     author='Jason Kai',

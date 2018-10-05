@@ -6,7 +6,7 @@ mkdir -p $DIR/mrtpipelines
 # Git
 git clone https://github.com/kaitj/mrtpipelines $DIR/mrtpipelines
 cd $DIR/mrtpipelines
-git checkout HCP
+git checkout template
 
 # Install requirements
 pip3 install -r requirements.txt
