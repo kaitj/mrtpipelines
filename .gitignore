@@ -7,3 +7,5 @@ notebooks/
 .ipynb_checkpoints
 
 *.swp
+
+mrtpipelines_venv/
