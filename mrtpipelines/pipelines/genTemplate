@@ -197,7 +197,7 @@ def main():
     subjSink.inputs.regexp_substitutions = regex_sub
 
     # Pipeline creation (join nodes and workflows)
-    pl = pe.Workflow(name='genHCPTemplate')
+    pl = pe.Workflow(name='genTemplate')
     pl.base_dir = work_dir
 
     pl.connect([
