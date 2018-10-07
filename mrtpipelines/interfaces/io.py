@@ -25,18 +25,21 @@ def getSubj(subjFile, work_dir, nthreads=1):
 def _getTemplate(template_dir, template_label, work_dir):
     import os.path as op
 
-    tempdir = op.abspath(op.join(template_dir, 'response'))
+    resdir = op.abspath(op.join(template_dir, 'response'))
+    dwidir = op.abspath(op.join(template_dir, 'dwi'))
 
     wm_fod = template_label + '_wmfod.mif'
-    wm_fod = op.join(tempdir, wm_fod)
+    wm_fod = op.join(resdir, wm_fod)
     wm_response = template_label + '_wmresponse.txt'
-    wm_response = op.join(tempdir, wm_response)
+    wm_response = op.join(resdir, wm_response)
     gm_response = template_label + '_gmresponse.txt'
-    gm_response = op.join(tempdir, gm_response)
+    gm_response = op.join(resdir, gm_response)
     csf_response = template_label + '_csfresponse.txt'
-    csf_response = op.join(tempdir, csf_response)
+    csf_response = op.join(resdir, csf_response)
+    mask = template_label + '_brainmask.mif'
+    mask = op.join(dwidir, mask)
 
-    return wm_fod, wm_response, gm_response, csf_response
+    return wm_fod, wm_response, gm_response, csf_response, mask
 
 def getTemplate(template_dir, template_label, wdir=None):
     from nipype.pipeline import engine as pe
@@ -51,7 +54,8 @@ def getTemplate(template_dir, template_label, wdir=None):
                                         output_names=['wm_fod',
                                                       'wm_response',
                                                       'gm_response',
-                                                      'csf_response']),
+                                                      'csf_response',
+                                                      'mask']),
                                         name='getTemplate')
 
     getTemplate.base_dir = wdir
