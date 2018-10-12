@@ -82,7 +82,7 @@ def main():
 
     # Required inputs
     bids_dir = args.bids_dir
-    deriv_dir = op.join(op.abspath(bids_dir), "derivatives")
+    deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
     subjids = args.participant_label
     shells = args.shells
     lmax = args.lmax
@@ -91,11 +91,11 @@ def main():
 
     # Set work & crash directories
     if args.work_dir:
-        work_dir = op.abspath(args.work_dir)
-        crash_dir = op.join(op.abspath(args.work_dir), "crash")
+        work_dir = op.realpath(args.work_dir)
+        crash_dir = op.join(op.realpath(args.work_dir), "crash")
     else:
         work_dir = op.join(bids_dir, "derivatives/MRtrix/work")
-        crash_dir = op.join(op.abspath(bids_dir, "derivatives/crash"))
+        crash_dir = op.join(op.realpath(bids_dir, "derivatives/crash"))
 
     if not op.exists(work_dir):
         os.makedirs(work_dir)
@@ -103,7 +103,7 @@ def main():
         os.makedirs(crash_dir)
 
     if args.out_dir:
-        out_dir = op.abspath(args.out_dir)
+        out_dir = op.realpath(args.out_dir)
     else:
         out_dir = op.join(deriv_dir, 'MRtrix')
 
