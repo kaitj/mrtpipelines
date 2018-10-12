@@ -25,8 +25,8 @@ def getSubj(subjFile, work_dir, nthreads=1):
 def _getTemplate(template_dir, template_label, work_dir):
     import os.path as op
 
-    resdir = op.abspath(op.join(template_dir, 'response'))
-    dwidir = op.abspath(op.join(template_dir, 'dwi'))
+    resdir = op.realpath(op.join(template_dir, 'response'))
+    dwidir = op.realpath(op.join(template_dir, 'dwi'))
 
     wm_fod = template_label + '_wmfod.mif'
     wm_fod = op.join(resdir, wm_fod)
