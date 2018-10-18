@@ -1,11 +1,13 @@
 from distutils.core import setup
+from mrtpipelines._version import __version__
 
 setup(
     # Project information
     name='MRTrix_Pipeline',
-    version='0.0.1',
+    version=__version__,
     description='Pipelines related to generating MRTrix tractography',
-    packages=['mrtpipelines/interfaces',
+    packages=['mrtpipelines',
+              'mrtpipelines/interfaces',
               'mrtpipelines/workflows'],
     scripts=['mrtpipelines/pipelines/genDhollanderTractography'],
 

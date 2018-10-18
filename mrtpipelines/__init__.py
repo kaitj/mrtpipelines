@@ -7,3 +7,5 @@ This pipeline is developed for use of in-house data acquired at The Centre of Fu
 Metabolic Mapping (http://cfmm.robarts.ca) at Robarts Research Institute, Western University and
 open-source use
 """
+
+from ._version import __version__
