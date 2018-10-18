@@ -11,6 +11,7 @@ def get_parser():
     Argument parser
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
+    from mrtpipelines._version import __version__
 
     parser = ArgumentParser(description="Pipeline to generate MRTrix3 "
                                         "multi-shell multi-tissue CSD "
@@ -20,7 +21,7 @@ def get_parser():
 
     # Version option
     parser.add_argument("-v", "--version", dest="version",
-                        action="version", version="0.0.2")
+                        action="version", version=__version__)
 
     # Required arguments
     g_req = parser.add_argument_group("Required arguments")

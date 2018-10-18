@@ -1,6 +1,7 @@
 # Byte-compiled / optimized/ DLL files
 *.py[cod]
 build/
+mrtpipelines/__pycache__/
 
 # Ipython Notebook
 notebooks/

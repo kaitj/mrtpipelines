@@ -1,11 +1,13 @@
 from distutils.core import setup
+from mrtpipelines._version import __version__
 
 setup(
     # Project information
-    name='HCPTemplate_MRTrix_Pipeline',
-    version='0.0.2',
-    description='Pipeline to generate HCP UR100 Template using MRTrix3',
-    packages=['mrtpipelines/interfaces',
+    name='MRTrix_TemplatePipeline',
+    version=__version__,
+    description='Pipeline to generate templates using MRTrix3',
+    packages=['mrtpipelines',
+              'mrtpipelines/interfaces',
               'mrtpipelines/workflows'],
     scripts=['mrtpipelines/pipelines/genHCPURTemplate',
              'mrtpipelines/pipelines/genTemplate'],
@@ -13,5 +15,5 @@ setup(
     # Metadata
     author='Jason Kai',
     author_email='tkai@uwo.ca',
-    url='https://github.com/kaitj/mrtpipelines'
+    url='https://github.com/kaitj/mrtpipelines/tree/template'
 )
