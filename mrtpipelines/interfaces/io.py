@@ -1,4 +1,3 @@
-import os.path as op
 
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
@@ -25,6 +24,8 @@ from nipype.interfaces import io as nio
 
 
 def _getTemplate(template_dir, template_label, work_dir):
+    import os.path as op
+
     resdir = op.realpath(op.join(template_dir, 'response'))
     dwidir = op.realpath(op.join(template_dir, 'dwi'))
 
