@@ -18,9 +18,6 @@ def act_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], template_dir=None,
         print("Missing template info")
         raise IOError
 
-    if nthreads >= 8:
-        nthreads = np.int(nthreads / 4)
-
     # Grab template data
     templateGrabber = io.getTemplate(template_dir=template_dir,
                                      template_label=template_label,

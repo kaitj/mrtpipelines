@@ -9,10 +9,6 @@ def genACTTract_wf(nfibers=25000, wdir=None, nthreads=1,
     Set up workflow to generate anatomically constrained tracts
     """
 
-    # Define number of threads to use
-    if nthreads >= 8:
-        nthreads = np.int(nthreads / 4)
-
     # Generate tract
     genTract = pe.Node(mrt.Tractography(), name='genTract')
     genTract.base_dir = wdir
@@ -52,10 +48,6 @@ def genDhollTract_wf(nfibers=25000, wdir=None, nthreads=1,
     """
     Set up workflow to generate tracts with Dhollander response
     """
-
-    # Define number of threads to use
-    if nthreads >= 8:
-        nthreads = np.int(nthreads / 4)
 
     # Generate tract
     genTract = pe.Node(mrt.Tractography(), name='genTract')

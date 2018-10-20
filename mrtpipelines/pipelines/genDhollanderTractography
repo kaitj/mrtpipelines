@@ -33,8 +33,7 @@ def get_parser():
                                             "standard")
     g_req.add_argument("template_label", help="Label for template "
                                               "(e.g. sub-MNI2009b_*)")
-    g_req.add_argument('participant_label', help="A file containing label(s) "
-                                                 "of participant(s) to perform "
+    g_req.add_argument('participant_label', help="Participant id to perform "
                                                  "pipeline execution on")
 
     # Optional arguments
@@ -89,7 +88,7 @@ def main():
     # Required inputs
     bids_dir = args.bids_dir
     deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
-    subjids = args.participant_label
+    subjid = args.participant_label
     shells = args.shells
     lmax = args.lmax
     temp_dir = op.realpath(args.template_dir)
@@ -99,11 +98,13 @@ def main():
 
     # Set work & crash directories
     if args.work_dir:
-        work_dir = op.realpath(args.work_dir)
-        crash_dir = op.join(op.realpath(args.work_dir), "crash")
+        work_dir = op.join(op.realpath(args.work_dir), subjid)
+        crash_dir = op.join(op.join(op.realpath(args.work_dir), subjid),
+                    "crash")
     else:
-        work_dir = op.join(bids_dir, "derivatives/scratch")
-        crash_dir = op.join(op.realpath(bids_dir, "derivatives/crash"))
+        work_dir = op.join(op.join(bids_dir, "derivatives/work"), subjid)
+        crash_dir = op.join(op.join(op.join(op.realpath(bids_dir,
+                    "derivatives/work")), subjid), "crash")
 
     if not op.exists(work_dir):
         os.makedirs(work_dir)
@@ -123,13 +124,11 @@ def main():
                                         }})
     logging.update_logging(config)
 
-    # getSubj
-    Subjid, noSubj = io.getSubj(subjids, work_dir)
-
     # Create necessary nodes not part of existing workflows
     # BIDSDataGrabber
     layout = BIDSLayout(deriv_dir)
-    BIDSDataGrabber = io.getBIDS(layout=layout, wdir=work_dir)
+    BIDSDataGrabber = io.getBIDS(layout=layout, subj=subjid, wdir=work_dir,
+                                 nthreads=nthreads)
 
     # MRTrix preprocessing workflow
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
@@ -202,8 +201,6 @@ def main():
 
     pl.connect([
                 # Input
-                (Subjid, BIDSDataGrabber, [
-                    ('subjid', 'subjid')]),
                 (BIDSDataGrabber, dholl_preproc_wf, [
                     ('nifti', 'dwiConvert.in_file'),
                     ('bdata', 'dwiConvert.grad_fsl'),
@@ -217,57 +214,57 @@ def main():
                     ('FODTransform.out_file', 'siftTract.in_fod')]),
 
                 # File rename
-                (Subjid, renameWarp1, [
+                (BIDSDataGrabber, renameWarp1, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameWarp1, [
                     ('WarpSelect1.out', 'in_file')]),
-                (Subjid, renameWarp2, [
+                (BIDSDataGrabber, renameWarp2, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameWarp2, [
                     ('WarpSelect2.out', 'in_file')]),
-                (Subjid, renameFOD, [
+                (BIDSDataGrabber, renameFOD, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameFOD, [
                     ('FODTransform.out_file', 'in_file')]),
-                (Subjid, renameMask, [
+                (BIDSDataGrabber, renameMask, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameMask, [
                     ('MaskTransform.out_file', 'in_file')]),
-                (Subjid, renameDWINorm, [
+                (BIDSDataGrabber, renameDWINorm, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameDWINorm, [
                     ('DWITransform.out_file', 'in_file')]),
-                (Subjid, renameDTI, [
+                (BIDSDataGrabber, renameDTI, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameDTI, [
                     ('FitTensor.out_file', 'in_file')]),
-                (Subjid, renameFA, [
+                (BIDSDataGrabber, renameFA, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameFA, [
                     ('TensorMetrics.out_fa', 'in_file')]),
-                (Subjid, renameMD, [
+                (BIDSDataGrabber, renameMD, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameMD, [
                     ('TensorMetrics.out_adc', 'in_file')]),
-                (Subjid, renameAD, [
+                (BIDSDataGrabber, renameAD, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameAD, [
                     ('TensorMetrics.out_ad', 'in_file')]),
-                (Subjid, renameRD, [
+                (BIDSDataGrabber, renameRD, [
                     ('subjid', 'subjid')]),
                 (dholl_preproc_wf, renameRD, [
                     ('TensorMetrics.out_rd', 'in_file')]),
-                (Subjid, renameTract, [
+                (BIDSDataGrabber, renameTract, [
                     ('subjid', 'subjid')]),
                 (dholl_tract_wf, renameTract, [
                     ('convTract.out_file', 'in_file')]),
-                (Subjid, renameTck, [
+                (BIDSDataGrabber, renameTck, [
                     ('subjid', 'subjid')]),
                 (dholl_tract_wf, renameTck, [
                     ('siftTract.out_file', 'in_file')]),
 
                 # Output
-                (Subjid, subjSink, [
+                (BIDSDataGrabber, subjSink, [
                     ('subjid', 'container')]),
                 (renameWarp1, subjSink, [
                     ('out_file', 'transform.@warp1')]),
@@ -298,8 +295,8 @@ def main():
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
     pl.write_graph(graph2use='colored', format='svg')
 
-    if nthreads >= 8:
-        pl.run(plugin='MultiProc', plugin_args={'n_procs': 4})
+    if nthreads >= 1:
+        pl.run(plugin='MultiProc')
     else:
         pl.run(plugin='Linear')
 
