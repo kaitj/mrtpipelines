@@ -1,4 +1,3 @@
-
 from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import io as nio

@@ -16,8 +16,6 @@ MRTrix3 processing diffusion and generating tractography of subject data from da
 ### <a name="intro"></a> Introduction
 Details regarding usage and workflows coming soon.
 
-* genACTTractography  
-    * Performs preprocessing to generate anatomically constrained tractography. Assumes Freesurfer tissue segmentation available for ACT processing.
 * genDhollanderTractography
     * Performs preprocessing to geneate whole-brain tractography following the Dhollander response algorithm.
 
