@@ -38,6 +38,9 @@ def get_parser():
 
     # Optional arguments
     g_opt = parser.add_argument_group("Optional arguments")
+    g_opt.add_argument("-m", "--mask", dest="brainmask", default=None,
+                                       help="User provided brainmask (provide "
+                                            "full path)")
     g_opt.add_argument("-N", "--select", dest="select", default=25000,
                                          help="Number of streamlines to "
                                               "generate for each subject. "
@@ -87,14 +90,18 @@ def main():
 
     # Required inputs
     bids_dir = args.bids_dir
-    deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
-    subjid = args.participant_label
-    shells = args.shells
-    lmax = args.lmax
     temp_dir = op.realpath(args.template_dir)
     temp_label = args.template_label
+    subjid = args.participant_label
+
+    # Optional inputs
+    shells = args.shells
+    lmax = args.lmax
     nfibers = int(args.select)
     nthreads = int(args.nthreads)
+    bmask = args.brainmask
+
+    deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
 
     # Set work & crash directories
     if args.work_dir:
@@ -127,8 +134,8 @@ def main():
     # Create necessary nodes not part of existing workflows
     # BIDSDataGrabber
     layout = BIDSLayout(deriv_dir)
-    BIDSDataGrabber = io.getBIDS(layout=layout, subj=subjid, wdir=work_dir,
-                                 nthreads=nthreads)
+    BIDSDataGrabber = io.getBIDS(layout=layout, subj=subjid, bmask=bmask,
+                                 wdir=work_dir, nthreads=nthreads)
 
     # MRTrix preprocessing workflow
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,

@@ -61,7 +61,7 @@ def getTemplate(template_dir, template_label, wdir=None):
     return getTemplate
 
 
-def _getData(bids_layout, subjid):
+def _getData(bids_layout, subjid, bmask):
     # Strip leading 'sub-'
     subj = subjid.lstrip('sub-')
 
@@ -72,28 +72,27 @@ def _getData(bids_layout, subjid):
                            return_type='file', extensions=['bval'])
     bvec = bids_layout.get(subject=subj, modality='dwi', type='preproc',
                            return_type='file', extensions=['bvec'])
-    mask = bids_layout.get(subject=subj, modality='dwi', type='brainmask',
-                           return_type='file', extensions=['nii', 'nii.gz'])
 
-    # Freesurfer parcellation (from fmriprep)
-    parc = bids_layout.get(subject=subjid, type='aseg',
-                           return_type='file', extensions=['mgz'])
+    if bmask is None:
+        mask = bids_layout.get(subject=subj, modality='dwi', type='brainmask',
+                               return_type='file', extensions=['nii', 'nii.gz'])
 
-    if not parc:
-        return subjid, nifti[0], (bvec[0], bval[0]), mask[0], None
+        return subjid, nifti[0], (bvec[0], bval[0]), mask[0]
     else:
-        return subjid, nifti[0], (bvec[0], bval[0]), mask[0], parc[0]
+        mask = bmask
+
+        return subjid, nifti[0], (bvec[0], bval[0]), mask
 
 
-def getBIDS(layout, subj, wdir=None, nthreads=1):
+def getBIDS(layout, subj, bmask, wdir=None, nthreads=1):
     BIDSDataGrabber = pe.Node(niu.Function(function=_getData,
                                            input_names=['bids_layout',
-                                                        'subjid'],
+                                                        'subjid',
+                                                        'bmask'],
                                            output_names=['subjid',
                                                          'nifti',
                                                          'bdata',
-                                                         'mask',
-                                                         'parc']),
+                                                         'mask']),
                                            name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = wdir
     BIDSDataGrabber.inputs.bids_layout = layout
