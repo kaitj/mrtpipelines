@@ -97,6 +97,7 @@ def getBIDS(layout, subj, bmask, wdir=None, nthreads=1):
     BIDSDataGrabber.base_dir = wdir
     BIDSDataGrabber.inputs.bids_layout = layout
     BIDSDataGrabber.inputs.subjid = subj
+    BIDSDataGrabber.inputs.bmask = bmask
     BIDSDataGrabber.interface.num_threads = nthreads
 
     return BIDSDataGrabber
