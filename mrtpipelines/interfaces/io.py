@@ -23,7 +23,9 @@ def getSubj(subjFile, work_dir, nthreads=1):
     return Subjid, noSubj
 
 
-def getData(bids_layout, subjid):
+def getData(bids_layout, subjid, b_layout):
+    import os
+
     # Strip leading 'sub-'
     subjid = subjid.lstrip('sub-')
 
@@ -34,13 +36,17 @@ def getData(bids_layout, subjid):
                            return_type='file', extensions=['bval'])
     bvec = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
                            return_type='file', extensions=['bvec'])
-    mask = bids_layout.get(subject=subjid, modality='dwi', type='brainmask',
-                           return_type='file', extensions=['nii', 'nii.gz'])
+    if b_layout is None:
+        mask = bids_layout.get(subject=subjid, modality='dwi', type='brainmask',
+                            return_type='file', extensions=['nii', 'nii.gz'])
+    else:
+        mask = bids_layout.get(subject=subjid, modality='dwi', type='brainmask',
+                               return_type='file', extensions=['nii', 'nii.gz'])
 
     # Anatomical
     t1w = bids_layout.get(subject=subjid, modality='anat', type='T1w',
                           return_type='file', extensions=['nii', 'nii.gz'])
-    t2w = bids_layout.get(subject=subjid, modality='anat', type='T2w', 
+    t2w = bids_layout.get(subject=subjid, modality='anat', type='T2w',
                           return_type='file', extensions=['nii', 'nii.gz'])
 
     if not t1w and not t2w:
@@ -53,7 +59,7 @@ def getData(bids_layout, subjid):
         return dwi[0], (bvec[0], bval[0]), mask[0], t1w[0], t2w[0]
 
 
-def getBIDS(layout, wdir=None, nthreads=1):
+def getBIDS(layout, bmask, wdir=None, nthreads=1):
     from nipype.pipeline import engine as pe
     from nipype.interfaces import utility as niu
 
@@ -61,7 +67,8 @@ def getBIDS(layout, wdir=None, nthreads=1):
 
     BIDSDataGrabber = pe.Node(niu.Function(function=io.getData,
                                            input_names=['bids_layout',
-                                                        'subjid'],
+                                                        'subjid',
+                                                        'bmask'],
                                            output_names=['dwi',
                                                          'bdata',
                                                          'mask',
@@ -70,6 +77,7 @@ def getBIDS(layout, wdir=None, nthreads=1):
                                            name='BIDSDataGrabber')
     BIDSDataGrabber.base_dir = wdir
     BIDSDataGrabber.inputs.bids_layout = layout
+    BIDSDataGrabber.inputs.bmask = bmask
     BIDSDataGrabber.interface.num_threads = nthreads
 
     return BIDSDataGrabber
