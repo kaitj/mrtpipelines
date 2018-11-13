@@ -303,7 +303,7 @@ def main():
     pl.write_graph(graph2use='colored', format='svg')
 
     if nthreads >= 1:
-        pl.run(plugin='MultiProc')
+        pl.run(plugin='MultiProc', plugin_args={'n_procs': 1})
     else:
         pl.run(plugin='Linear')
 
