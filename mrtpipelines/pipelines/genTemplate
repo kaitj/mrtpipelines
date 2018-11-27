@@ -132,10 +132,10 @@ def main():
 
     if bmask is not None:
         b_layout = BIDSLayout(bmask)
-        BIDSDataGrabber = io.getBIDS(layout=layout, b_layout=b_layout,
+        BIDSDataGrabber = io.getBIDS(layout=layout, bmask=b_layout,
                                      wdir=work_dir, nthreads=nthreads)
     else:
-        BIDSDataGrabber = io.getBIDS(layout=layout, b_layout=None,
+        BIDSDataGrabber = io.getBIDS(layout=layout, bmask=None,
                                      wdir=work_dir, nthreads=nthreads)
 
     # MRTrix preprocessing workflow
