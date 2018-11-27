@@ -7,7 +7,7 @@ decorator==4.3.0
 execnet==1.5.0
 funcsigs==1.0.2
 future==0.16.0
-grabbit==0.1.2
+grabbit==0.2.5
 isodate==0.6.0
 lxml==4.2.1
 mock==2.0.0
@@ -21,7 +21,7 @@ pbr==4.0.4
 pluggy==0.6.0
 prov==1.5.0
 py==1.5.3
-pybids==0.5.1
+pybids==0.6.5
 pydot==1.2.4
 pydotplus==2.0.2
 pyparsing==2.2.0
