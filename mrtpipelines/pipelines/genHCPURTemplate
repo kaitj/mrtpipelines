@@ -70,7 +70,7 @@ def main():
     import os
     import os.path as op
 
-    from bids.grabbids import BIDSLayout
+    from bids.layout import BIDSLayout
     # MRTrix subject tractography generation workflow
     from nipype import config, logging
     from nipype.pipeline import engine as pe
