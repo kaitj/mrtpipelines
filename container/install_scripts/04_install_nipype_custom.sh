@@ -9,7 +9,6 @@ mkdir -p $DIR/nipype
 
 git clone https://github.com/kaitj/nipype $DIR/nipype
 cd $DIR/nipype
-git checkout kai_dev
 
 # Install requirements 
 pip3 install -r requirements.txt
