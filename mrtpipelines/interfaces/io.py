@@ -4,14 +4,14 @@ from nipype.pipeline import engine as pe
 import numpy as np
 
 def getSubj(subjFile, work_dir, nthreads=1):
-    # Retrieve individual subject ids & number of subjectss
+    # Retrieve individual subject ids & number of subjects
     subjids = []
     noSubj = 0
     with open(subjFile) as f:
         for subj in f:
             # temp = subj.lstrip('sub-')
             temp = subj.rstrip('\n')
-            temp = 'sub-' + temp
+            # temp = 'sub-' + temp
             subjids.append(temp)
             noSubj += 1
 
@@ -23,7 +23,7 @@ def getSubj(subjFile, work_dir, nthreads=1):
     return Subjid, noSubj
 
 
-def getData(bids_layout, subjid, b_layout):
+def getData(bids_layout, subjid, bmask):
     import os
 
     # Strip leading 'sub-'
@@ -36,7 +36,7 @@ def getData(bids_layout, subjid, b_layout):
                            return_type='file', extensions=['bval'])
     bvec = bids_layout.get(subject=subjid, modality='dwi', type='preproc',
                            return_type='file', extensions=['bvec'])
-    if b_layout is None:
+    if bmask is None:
         mask = bids_layout.get(subject=subjid, modality='dwi', type='brainmask',
                             return_type='file', extensions=['nii', 'nii.gz'])
     else:
