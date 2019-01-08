@@ -183,7 +183,7 @@ from mrtpipelines.interfaces import io
 #     return workflow
 
 
-def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8],
+def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
                      template_dir=None, template_label=None,
                      wdir=None, nthreads=1, name='dholl_preproc_wf'):
     """
@@ -302,36 +302,70 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8],
     # Build workflow
     workflow = pe.Workflow(name=name)
 
-    workflow.connect([
-        # Compute FOD
-        (dwiConvert, dwi2response, [('out_file', 'in_file')]),
-        (dwiConvert, dwi2fod, [('out_file', 'in_file')]),
-        (dwi2response, dwi2fod, [('wm_file', 'wm_txt'),
-                                 ('gm_file', 'gm_txt'),
-                                 ('csf_file', 'csf_txt')]),
-        (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
-                                ('gm_odf', 'in_gm'),
-                                ('csf_odf', 'in_csf')]),
-        (maskConvert, mtnormalise, [('out_file', 'mask')]),
-        (maskConvert, MRRegister, [('out_file', 'mask1')]),
-        (templateGrabber, MRRegister, [('wm_fod', 'ref_file'),
-                                       ('mask', 'mask2')]),
-        (mtnormalise, MRRegister, [('out_wm', 'in_file')]),
-        (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
-        (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
-        (maskConvert, MaskTransform, [('out_file', 'in_file')]),
-        (WarpSelect1, MaskTransform, [('out', 'warp')]),
-        (mtnormalise, FODTransform, [('out_wm', 'in_file')]),
-        (WarpSelect1, FODTransform, [('out', 'warp')]),
-        # Compute tensors
-        (dwiConvert, DWINormalise, [('out_file', 'in_file')]),
-        (maskConvert, DWINormalise, [('out_file', 'in_mask')]),
-        (DWINormalise, DWITransform, [('out_file', 'in_file')]),
-        (WarpSelect1, DWITransform, [('out', 'warp')]),
-        (DWITransform, FitTensor, [('out_file', 'in_file')]),
-        (MaskTransform, FitTensor, [('out_file', 'in_mask')]),
-        (FitTensor, TensorMetrics, [('out_file', 'in_file')]),
-        (MaskTransform, TensorMetrics, [('out_file', 'in_mask')])
-    ])
+    # Single shell
+    if sshell is True:
+        workflow.connect([
+            # Compute FOD
+            (dwiConvert, dwi2response, [('out_file', 'in_file')]),
+            (dwiConvert, dwi2fod, [('out_file', 'in_file')]),
+            (dwi2response, dwi2fod, [('wm_file', 'wm_txt'),
+                                    ('csf_file', 'csf_txt')]),
+            (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
+                                    ('csf_odf', 'in_csf')]),
+            (maskConvert, mtnormalise, [('out_file', 'mask')]),
+            (maskConvert, MRRegister, [('out_file', 'mask1')]),
+            (templateGrabber, MRRegister, [('wm_fod', 'ref_file'),
+                                           ('mask', 'mask2')]),
+            (mtnormalise, MRRegister, [('out_wm', 'in_file')]),
+            (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
+            (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
+            (maskConvert, MaskTransform, [('out_file', 'in_file')]),
+            (WarpSelect1, MaskTransform, [('out', 'warp')]),
+            (mtnormalise, FODTransform, [('out_wm', 'in_file')]),
+            (WarpSelect1, FODTransform, [('out', 'warp')]),
+            # Compute tensors
+            (dwiConvert, DWINormalise, [('out_file', 'in_file')]),
+            (maskConvert, DWINormalise, [('out_file', 'in_mask')]),
+            (DWINormalise, DWITransform, [('out_file', 'in_file')]),
+            (WarpSelect1, DWITransform, [('out', 'warp')]),
+            (DWITransform, FitTensor, [('out_file', 'in_file')]),
+            (MaskTransform, FitTensor, [('out_file', 'in_mask')]),
+            (FitTensor, TensorMetrics, [('out_file', 'in_file')]),
+            (MaskTransform, TensorMetrics, [('out_file', 'in_mask')])
+        ])
+
+    # For multi-shell
+    else:
+        workflow.connect([
+            # Compute FOD
+            (dwiConvert, dwi2response, [('out_file', 'in_file')]),
+            (dwiConvert, dwi2fod, [('out_file', 'in_file')]),
+            (dwi2response, dwi2fod, [('wm_file', 'wm_txt'),
+                                     ('gm_file', 'gm_txt'),
+                                     ('csf_file', 'csf_txt')]),
+            (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
+                                    ('gm_odf', 'in_gm'),
+                                    ('csf_odf', 'in_csf')]),
+            (maskConvert, mtnormalise, [('out_file', 'mask')]),
+            (maskConvert, MRRegister, [('out_file', 'mask1')]),
+            (templateGrabber, MRRegister, [('wm_fod', 'ref_file'),
+                                           ('mask', 'mask2')]),
+            (mtnormalise, MRRegister, [('out_wm', 'in_file')]),
+            (MRRegister, WarpSelect1, [('nl_warp', 'inlist')]),
+            (MRRegister, WarpSelect2, [('nl_warp', 'inlist')]),
+            (maskConvert, MaskTransform, [('out_file', 'in_file')]),
+            (WarpSelect1, MaskTransform, [('out', 'warp')]),
+            (mtnormalise, FODTransform, [('out_wm', 'in_file')]),
+            (WarpSelect1, FODTransform, [('out', 'warp')]),
+            # Compute tensors
+            (dwiConvert, DWINormalise, [('out_file', 'in_file')]),
+            (maskConvert, DWINormalise, [('out_file', 'in_mask')]),
+            (DWINormalise, DWITransform, [('out_file', 'in_file')]),
+            (WarpSelect1, DWITransform, [('out', 'warp')]),
+            (DWITransform, FitTensor, [('out_file', 'in_file')]),
+            (MaskTransform, FitTensor, [('out_file', 'in_mask')]),
+            (FitTensor, TensorMetrics, [('out_file', 'in_file')]),
+            (MaskTransform, TensorMetrics, [('out_file', 'in_mask')])
+        ])
 
     return workflow

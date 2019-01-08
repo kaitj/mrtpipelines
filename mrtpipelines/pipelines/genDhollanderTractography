@@ -57,6 +57,9 @@ def get_parser():
                                        help="maximum harmonic degree(s) for "
                                             "response function estimation "
                                             "(eg. --lmax 0 8 8)")
+    g_opt.add_argument("ss", "--single-shell", dest="sshell", default=False,
+                                               type=bool, help="Processing for "
+                                               "single shell tissue")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                             "<bids_dir>/derivatives/scratch")
@@ -100,6 +103,7 @@ def main():
     nfibers = int(args.select)
     nthreads = int(args.nthreads)
     bmask = args.brainmask
+    sshell = args.sshell
 
     deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
 
@@ -139,6 +143,7 @@ def main():
 
     # MRTrix preprocessing workflow
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
+                                                   sshell=sshell,
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
                                                    wdir=work_dir,
