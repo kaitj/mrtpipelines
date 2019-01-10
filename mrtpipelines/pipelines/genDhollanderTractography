@@ -58,7 +58,8 @@ def get_parser():
                                             "response function estimation "
                                             "(eg. --lmax 0 8 8)")
     g_opt.add_argument("-ss", "--single-shell", dest="sshell", default=False,
-                                               type=bool, help="Processing for "
+                                                action='store_true',
+                                                help="Processing for "
                                                "single shell tissue")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
