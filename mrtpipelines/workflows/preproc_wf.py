@@ -229,12 +229,18 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
     dwi2fod.inputs.shell = shells
+    if sshell is not True:
+        dwi2fod.inputs.gm_odf = 'gm.mif'
+        dwi2fod.inputs.csf_odf = 'csf.mif'
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
 
     # mtnormalise
     mtnormalise = pe.Node(mrt.MTNormalise(), name='mtnormalise')
     mtnormalise.base_dir = wdir
+    if sshell is not True:
+        mtnormalise.inputs.out_gm = 'gmfod_norm.mif'
+        mtnormalise.inputs.out_csf = 'csffod_norm.mif'
     mtnormalise.inputs.nthreads = nthreads
     mtnormalise.interface.num_threads = nthreads
 
@@ -309,7 +315,6 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
             (dwiConvert, dwi2response, [('out_file', 'in_file')]),
             (dwiConvert, dwi2fod, [('out_file', 'in_file')]),
             (dwi2response, dwi2fod, [('wm_file', 'wm_txt'),
-                                     ('gm_file', 'gm_txt'),
                                      ('csf_file', 'csf_txt')]),
             (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
                                     ('csf_odf', 'in_csf')]),
