@@ -224,6 +224,7 @@ def main():
                 (dholl_preproc_wf, dholl_tract_wf, [
                     ('FODTransform.out_file', 'genTract.in_file'),
                     ('MaskTransform.out_file', 'genTract.seed_image'),
+                    ('MaskTransform.out_file', 'genTract.roi_mask'),
                     ('FODTransform.out_file', 'siftTract.in_fod')]),
 
                 # File rename
