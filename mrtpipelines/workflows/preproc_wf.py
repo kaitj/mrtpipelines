@@ -231,7 +231,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     dwi2fod.inputs.shell = shells
     if sshell is not True:
         dwi2fod.inputs.gm_odf = 'gm.mif'
-        dwi2fod.inputs.csf_odf = 'csf.mif'
+    dwi2fod.inputs.csf_odf = 'csf.mif'
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
 
@@ -240,7 +240,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     mtnormalise.base_dir = wdir
     if sshell is not True:
         mtnormalise.inputs.out_gm = 'gmfod_norm.mif'
-        mtnormalise.inputs.out_csf = 'csffod_norm.mif'
+    mtnormalise.inputs.out_csf = 'csffod_norm.mif'
     mtnormalise.inputs.nthreads = nthreads
     mtnormalise.interface.num_threads = nthreads
 
