@@ -60,7 +60,13 @@ def get_parser():
     g_opt.add_argument("-ss", "--single-shell", dest="sshell", default=False,
                                                 action='store_true',
                                                 help="Processing for "
-                                               "single shell tissue")
+                                                "single shell tissue")
+    g_opt.add_argument("-nr", "--noreorientation", dest="noreorient",
+                                                   default=False,
+                                                   action='store_true',
+                                                   help='Turn off FOD '
+                                                   'reorientation during '
+                                                   'registration.')
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                             "<bids_dir>/derivatives/scratch")
@@ -105,6 +111,7 @@ def main():
     nthreads = int(args.nthreads)
     bmask = args.brainmask
     sshell = args.sshell
+    noreorient = args.noreorient
 
     deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
 
@@ -145,6 +152,7 @@ def main():
     # MRTrix preprocessing workflow
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
                                                    sshell=sshell,
+                                                   noreorient=noreorient,
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
                                                    wdir=work_dir,
