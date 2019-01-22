@@ -72,7 +72,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     MRRegister.inputs.nl_warp = ['subj_2_template.mif',
                                  'template_2_subj.mif']
     if noreorient is True:
-        MRRegister.inputs.noreorientation = True 
+        MRRegister.inputs.noreorientation = True
     MRRegister.inputs.nthreads = nthreads
     MRRegister.interface.num_threads = nthreads
 
@@ -142,6 +142,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
                                      ('csf_file', 'csf_txt')]),
             (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
                                     ('csf_odf', 'in_csf')]),
+            (maskConvert, dwi2response, [('out_file', 'in_mask')]),
             (maskConvert, mtnormalise, [('out_file', 'mask')]),
             (maskConvert, MRRegister, [('out_file', 'mask1')]),
             (templateGrabber, MRRegister, [('wm_fod', 'ref_file'),
@@ -176,6 +177,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
             (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
                                     ('gm_odf', 'in_gm'),
                                     ('csf_odf', 'in_csf')]),
+            (maskConvert, dwi2response, [('out_file', 'in_mask')]),
             (maskConvert, mtnormalise, [('out_file', 'mask')]),
             (maskConvert, MRRegister, [('out_file', 'mask1')]),
             (templateGrabber, MRRegister, [('wm_fod', 'ref_file'),

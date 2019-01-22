@@ -67,6 +67,10 @@ def get_parser():
                                                    help='Turn off FOD '
                                                    'reorientation during '
                                                    'registration.')
+    g_opt.add_argument("-r", "--resample", dest="resample", default=None,
+                                           type=float,
+                                           help="Resample to isotropic "
+                                                "resolution in mm")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                             "<bids_dir>/derivatives/scratch")
@@ -112,6 +116,7 @@ def main():
     bmask = args.brainmask
     sshell = args.sshell
     noreorient = args.noreorient
+    resample = args.resample
 
     deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
 
@@ -153,6 +158,7 @@ def main():
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
                                                    sshell=sshell,
                                                    noreorient=noreorient,
+                                                   resample=resample
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
                                                    wdir=work_dir,
@@ -225,7 +231,6 @@ def main():
                 (BIDSDataGrabber, dholl_preproc_wf, [
                     ('nifti', 'dwiConvert.in_file'),
                     ('bdata', 'dwiConvert.grad_fsl'),
-                    ('bdata', 'dwi2response.grad_fsl'),
                     ('mask', 'maskConvert.in_file')]),
 
                 # Workflows
