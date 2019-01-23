@@ -158,7 +158,7 @@ def main():
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
                                                    sshell=sshell,
                                                    noreorient=noreorient,
-                                                   resample=resample
+                                                   resample=resample,
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
                                                    wdir=work_dir,
