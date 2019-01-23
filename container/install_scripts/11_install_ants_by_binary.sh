@@ -1,6 +1,14 @@
 #!/bin/bash
 
-D_DIR=/opt/ants
+if [ "$#" -lt 1 ]
+then
+echo "Usage: $0 <install folder (absolute path)>"
+exit 0
+fi
+
+DEST=$1
+mkdir -p $DEST
+D_DIR=$DEST/ants
 
 if [ -d $D_DIR ]; then
 	rm -rf $D_DIR

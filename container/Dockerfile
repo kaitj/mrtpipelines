@@ -12,7 +12,7 @@ RUN bash /src/install_scripts/01_install_freesurfer.sh > log_01_freesurfer
 RUN bash /src/install_scripts/02_install_mrtrix.sh > log_02_mrtrix
 RUN bash /src/install_scripts/03_install_mrtpipeline.sh > log_03_mrtpipeline
 RUN bash /src/install_scripts/04_install_nipype_custom.sh > log_04_nipype_custom
-RUN bash /src/install_scripts/11_install_ants_by_binary.sh > log_11_ants
+RUN bash /src/install_scripts/11_install_ants_by_binary.sh /opt > log_11_ants
 
 # Remove install scripts
 RUN rm -rf /src
