@@ -24,3 +24,7 @@ ENV PATH $FREESURFER_HOME/bin:$PATH
 # Mrtrix
 ENV MRTRIX_HOME /opt/git/mrtrix3
 ENV PATH $MRTRIX_HOME/bin:$PATH
+
+# Ants
+ENV PATH /opt/ants:$PATH
+ENV ANTSPATH /opt/ants
