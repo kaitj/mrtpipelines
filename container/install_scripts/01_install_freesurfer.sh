@@ -2,7 +2,7 @@
 
 echo -n "Installing freesurfer ..."
 
-S_DIR=/opt 
+S_DIR=/opt
 VERSION=6.0.0
 
 mkdir -p $S_DIR/freesurfer
@@ -24,10 +24,10 @@ tar -xvzf freesurfer-Linux-centos6_x86_64-stable-pub-v${VERSION}.tar.gz -C $S_DI
     --exclude='freesurfer/average/mult-comp-cor' \
     --exclude='freesurfer/lib/cuda' \
     --exclude='freesurfer/lib/qt'
-rm freesurfer-Linux-centos6_x86_64-stable-pub-v${VERSION}.tar.gz 
+rm freesurfer-Linux-centos6_x86_64-stable-pub-v${VERSION}.tar.gz
 
 # Get license
-curl -L --retry 5 https://www.dropbox.com/s/38gghuq2w7h17pe/freesurfer_license -o $S_DIR/freesurfer/.license
+curl -L --retry 5 https://www.dropbox.com/s/38gghuq2w7hl7pe/freesurfer_license -o $S_DIR/freesurfer/.license
 
 # Setup
 
