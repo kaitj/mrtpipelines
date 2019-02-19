@@ -71,8 +71,6 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     # MRRegister.inputs.ref_file = template
     MRRegister.inputs.nl_warp = ['subj_2_template.mif',
                                  'template_2_subj.mif']
-    if noreorient is True:
-        MRRegister.inputs.noreorientation = True
     MRRegister.inputs.nthreads = nthreads
     MRRegister.interface.num_threads = nthreads
 

@@ -61,12 +61,6 @@ def get_parser():
                                                 action='store_true',
                                                 help="Processing for "
                                                 "single shell tissue")
-    g_opt.add_argument("-nr", "--noreorientation", dest="noreorient",
-                                                   default=False,
-                                                   action='store_true',
-                                                   help='Turn off FOD '
-                                                   'reorientation during '
-                                                   'registration.')
     g_opt.add_argument("-r", "--resample", dest="resample", default=None,
                                            type=float,
                                            help="Resample to isotropic "
@@ -115,7 +109,6 @@ def main():
     nthreads = int(args.nthreads)
     bmask = args.brainmask
     sshell = args.sshell
-    noreorient = args.noreorient
     resample = args.resample
 
     deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
@@ -157,7 +150,6 @@ def main():
     # MRTrix preprocessing workflow
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
                                                    sshell=sshell,
-                                                   noreorient=noreorient,
                                                    resample=resample,
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
