@@ -2,26 +2,6 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import io as nio
 
-# DEPRECATED
-# def getSubj(subjFile, work_dir, nthreads=1):
-#     # Retrieve individual subject ids & number of subjectss
-#     subjids = []
-#     noSubj = 0
-#     with open(subjFile) as f:
-#         for subj in f:
-#             # temp = subj.lstrip('sub-')
-#             temp = subj.rstrip('\n')
-#             subjids.append(temp)
-#             noSubj += 1
-#
-#     Subjid = pe.Node(IdentityInterface(fields=['subjid']), name='SubjectID')
-#     Subjid.base_dir = work_dir
-#     Subjid.iterables = [('subjid', subjids)]
-#     Subjid.interface.num_threads = nthreads
-#
-#     return Subjid, noSubj
-
-
 def _getTemplate(template_dir, template_label, work_dir):
     import os.path as op
 
