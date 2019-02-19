@@ -63,10 +63,6 @@ def get_parser():
                                                 "single shell tissue. This "
                                                 "option uses DTI algorithms "
                                                 "instead of iFOD2 algorithm")
-    g_opt.add_argument("-r", "--resample", dest="resample", default=None,
-                                           type=float,
-                                           help="Resample to isotropic "
-                                                "resolution in mm")
     g_opt.add_argument("-w", "--work_dir", dest="work_dir",
                                            help="Work directory. Defaults to "
                                             "<bids_dir>/derivatives/scratch")
@@ -111,7 +107,6 @@ def main():
     nthreads = int(args.nthreads)
     bmask = args.brainmask
     sshell = args.sshell
-    resample = args.resample
 
     deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
 
@@ -152,21 +147,21 @@ def main():
     # MRTrix preprocessing workflow
     dholl_preproc_wf = preproc_wf.dholl_preproc_wf(shells=shells, lmax=lmax,
                                                    sshell=sshell,
-                                                   resample=resample,
                                                    template_dir=temp_dir,
                                                    template_label=temp_label,
                                                    wdir=work_dir,
                                                    nthreads=nthreads)
 
     dholl_tract_wf = tractography_wf.genDhollTract_wf(nfibers=nfibers,
+                                                      sshell=sshell,
                                                       wdir=work_dir,
                                                       nthreads=nthreads)
 
     # Rename nodes for sinking
-    renameWarp1 = io.renameFile(file_name='from-T1w_to-Template_xfm',
+    renameWarp1 = io.renameFile(file_name='from-dwi_to-Template_xfm',
                                 node_name='renameWarp1', wdir=work_dir,
                                 nthreads=nthreads)
-    renameWarp2 = io.renameFile(file_name='from-Template_to-T1w_xfm',
+    renameWarp2 = io.renameFile(file_name='from-Template_to-dwi_xfm',
                                 node_name='renameWarp2', wdir=work_dir,
                                 nthreads=nthreads)
     renameFOD = io.renameFile(file_name='space-Template_model-CSD_WMFODNorm',
@@ -228,98 +223,192 @@ def main():
     pl = pe.Workflow(name='genDhollanderTractography')
     pl.base_dir = work_dir
 
-    pl.connect([
-                # Input
-                (BIDSDataGrabber, dholl_preproc_wf, [
-                    ('nifti', 'dwiConvert.in_file'),
-                    ('bdata', 'dwiConvert.grad_fsl'),
-                    ('mask', 'maskConvert.in_file')]),
+    if sshell is False:  # Multi-shell
+        pl.connect([
+                    # Input
+                    (BIDSDataGrabber, dholl_preproc_wf, [
+                        ('nifti', 'dwiConvert.in_file'),
+                        ('bdata', 'dwiConvert.grad_fsl'),
+                        ('mask', 'maskConvert.in_file')]),
 
-                # Workflows
-                (dholl_preproc_wf, dholl_tract_wf, [
-                    ('FODTransform.out_file', 'genTract.in_file'),
-                    ('MaskTransform.out_file', 'genTract.seed_image'),
-                    ('MaskTransform.out_file', 'genTract.roi_mask'),
-                    ('FODTransform.out_file', 'siftTract.in_fod')]),
+                    # Workflows
+                    (dholl_preproc_wf, dholl_tract_wf, [
+                        ('FODTransform.out_file', 'genTract.in_file'),
+                        ('MaskTransform.out_file', 'genTract.seed_image'),
+                        ('MaskTransform.out_file', 'genTract.roi_mask'),
+                        ('FODTransform.out_file', 'siftTract.in_fod')]),
 
-                # File rename
-                (BIDSDataGrabber, renameWarp1, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameWarp1, [
-                    ('WarpSelect1.out', 'in_file')]),
-                (BIDSDataGrabber, renameWarp2, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameWarp2, [
-                    ('WarpSelect2.out', 'in_file')]),
-                (BIDSDataGrabber, renameFOD, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameFOD, [
-                    ('FODTransform.out_file', 'in_file')]),
-                (BIDSDataGrabber, renameMask, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameMask, [
-                    ('MaskTransform.out_file', 'in_file')]),
-                (BIDSDataGrabber, renameDWINorm, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameDWINorm, [
-                    ('DWITransform.out_file', 'in_file')]),
-                (BIDSDataGrabber, renameDTI, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameDTI, [
-                    ('FitTensor.out_file', 'in_file')]),
-                (BIDSDataGrabber, renameFA, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameFA, [
-                    ('TensorMetrics.out_fa', 'in_file')]),
-                (BIDSDataGrabber, renameMD, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameMD, [
-                    ('TensorMetrics.out_adc', 'in_file')]),
-                (BIDSDataGrabber, renameAD, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameAD, [
-                    ('TensorMetrics.out_ad', 'in_file')]),
-                (BIDSDataGrabber, renameRD, [
-                    ('subjid', 'subjid')]),
-                (dholl_preproc_wf, renameRD, [
-                    ('TensorMetrics.out_rd', 'in_file')]),
-                (BIDSDataGrabber, renameTract, [
-                    ('subjid', 'subjid')]),
-                (dholl_tract_wf, renameTract, [
-                    ('convTract.out_file', 'in_file')]),
-                (BIDSDataGrabber, renameTck, [
-                    ('subjid', 'subjid')]),
-                (dholl_tract_wf, renameTck, [
-                    ('siftTract.out_file', 'in_file')]),
+                    # File rename
+                    (BIDSDataGrabber, renameWarp1, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameWarp1, [
+                        ('WarpSelect1.out', 'in_file')]),
+                    (BIDSDataGrabber, renameWarp2, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameWarp2, [
+                        ('WarpSelect2.out', 'in_file')]),
+                    (BIDSDataGrabber, renameFOD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameFOD, [
+                        ('FODTransform.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameMask, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameMask, [
+                        ('MaskTransform.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameDWINorm, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameDWINorm, [
+                        ('DWITransform.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameDTI, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameDTI, [
+                        ('FitTensor.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameFA, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameFA, [
+                        ('TensorMetrics.out_fa', 'in_file')]),
+                    (BIDSDataGrabber, renameMD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameMD, [
+                        ('TensorMetrics.out_adc', 'in_file')]),
+                    (BIDSDataGrabber, renameAD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameAD, [
+                        ('TensorMetrics.out_ad', 'in_file')]),
+                    (BIDSDataGrabber, renameRD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameRD, [
+                        ('TensorMetrics.out_rd', 'in_file')]),
+                    (BIDSDataGrabber, renameTract, [
+                        ('subjid', 'subjid')]),
+                    (dholl_tract_wf, renameTract, [
+                        ('convTract.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameTck, [
+                        ('subjid', 'subjid')]),
+                    (dholl_tract_wf, renameTck, [
+                        ('siftTract.out_file', 'in_file')]),
 
-                # Output
-                (BIDSDataGrabber, subjSink, [
-                    ('subjid', 'container')]),
-                (renameWarp1, subjSink, [
-                    ('out_file', 'transform.@warp1')]),
-                (renameWarp2, subjSink, [
-                    ('out_file', 'transform.@warp2')]),
-                (renameFOD, subjSink, [
-                    ('out_file', 'response.@wmfod')]),
-                (renameMask, subjSink, [
-                    ('out_file', 'dwi.@mask')]),
-                (renameDWINorm, subjSink, [
-                    ('out_file', 'dwi.@data')]),
-                (renameDTI, subjSink, [
-                    ('out_file', 'dti.@tensor')]),
-                (renameFA, subjSink, [
-                    ('out_file', 'dti.@fa')]),
-                (renameMD, subjSink, [
-                    ('out_file', 'dti.@md')]),
-                (renameAD, subjSink, [
-                    ('out_file', 'dti.@ad')]),
-                (renameRD, subjSink, [
-                    ('out_file', 'dti.@rd')]),
-                (renameTract, subjSink, [
-                    ('out_file', 'tractography.@tract')]),
-                (renameTck, subjSink, [
-                    ('out_file', 'tractography.@tck')])
-            ])
+                    # Output
+                    (BIDSDataGrabber, subjSink, [
+                        ('subjid', 'container')]),
+                    (renameWarp1, subjSink, [
+                        ('out_file', 'transform.@warp1')]),
+                    (renameWarp2, subjSink, [
+                        ('out_file', 'transform.@warp2')]),
+                    (renameFOD, subjSink, [
+                        ('out_file', 'response.@wmfod')]),
+                    (renameMask, subjSink, [
+                        ('out_file', 'dwi.@mask')]),
+                    (renameDWINorm, subjSink, [
+                        ('out_file', 'dwi.@data')]),
+                    (renameDTI, subjSink, [
+                        ('out_file', 'dti.@tensor')]),
+                    (renameFA, subjSink, [
+                        ('out_file', 'dti.@fa')]),
+                    (renameMD, subjSink, [
+                        ('out_file', 'dti.@md')]),
+                    (renameAD, subjSink, [
+                        ('out_file', 'dti.@ad')]),
+                    (renameRD, subjSink, [
+                        ('out_file', 'dti.@rd')]),
+                    (renameTract, subjSink, [
+                        ('out_file', 'tractography.@tract')]),
+                    (renameTck, subjSink, [
+                        ('out_file', 'tractography.@tck')])
+                ])
+    else:  # Single-shell
+        pl.connect([
+                    # Input
+                    (BIDSDataGrabber, dholl_preproc_wf, [
+                        ('nifti', 'dwiConvert.in_file'),
+                        ('bdata', 'dwiConvert.grad_fsl'),
+                        ('mask', 'maskConvert.in_file')]),
+
+                    # Workflows
+                    (dholl_preproc_wf, dholl_tract_wf, [
+                        ('DWITransform.out_file', 'genTract.in_file'),
+                        ('MaskTransform.out_file', 'genTract.seed_image'),
+                        ('MaskTransform.out_file', 'genTract.roi_mask'),
+                        ('FODTransform.out_file', 'siftTract.in_fod')]),
+
+                    # File rename
+                    (BIDSDataGrabber, renameWarp1, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameWarp1, [
+                        ('WarpSelect1.out', 'in_file')]),
+                    (BIDSDataGrabber, renameWarp2, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameWarp2, [
+                        ('WarpSelect2.out', 'in_file')]),
+                    (BIDSDataGrabber, renameFOD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameFOD, [
+                        ('FODTransform.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameMask, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameMask, [
+                        ('MaskTransform.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameDWINorm, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameDWINorm, [
+                        ('DWITransform.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameDTI, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameDTI, [
+                        ('FitTensor.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameFA, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameFA, [
+                        ('TensorMetrics.out_fa', 'in_file')]),
+                    (BIDSDataGrabber, renameMD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameMD, [
+                        ('TensorMetrics.out_adc', 'in_file')]),
+                    (BIDSDataGrabber, renameAD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameAD, [
+                        ('TensorMetrics.out_ad', 'in_file')]),
+                    (BIDSDataGrabber, renameRD, [
+                        ('subjid', 'subjid')]),
+                    (dholl_preproc_wf, renameRD, [
+                        ('TensorMetrics.out_rd', 'in_file')]),
+                    (BIDSDataGrabber, renameTract, [
+                        ('subjid', 'subjid')]),
+                    (dholl_tract_wf, renameTract, [
+                        ('convTract.out_file', 'in_file')]),
+                    (BIDSDataGrabber, renameTck, [
+                        ('subjid', 'subjid')]),
+                    (dholl_tract_wf, renameTck, [
+                        ('siftTract.out_file', 'in_file')]),
+
+                    # Output
+                    (BIDSDataGrabber, subjSink, [
+                        ('subjid', 'container')]),
+                    (renameWarp1, subjSink, [
+                        ('out_file', 'transform.@warp1')]),
+                    (renameWarp2, subjSink, [
+                        ('out_file', 'transform.@warp2')]),
+                    (renameFOD, subjSink, [
+                        ('out_file', 'response.@wmfod')]),
+                    (renameMask, subjSink, [
+                        ('out_file', 'dwi.@mask')]),
+                    (renameDWINorm, subjSink, [
+                        ('out_file', 'dwi.@data')]),
+                    (renameDTI, subjSink, [
+                        ('out_file', 'dti.@tensor')]),
+                    (renameFA, subjSink, [
+                        ('out_file', 'dti.@fa')]),
+                    (renameMD, subjSink, [
+                        ('out_file', 'dti.@md')]),
+                    (renameAD, subjSink, [
+                        ('out_file', 'dti.@ad')]),
+                    (renameRD, subjSink, [
+                        ('out_file', 'dti.@rd')]),
+                    (renameTract, subjSink, [
+                        ('out_file', 'tractography.@tract')]),
+                    (renameTck, subjSink, [
+                        ('out_file', 'tractography.@tck')])
+                ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
     pl.write_graph(graph2use='colored', format='svg')
