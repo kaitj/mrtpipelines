@@ -169,13 +169,13 @@ def main():
     renameWarp2 = io.renameFile(file_name='from-Template_to-T1w_xfm',
                                 node_name='renameWarp2', wdir=work_dir,
                                 nthreads=nthreads)
-    renameFOD = io.renameFile(file_name='space-Template_model-CSD_WMFOD',
+    renameFOD = io.renameFile(file_name='space-Template_model-CSD_WMFODNorm',
                               node_name='renameFOD', wdir=work_dir,
                               nthreads=nthreads)
     renameMask = io.renameFile(file_name='space-Template_brainmask',
                                node_name='renameMask', wdir=work_dir,
                                nthreads=nthreads)
-    renameDWINorm = io.renameFile(file_name='space-Template_desc-WLS_model-DTI',
+    renameDWINorm = io.renameFile(file_name='space-Template_dwiNorm',
                                   node_name='renameDWINorm', wdir=work_dir,
                                   nthreads=nthreads)
     renameDTI = io.renameFile(file_name='space-Template_desc-WLS_model-DTI_Tensor',
