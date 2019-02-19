@@ -5,8 +5,8 @@ from nipype.interfaces import mrtrix3 as mrt
 from mrtpipelines.interfaces import io
 
 def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
-                     noreorient=False, template_dir=None, template_label=None,
-                     wdir=None, nthreads=1, name='dholl_preproc_wf'):
+                     template_dir=None, template_label=None, wdir=None,
+                     nthreads=1, name='dholl_preproc_wf'):
     """
     Set up Dhollander response preproc workflow
     No assumption of registration to T1w space is made
@@ -31,9 +31,9 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     dwi2response = pe.Node(mrt.ResponseSD(), name='dwi2response')
     dwi2response.base_dir = wdir
     dwi2response.inputs.algorithm = 'dhollander'
-    dwi2response.inputs.wm_file = 'space-dwi_wm.txt'
-    dwi2response.inputs.gm_file = 'space-dwi_gm.txt'
-    dwi2response.inputs.csf_file = 'space-dwi_csf.txt'
+    dwi2response.inputs.wm_file = 'space-dwi_model-CSD_WMResp.txt'
+    dwi2response.inputs.gm_file = 'space-dwi_model-CSD_GMResp.txt'
+    dwi2response.inputs.csf_file = 'space-dwi_model-CSD_CSFResp.txt'
     dwi2response.inputs.max_sh = lmax
     dwi2response.inputs.shell = shells
     dwi2response.inputs.nthreads = nthreads
@@ -50,18 +50,20 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     dwi2fod.base_dir = wdir
     dwi2fod.inputs.algorithm = 'msmt_csd'
     dwi2fod.inputs.shell = shells
-    if sshell is not True:
-        dwi2fod.inputs.gm_odf = 'gm.mif'
-    dwi2fod.inputs.csf_odf = 'csf.mif'
+    dwi2fod.inputs.wm_odf = 'space-dwi_model-CSD_WMFOD.mif'
+    if sshell is False:
+        dwi2fod.inputs.gm_odf = 'space-dwi_model-CSD_GMFOD.mif'
+    dwi2fod.inputs.csf_odf = 'space-dwi_model-CSD_CSFFOD.mif'
     dwi2fod.inputs.nthreads = nthreads
     dwi2fod.interface.num_threads = nthreads
 
     # mtnormalise
     mtnormalise = pe.Node(mrt.MTNormalise(), name='mtnormalise')
     mtnormalise.base_dir = wdir
-    if sshell is not True:
-        mtnormalise.inputs.out_gm = 'gmfod_norm.mif'
-    mtnormalise.inputs.out_csf = 'csffod_norm.mif'
+    mtnormalise.inputs.out_wm = 'space-dwi_model-CSD_WMFODNorm.mif'
+    if sshell is False:
+        mtnormalise.inputs.out_gm = 'space-dwi_model-CSD_GMFODNorm.mif'
+    mtnormalise.inputs.out_csf = 'space-dwi_model-CSD_CSFFODNorm.mif'
     mtnormalise.inputs.nthreads = nthreads
     mtnormalise.interface.num_threads = nthreads
 
@@ -69,8 +71,8 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     MRRegister = pe.Node(mrt.MRRegister(), name='MRRegister')
     MRRegister.base_dir = wdir
     # MRRegister.inputs.ref_file = template
-    MRRegister.inputs.nl_warp = ['subj_2_template.mif',
-                                 'template_2_subj.mif']
+    MRRegister.inputs.nl_warp = ['from-dwi_to-Template',
+                                 'from-Template_to-dwi']
     MRRegister.inputs.nthreads = nthreads
     MRRegister.interface.num_threads = nthreads
 
@@ -88,13 +90,13 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     # Warp data
     MaskTransform = pe.Node(mrt.MRTransform(), name='MaskTransform')
     MaskTransform.base_dir = wdir
-    MaskTransform.inputs.out_file = 'space-Template_mask.mif'
+    MaskTransform.inputs.out_file = 'space-Template_brainmask.mif'
     MaskTransform.inputs.nthreads = nthreads
     MaskTransform.interface.num_threads = nthreads
 
     FODTransform = pe.Node(mrt.MRTransform(), name='FODTransform')
     FODTransform.base_dir = wdir
-    FODTransform.inputs.out_file = 'space-Template_wmfod_norm.mif'
+    FODTransform.inputs.out_file = 'space-Template_model-CSD_WMFODNorm.mif'
     FODTransform.inputs.modulate
     FODTransform.inputs.nthreads = nthreads
     FODTransform.interface.num_threads = nthreads
@@ -102,28 +104,28 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     # Tensor processing
     DWINormalise = pe.Node(mrt.DWINormalise(), name='DWINormalise')
     DWINormalise.base_dir = wdir
-    DWINormalise.inputs.out_file = 'space-dwi_norm.mif'
+    DWINormalise.inputs.out_file = 'space-dwi_dwiNorm.mif'
     DWINormalise.inputs.nthreads = nthreads
     DWINormalise.interface.num_threads = nthreads
 
     DWITransform = pe.Node(mrt.MRTransform(), name='DWITransform')
     DWITransform.base_dir = wdir
-    DWITransform.inputs.out_file = 'space-Template_norm.mif'
+    DWITransform.inputs.out_file = 'space-Template_dwiNorm.mif'
     DWITransform.inputs.nthreads = nthreads
     DWITransform.interface.num_threads = nthreads
 
     FitTensor = pe.Node(mrt.FitTensor(), name='FitTensor')
     FitTensor.base_dir = wdir
-    FitTensor.inputs.out_file = 'space-Template_tensor.mif'
+    FitTensor.inputs.out_file = 'space-Template_desc-WLS_model-DTI_tensor.mif'
     FitTensor.inputs.nthreads = nthreads
     FitTensor.interface.num_threads = nthreads
 
     TensorMetrics = pe.Node(mrt.TensorMetrics(), name='TensorMetrics')
     TensorMetrics.base_dir = wdir
-    TensorMetrics.inputs.out_fa = 'space-Template_fa.mif'
-    TensorMetrics.inputs.out_adc = 'space-Template_md.mif'
-    TensorMetrics.inputs.out_ad = 'space-Template_ad.mif'
-    TensorMetrics.inputs.out_rd = 'space-Template_rd.mif'
+    TensorMetrics.inputs.out_fa = 'space-Template_model-DTI_FA.mif'
+    TensorMetrics.inputs.out_adc = 'space-Template_model-DTI_MD.mif'
+    TensorMetrics.inputs.out_ad = 'space-Template_model-DTI_AD.mif'
+    TensorMetrics.inputs.out_rd = 'space-Template_model-DTI_RD.mif'
     TensorMetrics.inputs.nthreads = nthreads
     TensorMetrics.interface.num_threads = nthreads
 
@@ -141,6 +143,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
             (dwi2fod, mtnormalise, [('wm_odf', 'in_wm'),
                                     ('csf_odf', 'in_csf')]),
             (maskConvert, dwi2response, [('out_file', 'in_mask')]),
+            (maskConvert, dwi2fod, [('out_file', 'mask_file')]),
             (maskConvert, mtnormalise, [('out_file', 'mask')]),
             (maskConvert, MRRegister, [('out_file', 'mask1')]),
             (templateGrabber, MRRegister, [('wm_fod', 'ref_file'),
@@ -176,6 +179,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
                                     ('gm_odf', 'in_gm'),
                                     ('csf_odf', 'in_csf')]),
             (maskConvert, dwi2response, [('out_file', 'in_mask')]),
+            (maskConvert, dwi2fod, [('out_file', 'mask_file')]),
             (maskConvert, mtnormalise, [('out_file', 'mask')]),
             (maskConvert, MRRegister, [('out_file', 'mask1')]),
             (templateGrabber, MRRegister, [('wm_fod', 'ref_file'),
