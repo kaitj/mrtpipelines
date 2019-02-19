@@ -39,13 +39,13 @@ def genDhollTract_wf(nfibers=50000, sshell=False, wdir=None, nthreads=1,
     if sshell is False:  # Multi-shell
         tractConvert.inputs.out_file = 'space-Template_desc-iFOD2_tractography.vtk'
     else:  # Single-shell
-        tractConvert.inputs.out_file = 'space-Template_desc-TensorProb.tractography.vtk'
+        tractConvert.inputs.out_file = 'space-Template_desc-TensorProb_tractography.vtk'
     tractConvert.inputs.nthreads = nthreads
     tractConvert.interface.num_threads = nthreads
 
     # Build workflow
     workflow = pe.Workflow(name=name)
-    
+
     workflow.connect([
         (genTract, siftTract, [('out_file', 'in_file')]),
         (siftTract, tractConvert, [('out_file', 'in_file')])
