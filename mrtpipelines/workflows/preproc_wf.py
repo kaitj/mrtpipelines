@@ -71,8 +71,8 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     MRRegister = pe.Node(mrt.MRRegister(), name='MRRegister')
     MRRegister.base_dir = wdir
     # MRRegister.inputs.ref_file = template
-    MRRegister.inputs.nl_warp = ['from-dwi_to-Template',
-                                 'from-Template_to-dwi']
+    MRRegister.inputs.nl_warp = ['from-dwi_to-Template_xfm',
+                                 'from-Template_to-dwi_xfm']
     MRRegister.inputs.nthreads = nthreads
     MRRegister.interface.num_threads = nthreads
 
