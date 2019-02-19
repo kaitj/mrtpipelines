@@ -14,9 +14,9 @@ def get_parser():
     from mrtpipelines._version import __version__
 
     parser = ArgumentParser(description="Pipeline to generate MRTrix3 "
-                                        "multi-shell multi-tissue CSD "
-                                        "tractography with Dhollander "
-                                        "response",
+                                        "multi-shell (iFOD2) or single-shell "
+                                        "(probabilistic tensor) tractography "
+                                        "with Dhollander response",
                             formatter_class=RawTextHelpFormatter)
 
     # Version option
