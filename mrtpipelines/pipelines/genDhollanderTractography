@@ -60,7 +60,9 @@ def get_parser():
     g_opt.add_argument("-ss", "--single-shell", dest="sshell", default=False,
                                                 action='store_true',
                                                 help="Processing for "
-                                                "single shell tissue")
+                                                "single shell tissue. This "
+                                                "option uses DTI algorithms "
+                                                "instead of iFOD2 algorithm")
     g_opt.add_argument("-r", "--resample", dest="resample", default=None,
                                            type=float,
                                            help="Resample to isotropic "
@@ -161,42 +163,50 @@ def main():
                                                       nthreads=nthreads)
 
     # Rename nodes for sinking
-    renameWarp1 = io.renameFile(file_name='space-Template_warp',
+    renameWarp1 = io.renameFile(file_name='from-T1w_to-Template_xfm',
                                 node_name='renameWarp1', wdir=work_dir,
                                 nthreads=nthreads)
-    renameWarp2 = io.renameFile(file_name='space-dwi_warp',
+    renameWarp2 = io.renameFile(file_name='from-Template_to-T1w_xfm',
                                 node_name='renameWarp2', wdir=work_dir,
                                 nthreads=nthreads)
-    renameFOD = io.renameFile(file_name='space-Template_wmfod_norm',
+    renameFOD = io.renameFile(file_name='space-Template_model-CSD_WMFOD',
                               node_name='renameFOD', wdir=work_dir,
                               nthreads=nthreads)
     renameMask = io.renameFile(file_name='space-Template_brainmask',
                                node_name='renameMask', wdir=work_dir,
                                nthreads=nthreads)
-    renameDWINorm = io.renameFile(file_name='space-Template_normalize',
+    renameDWINorm = io.renameFile(file_name='space-Template_desc-WLS_model-DTI',
                                   node_name='renameDWINorm', wdir=work_dir,
                                   nthreads=nthreads)
-    renameDTI = io.renameFile(file_name='space-Template_tensor',
+    renameDTI = io.renameFile(file_name='space-Template_desc-WLS_model-DTI_Tensor',
                               node_name='renameDTI', wdir=work_dir,
                               nthreads=nthreads)
-    renameFA = io.renameFile(file_name='space-Template_fa',
+    renameFA = io.renameFile(file_name='space-Template_model-DTI_FA',
                              node_name='renameFA', wdir=work_dir,
                              nthreads=nthreads)
-    renameMD = io.renameFile(file_name='space-Template_md',
+    renameMD = io.renameFile(file_name='space-Template_model-DTI_MD',
                              node_name='renameMD', wdir=work_dir,
                              nthreads=nthreads)
-    renameAD = io.renameFile(file_name='space-Template_ad',
+    renameAD = io.renameFile(file_name='space-Template_model-DTI_AD',
                              node_name='renameAD', wdir=work_dir,
                              nthreads=nthreads)
-    renameRD = io.renameFile(file_name='space-Template_rd',
+    renameRD = io.renameFile(file_name='space-Template_model-DTI_RD',
                              node_name='renameRD', wdir=work_dir,
                              nthreads=nthreads)
-    renameTract = io.renameFile(file_name=('space-Template_variant-tcksift_streamlines-%d_tract' % nfibers),
-                                node_name='renameTract', wdir=work_dir,
-                                nthreads=nthreads)
-    renameTck = io.renameFile(file_name=('space-Template_variant-tcksift_streamlines-%d_tract' % nfibers),
-                              node_name='renameTck', wdir=work_dir,
-                              nthreads=nthreads)
+    if sshell is False:  # Multi-shell
+        renameTract = io.renameFile(file_name='space-Template_desc-iFOD2_tractography',
+                                    node_name='renameTract', wdir=work_dir,
+                                    nthreads=nthreads)
+        renameTck = io.renameFile(file_name='space-Template_desc-iFOD2_tractography',
+                                  node_name='renameTck', wdir=work_dir,
+                                  nthreads=nthreads)
+    else:  # Single shell
+        renameTract = io.renameFile(file_name='space-Template_desc-TensorProb_tractography',
+                                    node_name='renameTract', wdir=work_dir,
+                                    nthreads=nthreads)
+        renameTck = io.renameFile(file_name='space-Template_desc-TensorProb_tractography',
+                                  node_name='renameTck', wdir=work_dir,
+                                  nthreads=nthreads)
 
     # Subject datasink
     subjSink = io.subjSink(out_dir, wdir=work_dir, nthreads=nthreads)
