@@ -134,7 +134,8 @@ def main():
                                       'log_to_file': True,
                                       },
                           'execution': {'crashdump_dir': crash_dir,
-                                        'crashfile_format': 'txt'
+                                        'crashfile_format': 'txt',
+                                        'hash_method': 'content'
                                         }})
     logging.update_logging(config)
 
