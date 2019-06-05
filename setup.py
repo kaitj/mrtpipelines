@@ -10,7 +10,7 @@ setup(
               'mrtpipelines/interfaces',
               'mrtpipelines/workflows'],
     scripts=['mrtpipelines/pipelines/genHCPURTemplate',
-             'mrtpipelines/pipelines/genTemplate'
+             'mrtpipelines/pipelines/genTemplate',
              'mrtpipelines/pipelines/xfmTracts'],
 
     # Metadata
