@@ -64,7 +64,7 @@ def main():
     # Convert to from .vtk to .tck
     ftck = in_file.split('.', -1)[-2]
     ftck = ftck.split('/', -1)[-1]
-    ftck = op.join(out_dir, ftck) + '.tck'
+    ftck = op.join(op.abspath(out_dir), ftck) + '.tck'
 
     cmd = proc_cmd("tckconvert -nthreads %d %s %s" % (nthreads, in_file, ftck))
     conv1_proc = subprocess.Popen(cmd,
@@ -92,7 +92,7 @@ def main():
     if args.verbose != 0:
         print("\nConverting back to vtk file...")
 
-    # Convert to text file
+    # Convert to vtk
     fvtk = ftck_xfm.split('.', -1)[-2]
     fvtk = fvtk + '.vtk'
 
