@@ -2,8 +2,8 @@ FROM kaitj/mrtpipelines_template:base
 
 MAINTAINER <tkai@uwo.ca>
 
-# run mkdir -p /src/install_scripts
-# COPY ./install_scripts/*.sh /src/install_scripts/
+run mkdir -p /src/install_scripts
+COPY ./install_scripts/*.sh /src/install_scripts/
 
 ENV DEBIAN_FRONTEND noninteractive
 # RUN bash /src/install_scripts/00_install_basics.sh > log_00_basics
