@@ -14,7 +14,7 @@ def get_parser():
     Argument Parser
     """
     from argparse import ArgumentParser, RawTextHelpFormatter
-    from neurobeer._version import __version__
+    from mrtpipelines._version import __version__
 
     parser = ArgumentParser(description=('Tracks scalar information to vtk '
                                          'polydata and returns text file'),
