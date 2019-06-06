@@ -63,7 +63,7 @@ def main():
     ftck = ftck.split('/', -1)[-1]
     ftck = op.join(op.abspath(out_dir), ftck) + '.tck'
 
-    cmd = proc_cmd("tckconvert %s %s" % (in_file, ftck))
+    cmd = proc_cmd("tckconvert -nthreads 1 %s %s" % (in_file, ftck))
     conv1_proc = subprocess.Popen(cmd,
                                   stdout=open(os.devnull, 'wb')).communicate()
 
@@ -77,7 +77,7 @@ def main():
 
     ftck_xfm = ftck.replace('Clustered.tck', 'xfm_Clustered.tck')
 
-    cmd = proc_cmd("tcktransform %s %s %s" % (ftck, warp, ftck_xfm))
+    cmd = proc_cmd("tcktransform -nthreads 1 %s %s %s" % (ftck, warp, ftck_xfm))
     xfm_proc = subprocess.Popen(cmd,
                                 stdout=open(os.devnull, 'wb')).communicate()
 
@@ -92,7 +92,7 @@ def main():
     fvtk = ftck_xfm.split('.', -1)[-2]
     fvtk = fvtk + '.vtk'
 
-    cmd = proc_cmd("tckconvert %s %s" % (ftck_xfm, fvtk))
+    cmd = proc_cmd("tckconvert -nthreads 1 %s %s" % (ftck_xfm, fvtk))
     conv2_proc = subprocess.Popen(cmd,
                                   stdout=open(os.devnull, 'wb')).communicate()
 
