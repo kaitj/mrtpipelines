@@ -13,7 +13,7 @@ jobs:
     # Checkout correct branch
     - uses: actions/checkout@master
       with:
-        ref: reafs/heads/master
+        ref: refs/heads/master
 
     # Build and deploy docker dev image
     - name: Build & deploy MRTPipelines Docker image
