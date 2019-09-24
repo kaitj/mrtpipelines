@@ -16,7 +16,7 @@ jobs:
         ref: ${{ github.ref }}
 
     # Build and deploy docker dev image
-    - name: Build & deploy Docker dev image
+    - name: Build & deploy MRTPipelines Docker base image
       if: github.ref == 'refs/heads/base'
       env:
         DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
