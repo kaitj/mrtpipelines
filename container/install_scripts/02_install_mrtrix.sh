@@ -9,6 +9,8 @@ apt-get install -y g++ python python-numpy libeigen3-dev zlib1g-dev libqt4-openg
 
 # install mrtrix3
 git clone https://github.com/MRtrix3/mrtrix3.git $DIR/mrtrix3
+# install mrtrix3tissue
+# git clone https://github.com/3Tissue/MRTrix3Tissue.git $DIR/mrtrix3
 
 cd $DIR/mrtrix3
 ./configure
