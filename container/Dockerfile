@@ -1,4 +1,4 @@
-FROM kaitj/mrtpipelines_template:base
+FROM kaitj/mrtpipelines:base
 
 MAINTAINER <tkai@uwo.ca>
 
