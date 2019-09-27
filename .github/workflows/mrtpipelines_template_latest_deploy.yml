@@ -29,10 +29,10 @@ jobs:
         echo 'Building docker image...'
         echo ''
         cd container
-        docker build . --tag kaitj/mrtpipelines_template:latest
+        docker build . --tag $DOCKER_HUB_USER/mrtpipelines_template:latest
         echo ''
         echo 'Pushing docker image...'
         echo ''
-        docker push kaitj/mrtpipelines_template:latest
+        docker push $DOCKER_HUB_USER/mrtpipelines_template:latest
         echo ''
         echo 'Finished deploying docker image!'
