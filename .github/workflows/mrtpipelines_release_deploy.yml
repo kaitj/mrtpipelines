@@ -13,7 +13,7 @@ jobs:
     steps:
     # Pull and check version
     - uses: actions/checkout@master
-    - name: Set env
+    - name: Set env & deploy with specific release version
       run: |
         echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
     - name: Check version
@@ -39,4 +39,4 @@ jobs:
         echo ''
         docker push $DOCKER_HUB_USER/mrtpipelines:$RELEASE_VERSION
         echo ''
-        echo 'Finished deploying docker image, version $RELEASE_VERSION!'
+        echo 'Finished deploying docker image, version $RELEASE_VERSION'
