@@ -5,8 +5,8 @@ from nipype.interfaces import mrtrix3 as mrt
 from mrtpipelines.interfaces import io
 
 def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
-                     template_dir=None, template_label=None, wdir=None,
-                     nthreads=1, name='dholl_preproc_wf'):
+                     noreorient=False, template_dir=None, template_label=None,
+                     wdir=None, nthreads=1, name='dholl_preproc_wf'):
     """
     Set up Dhollander response preproc workflow
     No assumption of registration to T1w space is made
@@ -73,6 +73,8 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     # MRRegister.inputs.ref_file = template
     MRRegister.inputs.nl_warp = ['from-dwi_to-Template_xfm.mif',
                                  'from-Template_to-dwi_xfm.mif']
+    if noreorient is True:
+        MRRegister.inputs.noreorientation
     MRRegister.inputs.nthreads = nthreads
     MRRegister.interface.num_threads = nthreads
 
