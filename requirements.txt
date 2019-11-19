@@ -19,7 +19,7 @@ numpy==1.14.4
 packaging==17.1
 pbr==4.0.4
 pluggy==0.6.0
-prov==1.5.0
+prov==1.5.2
 py==1.5.3
 pybids==0.6.5
 pydot==1.2.4
