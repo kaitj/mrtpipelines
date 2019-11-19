@@ -112,6 +112,7 @@ def main():
     bmask = args.brainmask
     sshell = args.sshell
     noreorient = args.noreorient
+    print(noreorient)
 
     deriv_dir = op.join(op.realpath(bids_dir), "derivatives")
 
