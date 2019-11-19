@@ -74,7 +74,7 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     MRRegister.inputs.nl_warp = ['from-dwi_to-Template_xfm.mif',
                                  'from-Template_to-dwi_xfm.mif']
     if noreorient is not False:
-        MRRegister.inputs.noreorientation
+        MRRegister.inputs.noreorientation = noreorient
     MRRegister.inputs.nthreads = nthreads
     MRRegister.interface.num_threads = nthreads
 
@@ -99,7 +99,6 @@ def dholl_preproc_wf(shells=[0, 1000, 2000], lmax=[0, 8, 8], sshell=False,
     FODTransform = pe.Node(mrt.MRTransform(), name='FODTransform')
     FODTransform.base_dir = wdir
     FODTransform.inputs.out_file = 'space-Template_model-CSD_WMFODNorm.mif'
-    FODTransform.inputs.modulate
     FODTransform.inputs.nthreads = nthreads
     FODTransform.interface.num_threads = nthreads
 
