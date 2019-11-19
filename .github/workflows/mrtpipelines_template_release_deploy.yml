@@ -1,0 +1,42 @@
+name: MRTPipelines Docker
+
+on:
+  release:
+    types: [published]
+    tags:
+        - 'v*.*.*'
+
+jobs:
+  docker_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Pull and check version
+    - uses: actions/checkout@master
+    - name: Set env & deploy with specific release version
+      run: |
+        echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
+    - name: Check version
+      run: |
+        echo $RELEASE_VERSION
+    # Build and deploy docker dev image
+    - name: Deploy MRTPipelines Docker image with specific release
+      env:
+        DOCKER_HUB_USER: ${{ secrets.DOCKER_HUB_USER }}
+        DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY }}
+      run: |
+        echo 'Docker login'
+        echo ''
+        docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_KEY
+        echo ''
+        echo 'Pull latest docker image'
+        echo ''
+        cd container
+        docker pull $DOCKER_HUB_USER/mrtpipelines_template:latest
+        echo ''
+        echo 'Tag docker version'
+        docker tag $DOCKER_HUB_USER/mrtpipelines_template $DOCKER_HUB_USER/mrtpipelines_template:$RELEASE_VERSION
+        echo ''
+        docker push $DOCKER_HUB_USER/mrtpipelines_template:$RELEASE_VERSION
+        echo ''
+        echo 'Finished deploying docker image, version $RELEASE_VERSION'
