@@ -13,7 +13,7 @@ jobs:
     steps:
     # Pull and check version
     - uses: actions/checkout@master
-    - name: Set env & deploy with specific release version
+    - name: Set env 
       run: |
         echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10})
     - name: Check version
