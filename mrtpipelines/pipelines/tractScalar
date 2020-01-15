@@ -60,7 +60,7 @@ def main():
     args = get_parser().parse_args()
     # Required inputs
     bids_dir = args.bids_dir
-    subjid = args.subjid
+    subjid = args.participant_label
     scalar = args.scalar
 
     # Optional inputs
