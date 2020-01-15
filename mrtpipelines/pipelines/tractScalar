@@ -52,7 +52,7 @@ def main():
 
     from bids.grabbids import BIDSLayout
 
-    from nipype import engine as pe
+    from nipype.pipeline import engine as pe
     from nipype import config, logging
 
     from mrtpipelines.interfaces import io, tractography
