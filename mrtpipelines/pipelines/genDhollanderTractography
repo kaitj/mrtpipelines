@@ -420,7 +420,7 @@ def main():
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
     pl.write_graph(graph2use='colored', format='svg')
 
-    if nthreads >= 1:
+    if nthreads > 1:
         pl.run(plugin='MultiProc', plugin_args={'n_procs': 1})
     else:
         pl.run(plugin='Linear')
