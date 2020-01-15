@@ -9,7 +9,8 @@ setup(
     packages=['mrtpipelines',
               'mrtpipelines/interfaces',
               'mrtpipelines/workflows'],
-    scripts=['mrtpipelines/pipelines/genDhollanderTractography'],
+    scripts=['mrtpipelines/pipelines/genDhollanderTractography',
+             'mrtpipelines/pipelines/tractScalar'],
 
     # Metadata
     author='Jason Kai',
