@@ -106,7 +106,8 @@ def main():
 
     writeScalar = tractography.writeScalar(wdir=work_dir, nthreads=nthreads)
 
-    renameScalar = io.renameFile(file_name="space-Template_model-DTI_%s" % scalar,
+    filename = "space-Template_model-DTI_%s" % scalar
+    renameScalar = io.renameFile(file_name=filename,
                                  node_name="renameScalar", wdir=work_dir,
                                  nthreads=nthreads)
 
