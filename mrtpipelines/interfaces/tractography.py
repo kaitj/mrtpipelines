@@ -5,7 +5,7 @@ from nipype.interfaces import utility as niu
 import os.path as op
 
 def tckSample(wdir=None, nthreads=1):
-    tckSample = pe.Node(mrt.tcksample(), name='tckSample')
+    tckSample = pe.Node(mrt.TCKSample(), name='tckSample')
     tckSample.base_dir = wdir
     tckSample.inputs.nthreads = nthreads
     tckSample.interface.num_threads = nthreads
