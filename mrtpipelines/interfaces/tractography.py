@@ -7,8 +7,8 @@ import os.path as op
 def tckSample(wdir=None, nthreads=1):
     tckSample = pe.Node(mrt.TCKSample(), name='tckSample')
     tckSample.base_dir = wdir
+    tckSample.inputs.out_file = "scalar.txt"
     tckSample.inputs.nthreads = nthreads
-    tckSample.inputs.out_file = 'scalar.txt'
     tckSample.interface.num_threads = nthreads
 
     return tckSample
@@ -36,7 +36,7 @@ def _writeScalar(in_file, wdir):
 
     return out_file
 
-def writeScalar(wdir=None, nthreads=1):
+def writeScalar(wdir=None):
     writeScalar = pe.Node(niu.Function(function=_writeScalar,
                                        input_names=['in_file',
                                                     'wdir'],
@@ -44,4 +44,5 @@ def writeScalar(wdir=None, nthreads=1):
                                        name="writeScalar")
     writeScalar.base_dir = wdir
     writeScalar.inputs.wdir = wdir
-    writeScalar.interface.num_threads = nthreads
+
+    return writeScalar
