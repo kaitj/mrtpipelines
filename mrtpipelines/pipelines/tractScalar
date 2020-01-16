@@ -140,10 +140,10 @@ def main():
         # Output
         (BIDSScalarGrabber, subjSink, [
             ('subjid', 'container')
-        ]),
-        (renameScalar, subjSink, [
-            ('out_file', 'dti.@scalar')
         ])
+        # (renameScalar, subjSink, [
+        #     ('out_file', 'dti.@scalar')
+        # ])
     ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
