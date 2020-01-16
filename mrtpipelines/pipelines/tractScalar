@@ -104,7 +104,7 @@ def main():
 
     tckSample = tractography.tckSample(wdir=work_dir, nthreads=nthreads)
 
-    writeScalar = tractography.writeScalar(wdir=work_dir, nthreads=nthreads)
+    writeScalar = tractography.writeScalar(wdir=work_dir)
 
     filename = "space-Template_model-DTI_%s" % scalar
     renameScalar = io.renameFile(file_name=filename,
@@ -122,28 +122,16 @@ def main():
 
     pl.connect([
         # Input
-        (BIDSScalarGrabber, tckSample, [
-            ('tract', 'in_file'),
-            ('scalar', 'in_image')
-        ]),
+        (BIDSScalarGrabber, tckSample, [('tract', 'in_file'),
+                                        ('scalar', 'in_image')]),
         # Processing
-        (tckSample, writeScalar, [
-            ('out_file', 'in_file')
-        ]),
+        (tckSample, writeScalar, [('out_file', 'in_file')]),
         # File rename
-        (BIDSScalarGrabber, renameScalar, [
-            ('subjid', 'subjid'),
-        ]),
-        (writeScalar, renameScalar, [
-            ('out_file', 'in_file')
-        ]),
-        # Output
-        (BIDSScalarGrabber, subjSink, [
-            ('subjid', 'container')
-        ]),
-        (renameScalar, subjSink, [
-            ('out_file', 'dti.@scalar')
-        ])
+        (BIDSScalarGrabber, renameScalar, [('subjid', 'subjid')]),
+        (writeScalar, renameScalar, [('out_file', 'in_file')]),
+        # # Output
+        (BIDSScalarGrabber, subjSink, [('subjid', 'container')]),
+        (renameScalar, subjSink, [('out_file', 'dti.@scalar')])
     ])
 
     pl.write_graph(graph2use='flat', format='svg', simple_form=False)
