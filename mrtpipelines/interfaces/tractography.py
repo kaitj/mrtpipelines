@@ -8,6 +8,7 @@ def tckSample(wdir=None, nthreads=1):
     tckSample = pe.Node(mrt.TCKSample(), name='tckSample')
     tckSample.base_dir = wdir
     tckSample.inputs.nthreads = nthreads
+    tckSample.inputs.out_file = 'scalar.txt'
     tckSample.interface.num_threads = nthreads
 
     return tckSample
