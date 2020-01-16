@@ -68,12 +68,12 @@ def main():
 
     # Set work & crash directories
     if args.work_dir:
-        work_dir = op.join(op.realthpath(args.work_dir), subjid)
+        work_dir = op.join(op.realpath(args.work_dir), subjid)
         crash_dir = op.join(op.join(op.realpath(args.work_dir), subjid), "crash")
     else:
         work_dir = op.join(op.join(bids_dir, "work"), subjid)
-        crash_dir = op.join(op.join(op.join(op.realpath(bids_dir,
-                    "work")), subjid), "crash")
+        crash_dir = op.join(op.join(op.join(op.realpath(bids_dir),
+                    "work"), subjid), "crash")
 
     if not op.exists(work_dir):
         os.makedirs(work_dir)
