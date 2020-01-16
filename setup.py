@@ -3,7 +3,7 @@ from mrtpipelines._version import __version__
 
 setup(
     # Project information
-    name='MRTrix_Pipeline',
+    name='MRTrix3 Pipeline',
     version=__version__,
     description='Pipelines related to generating MRTrix tractography',
     packages=['mrtpipelines',
