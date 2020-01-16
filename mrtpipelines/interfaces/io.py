@@ -93,7 +93,7 @@ def _getScalarData(bids_layout, subjid, scalar):
     scalar = bids_layout.get(subject=subj, type=scalar,
                              return_type='file', extensions=['nii', 'nii.gz', 'mif'])
 
-    return subjid, tract, scalar
+    return subjid, tract[0], scalar[0]
 
 
 def getScalarData(layout, subj, scalar, wdir=None, nthreads=1):
