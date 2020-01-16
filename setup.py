@@ -3,7 +3,7 @@ from mrtpipelines._version import __version__
 
 setup(
     # Project information
-    name='MRTrix_TemplatePipeline',
+    name='MRTrix Base',
     version=__version__,
     description='Pipeline to generate templates using MRTrix3',
     packages=['mrtpipelines',
