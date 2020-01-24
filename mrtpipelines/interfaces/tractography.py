@@ -2,8 +2,6 @@ from nipype.pipeline import engine as pe
 from nipype.interfaces import mrtrix3 as mrt
 from nipype.interfaces import utility as niu
 
-import os.path as op
-
 def tckSample(wdir=None, nthreads=1):
     tckSample = pe.Node(mrt.TCKSample(), name='tckSample')
     tckSample.base_dir = wdir
@@ -14,6 +12,8 @@ def tckSample(wdir=None, nthreads=1):
     return tckSample
 
 def _writeScalar(in_file, wdir):
+    import os.path as op
+
     with open(in_file) as file:
         scalar_streamlines = [line.rstrip('\n') for line in file]
 
