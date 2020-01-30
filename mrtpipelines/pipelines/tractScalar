@@ -83,7 +83,6 @@ def main():
     # Set output directory
     if args.out_dir:
         out_dir = op.realpath(args.out_dir)
-        out_dir = op.join(op.join(out_dir, subjid), "dti")
     else:
         out_dir = op.join(op.join("mrtpipelines", subjid), "dti")
 
