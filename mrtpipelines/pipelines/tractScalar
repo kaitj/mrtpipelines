@@ -49,6 +49,7 @@ def main():
     """
     import os
     import os.path as op
+    from datetime import datetime
 
     from bids.grabbids import BIDSLayout
 
@@ -66,9 +67,14 @@ def main():
     # Optional inputs
     nthreads = int(args.nthreads)
 
+    # Get timestamp to distinguish work dirs for overwrite problem
+    now = datetime.now()
+    current_time = now.strftime("%Y-%m-%d_%Hh%Mm%Ss")
+
     # Set work & crash directories
     if args.work_dir:
-        work_dir = op.join(op.realpath(args.work_dir), subjid)
+        work_dir = op.join(op.join(op.realpath(args.work_dir), current_time),
+            subjid)
         crash_dir = op.join(op.join(op.realpath(args.work_dir), subjid), "crash")
     else:
         work_dir = op.join(op.join(bids_dir, "work"), subjid)
