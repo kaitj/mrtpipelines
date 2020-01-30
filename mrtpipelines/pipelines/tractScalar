@@ -77,7 +77,8 @@ def main():
             subjid)
         crash_dir = op.join(op.join(op.realpath(args.work_dir), subjid), "crash")
     else:
-        work_dir = op.join(op.join(bids_dir, "work"), subjid)
+        work_dir = op.join(op.join(op.join(bids_dir, "work"), current_time),
+            subjid)
         crash_dir = op.join(op.join(op.join(op.realpath(bids_dir),
                     "work"), subjid), "crash")
 
