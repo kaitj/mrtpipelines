@@ -12,7 +12,7 @@ def genDhollTract_wf(nfibers=50000, sshell=False, wdir=None, nthreads=1,
     # Generate tract
     genTract = pe.Node(mrt.Tractography(), name='genTract')
     genTract.base_dir = wdir
-    genTract.inputs.n_tracks = np.int(nfibers * 2)
+    genTract.inputs.n_tracks = np.int(nfibers * 10)
     if sshell is False:  # Single-shell
         genTract.inputs.out_file = 'space-Template_desc-iFOD2_tractography.tck'
         genTract.inputs.algorithm = 'iFOD2'
