@@ -105,8 +105,7 @@ def getScalarData(layout, subj, scalar, space, wdir=None, nthreads=1):
                                                         'space'],
                                            output_names=['subjid',
                                                          'tract',
-                                                         'scalar',
-                                                         'space']),
+                                                         'scalar']),
                                            name='BIDSScalarGrabber')
     BIDSScalarGrabber.base_dir = wdir
     BIDSScalarGrabber.inputs.bids_layout = layout
