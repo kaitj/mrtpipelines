@@ -53,7 +53,7 @@ def main():
     import os.path as op
     from datetime import datetime
 
-    from bids.grabbids import BIDSLayout
+    from bids.layout import BIDSLayout
 
     from nipype.pipeline import engine as pe
     from nipype import config, logging
@@ -107,7 +107,7 @@ def main():
     logging.update_logging(config)
 
     # Grab necessary files
-    layout = BIDSLayout(bids_dir)
+    layout = BIDSLayout(bids_dir, validate=False)
     BIDSScalarGrabber = io.getScalarData(layout=layout, subj=subjid,
                                          space=space, scalar=scalar,
                                          wdir=work_dir, nthreads=nthreads)
