@@ -83,32 +83,36 @@ def getBIDS(layout, subj, bmask, wdir=None, nthreads=1):
     return BIDSDataGrabber
 
 
-def _getScalarData(bids_layout, subjid, scalar):
+def _getScalarData(bids_layout, subjid, scalar, space):
     # Strip leading 'sub-'
     subj = subjid.lstrip('sub-')
 
     # Diffusion
-    tract = bids_layout.get(subject=subj, type='tractography',
+    tract = bids_layout.get(subject=subj, type='tractography', space=space,
                             return_type='file', extensions=['tck'])
-    scalar = bids_layout.get(subject=subj, type=scalar,
-                             return_type='file', extensions=['nii', 'nii.gz', 'mif'])
+    scalar = bids_layout.get(subject=subj, type=scalar, space=space,
+                             return_type='file',
+                             extensions=['nii', 'nii.gz', 'mif'])
 
     return subjid, tract[0], scalar[0]
 
 
-def getScalarData(layout, subj, scalar, wdir=None, nthreads=1):
+def getScalarData(layout, subj, scalar, space, wdir=None, nthreads=1):
     BIDSScalarGrabber = pe.Node(niu.Function(function=_getScalarData,
                                            input_names=['bids_layout',
                                                         'subjid',
-                                                        'scalar'],
+                                                        'scalar',
+                                                        'space'],
                                            output_names=['subjid',
                                                          'tract',
-                                                         'scalar']),
+                                                         'scalar',
+                                                         'space']),
                                            name='BIDSScalarGrabber')
     BIDSScalarGrabber.base_dir = wdir
     BIDSScalarGrabber.inputs.bids_layout = layout
     BIDSScalarGrabber.inputs.subjid = subj
     BIDSScalarGrabber.inputs.scalar = scalar
+    BIDSScalarGrabber.inputs.space = space
     BIDSScalarGrabber.interface.num_threads = nthreads
 
     return BIDSScalarGrabber
