@@ -89,10 +89,10 @@ def _getScalarData(bids_layout, subjid, scalar, space):
 
     # Diffusion
     tract = bids_layout.get(subject=subj, suffix='tractography', space=space,
-                            return_type='file', extensions=['tck'])
+                            return_type='file', extension=['tck'])
     scalar = bids_layout.get(subject=subj, suffix=scalar, space=space,
                              return_type='file',
-                             extensions=['nii', 'nii.gz', 'mif'])
+                             extension=['nii', 'nii.gz', 'mif'])
 
     return subjid, tract[0], scalar[0]
 

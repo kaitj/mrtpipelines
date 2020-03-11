@@ -109,7 +109,7 @@ def main():
     # Grab necessary files
     layout = BIDSLayout(bids_dir, validate=False)
     BIDSScalarGrabber = io.getScalarData(layout=layout, subj=subjid,
-                                         space=space, scalar=scalar,
+                                         scalar=scalar, space=space,
                                          wdir=work_dir, nthreads=nthreads)
 
     tckSample = tractography.tckSample(wdir=work_dir, nthreads=nthreads)
