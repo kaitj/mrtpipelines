@@ -24,7 +24,7 @@ pbr==4.0.4
 pluggy==0.6.0
 prov==1.5.2
 py==1.5.3
-pybids==0.7.1
+pybids==0.6.5
 pydot==1.2.4
 pydotplus==2.0.2
 pyparsing==2.2.0
