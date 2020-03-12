@@ -96,8 +96,8 @@ def _getScalarData(bids_layout, subjid, scalar, space):
 
     # Search for correct files via filter
     space_str = "space-%s" % space
-    tract = list(filter(lambda x: space_str in tract))
-    scalar = list(filter(lambda x: space_str in scalar))
+    tract = list(filter(lambda x: space_str in x, tract))
+    scalar = list(filter(lambda x: space_str in x, scalar))
 
     return subjid, tract[0], scalar[0]
 
