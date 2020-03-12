@@ -46,15 +46,15 @@ def _getData(bids_layout, subjid, bmask):
     subj = subjid.lstrip('sub-')
 
     # Diffusion
-    nifti = bids_layout.get(subject=subj, datatype='dwi', suffix='preproc',
+    nifti = bids_layout.get(subject=subj, modality='dwi', type='preproc',
                             return_type='file', extensions=['nii', 'nii.gz'])
-    bval = bids_layout.get(subject=subj, datatype='dwi', suffix='preproc',
+    bval = bids_layout.get(subject=subj, modality='dwi', type='preproc',
                            return_type='file', extensions=['bval'])
-    bvec = bids_layout.get(subject=subj, datatype='dwi', suffix='preproc',
+    bvec = bids_layout.get(subject=subj, modality='dwi', type='preproc',
                            return_type='file', extensions=['bvec'])
 
     if bmask is None:
-        mask = bids_layout.get(subject=subj, datatype='dwi', suffix='brainmask',
+        mask = bids_layout.get(subject=subj, modality='dwi', type='brainmask',
                                return_type='file', extensions=['nii', 'nii.gz'])
 
         return subjid, nifti[0], (bvec[0], bval[0]), mask[0]
@@ -88,9 +88,9 @@ def _getScalarData(bids_layout, subjid, scalar, space):
     subj = subjid.lstrip('sub-')
 
     # Diffusion
-    tract_list = bids_layout.get(subject=subj, suffix='tractography',
+    tract_list = bids_layout.get(subject=subj, type='tractography',
                             return_type='file', extensions=['tck'])
-    scalar_list = bids_layout.get(subject=subj, suffix=scalar,
+    scalar_list = bids_layout.get(subject=subj, type=scalar,
                              return_type='file',
                              extensions=['nii', 'nii.gz', 'mif'])
 
