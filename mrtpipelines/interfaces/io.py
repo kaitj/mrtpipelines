@@ -88,16 +88,16 @@ def _getScalarData(bids_layout, subjid, scalar, space):
     subj = subjid.lstrip('sub-')
 
     # Diffusion
-    tract = bids_layout.get(subject=subj, suffix='tractography',
+    tract_list = bids_layout.get(subject=subj, suffix='tractography',
                             return_type='file', extensions=['tck'])
-    scalar = bids_layout.get(subject=subj, suffix=scalar,
+    scalar_list = bids_layout.get(subject=subj, suffix=scalar,
                              return_type='file',
                              extensions=['nii', 'nii.gz', 'mif'])
 
     # Search for correct files via filter
     space_str = "space-%s" % space
-    tract = list(filter(lambda x: space_str in x, tract))
-    scalar = list(filter(lambda x: space_str in x, scalar))
+    tract = list(filter(lambda x: space_str in x, tract_list))
+    scalar = list(filter(lambda x: space_str in x, scalar_list))
 
     return subjid, tract[0], scalar[0]
 
