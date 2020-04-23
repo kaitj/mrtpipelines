@@ -7,7 +7,7 @@ mkdir -p $DIR/mrtrix3
 # Dependencies
 apt-get install -y g++ python python-numpy libeigen3-dev zlib1g-dev libqt4-opengl-dev libgl1-mesa-dev libfftw3-dev libtiff5-dev
 
-# install mrtrix3
+# install mrtrix3 - prod. 3.0.0
 git clone https://github.com/MRtrix3/mrtrix3.git $DIR/mrtrix3
 # install mrtrix3tissue
 # git clone https://github.com/3Tissue/MRTrix3Tissue.git $DIR/mrtrix3
